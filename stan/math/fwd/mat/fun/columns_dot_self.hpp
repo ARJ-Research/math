@@ -14,10 +14,10 @@ template <typename T, int R, int C>
 inline Eigen::Matrix<fvar<T>, 1, C> columns_dot_self(
     const Eigen::Matrix<fvar<T>, R, C>& x) {
   Eigen::Matrix<fvar<T>, 1, C> ret(1, x.cols());
-  for (size_type i = 0; i < x.cols(); i++) {
-    Eigen::Matrix<fvar<T>, R, 1> ccol = x.col(i);
-    ret(0, i) = dot_self(ccol);
-  }
+  Eigen::Matrix<T, R, C> xval = x.val_();
+
+  ret.val_() = (xval.transpose() * xval).diagonal();
+  ret.d_() = (xval.transpose() * x.d_()).diagonal().array() * 2.0;
   return ret;
 }
 }  // namespace math
