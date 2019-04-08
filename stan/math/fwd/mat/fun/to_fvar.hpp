@@ -18,8 +18,7 @@ template <int R, int C>
 inline Eigen::Matrix<fvar<double>, R, C> to_fvar(
     const Eigen::Matrix<double, R, C>& m) {
   Eigen::Matrix<fvar<double>, R, C> m_fd(m.rows(), m.cols());
-  for (int i = 0; i < m.size(); ++i)
-    m_fd(i) = m(i);
+  m_fd.val_() = m;
   return m_fd;
 }
 
@@ -28,12 +27,8 @@ inline Eigen::Matrix<fvar<T>, R, C> to_fvar(
     const Eigen::Matrix<T, R, C>& val, const Eigen::Matrix<T, R, C>& deriv) {
   check_matching_dims("to_fvar", "value", val, "deriv", deriv);
   Eigen::Matrix<fvar<T>, R, C> ret(val.rows(), val.cols());
-  for (int i = 0; i < val.rows(); i++) {
-    for (int j = 0; j < val.cols(); j++) {
-      ret(i, j).val_ = val(i, j);
-      ret(i, j).d_ = deriv(i, j);
-    }
-  }
+  ret.val_() = val;
+  ret.d_() = deriv;
   return ret;
 }
 

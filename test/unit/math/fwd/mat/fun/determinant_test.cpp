@@ -1,4 +1,3 @@
-#include <stan/math/fwd/mat/fun/determinant.hpp>
 #include <stan/math/fwd/mat.hpp>
 #include <gtest/gtest.h>
 
