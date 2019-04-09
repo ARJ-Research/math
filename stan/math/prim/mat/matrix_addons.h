@@ -87,8 +87,8 @@ struct val_Op {
  * Coefficient-wise function applying val_Op struct to a matrix of const var
  * and returning a const matrix of type T containing the values
  */
-inline const CwiseUnaryView<val_Op, const Derived>
-val() const { return CwiseUnaryView<val_Op, const Derived>
+inline const CwiseUnaryOp<val_Op, const Derived>
+val() const { return CwiseUnaryOp<val_Op, const Derived>
     (derived(), val_Op());
 }
 
@@ -113,8 +113,8 @@ struct adj_Op {
  * Coefficient-wise function applying adj_Op struct to a matrix of const var
  * and returning a const matrix of type T containing the values
  */
-inline const CwiseUnaryView<adj_Op, const Derived>
-adj() const { return CwiseUnaryView<adj_Op, const Derived>
+inline const CwiseUnaryOp<adj_Op, const Derived>
+adj() const { return CwiseUnaryOp<adj_Op, const Derived>
     (derived(), adj_Op());
 }
 
