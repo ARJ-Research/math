@@ -18,11 +18,12 @@ inline Eigen::Matrix<fvar<T>, R1, 1> rows_dot_product(
     const Eigen::Matrix<fvar<T>, R2, C2>& v2) {
   check_matching_dims("rows_dot_product", "v1", v1, "v2", v2);
   Eigen::Matrix<fvar<T>, R1, 1> ret(v1.rows(), 1);
-  for (size_type j = 0; j < v1.rows(); ++j) {
-    Eigen::Matrix<fvar<T>, R1, C1> crow1 = v1.row(j);
-    Eigen::Matrix<fvar<T>, R2, C2> crow2 = v2.row(j);
-    ret(j, 0) = dot_product(crow1, crow2);
-  }
+  Eigen::Matrix<T, R1, C1> v1val = v1.val_();
+  Eigen::Matrix<T, R2, C2> v2val = v2.val_();
+
+  ret.val_() = (v1val.transpose() * v2val).diagonal().transpose();
+  ret.d_() = (v1.d_().transpose() * v2val).diagonal().transpose()
+              + (v1val.transpose() * v2.d_()).diagonal().transpose();
   return ret;
 }
 

@@ -13,7 +13,9 @@ fvar<T> log_sum_exp(const Eigen::Matrix<fvar<T>, R, C>& v) {
   Eigen::Matrix<T, R, C> vals = v.val_();
   Eigen::Matrix<T, R, C> exp_vals = vals.array().exp(); 
 
-  return fvar<T>(log_sum_exp(vals), v.d_().cwiseProduct(exp_vals).sum()/ exp_vals.sum());
+  return fvar<T>(log_sum_exp(vals),
+                  v.d_().cwiseProduct(exp_vals).sum()
+                    / exp_vals.sum());
 }
 
 }  // namespace math

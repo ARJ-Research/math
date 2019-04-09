@@ -20,8 +20,8 @@ struct val__Op {
  * Coefficient-wise function applying val__Op struct to a matrix of const fvar<T>
  * and returning a matrix of type T containing the values
  */
-inline const CwiseUnaryView<val__Op, const Derived>
-val_() const { return CwiseUnaryView<val__Op, const Derived>
+inline const CwiseUnaryOp<val__Op, const Derived>
+val_() const { return CwiseUnaryOp<val__Op, const Derived>
     (derived(), val__Op());
 }
 
@@ -57,8 +57,8 @@ struct d__Op {
  * Coefficient-wise function applying d__Op struct to a matrix of const fvar<T>
  * and returning a const matrix of type T containing the tangents
  */
-inline const CwiseUnaryView<d__Op, const Derived>
-d_() const { return CwiseUnaryView<d__Op, const Derived>
+inline const CwiseUnaryOp<d__Op, const Derived>
+d_() const { return CwiseUnaryOp<d__Op, const Derived>
     (derived(), d__Op());
 }
 

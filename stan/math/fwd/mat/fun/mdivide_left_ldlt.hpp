@@ -24,7 +24,9 @@ inline Eigen::Matrix<fvar<T2>, R1, C2> mdivide_left_ldlt(
     const Eigen::Matrix<fvar<T2>, R2, C2> &b) {
   check_multiplicable("mdivide_left_ldlt", "A", A, "b", b);
 
-  return to_fvar(mdivide_left_ldlt(A, b.val_().eval()), mdivide_left_ldlt(A, b.d_().eval()));
+  return to_fvar(
+            mdivide_left_ldlt(A, b.val_().eval()),
+            mdivide_left_ldlt(A, b.d_().eval()));
 }
 
 }  // namespace math

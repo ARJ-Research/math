@@ -64,7 +64,7 @@ inline Eigen::Matrix<fvar<T>, R1, C2> multiply(
   Eigen::Matrix<T, R2, C2> m2val = m2.val_();
 
   result.val_() = m1val * m2val;
-  result.d_() = m1val * m2.d_().eval() + m1.d_().eval() * m2val;
+  result.d_() = m1val * m2.d_() + m1.d_() * m2val;
   
   return result;
 }
@@ -76,8 +76,8 @@ inline Eigen::Matrix<fvar<T>, R1, C2> multiply(
   check_multiplicable("multiply", "m1", m1, "m2", m2);
   Eigen::Matrix<fvar<T>, R1, C2> result(m1.rows(), m2.cols());
 
-  result.val_() = multiply(m1.val_().eval(), m2);
-  result.d_() = multiply(m1.d_().eval(), m2);
+  result.val_() = m1.val_().lazyProduct(m2);
+  result.d_() = m1.d_().lazyProduct(m2);
   
   return result;
 }
@@ -89,8 +89,8 @@ inline Eigen::Matrix<fvar<T>, R1, C2> multiply(
   check_multiplicable("multiply", "m1", m1, "m2", m2);
   Eigen::Matrix<fvar<T>, R1, C2> result(m1.rows(), m2.cols());
 
-  result.val_() = multiply(m1, m2.val_().eval());
-  result.d_() = multiply(m1, m2.d_().eval());
+  result.val_() = m1.lazyProduct(m2.val_());
+  result.d_() = m1.lazyProduct(m2.d_());
   
   return result;
 }

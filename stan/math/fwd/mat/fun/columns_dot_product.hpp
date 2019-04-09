@@ -18,8 +18,8 @@ inline Eigen::Matrix<fvar<T>, 1, C1> columns_dot_product(
   Eigen::Matrix<T, R2, C2> v2val = v2.val_();
 
   ret.val_() = (v2val.transpose() * v1val).diagonal();
-  ret.d_() = (v2.d_().eval().transpose() * v1val).diagonal()
-              + (v2val.transpose() * v1.d_().eval()).diagonal();
+  ret.d_() = (v2.d_().transpose() * v1val).diagonal()
+              + (v2val.transpose() * v1.d_()).diagonal();
   return ret;
 }
 
@@ -29,10 +29,9 @@ inline Eigen::Matrix<fvar<T>, 1, C1> columns_dot_product(
     const Eigen::Matrix<double, R2, C2>& v2) {
   check_matching_dims("columns_dot_product", "v1", v1, "v2", v2);
   Eigen::Matrix<fvar<T>, 1, C1> ret(1, v1.cols());
-  Eigen::Matrix<T, R1, C1> v1val = v1.val_();
 
-  ret.val_() = (v2.transpose() * v1val).diagonal();
-  ret.d_() = (v2.transpose() * v1.d_().eval()).diagonal();
+  ret.val_() = (v2.transpose() * v1.val_()).diagonal();
+  ret.d_() = (v2.transpose() * v1.d_()).diagonal();
   return ret;
 }
 
@@ -42,10 +41,9 @@ inline Eigen::Matrix<fvar<T>, 1, C1> columns_dot_product(
     const Eigen::Matrix<fvar<T>, R2, C2>& v2) {
   check_matching_dims("columns_dot_product", "v1", v1, "v2", v2);
   Eigen::Matrix<fvar<T>, 1, C1> ret(1, v1.cols());
-  Eigen::Matrix<T, R2, C2> v2val = v2.val_();
 
-  ret.val_() = (v2val.transpose() * v1).diagonal();
-  ret.d_() = (v2.d_().eval().transpose() * v1).diagonal();
+  ret.val_() = (v2.val_().transpose() * v1).diagonal();
+  ret.d_() = (v2.d_().transpose() * v1).diagonal();
   return ret;
 }
 
