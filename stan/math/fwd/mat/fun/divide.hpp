@@ -34,10 +34,8 @@ template <typename T, int R, int C>
 inline Eigen::Matrix<fvar<T>, R, C> divide(const Eigen::Matrix<double, R, C>& v,
                                            const fvar<T>& c) {
   Eigen::Matrix<fvar<T>, R, C> res(v.rows(), v.cols());
-  for (int i = 0; i < v.rows(); i++) {
-    for (int j = 0; j < v.cols(); j++)
-      res(i, j) = v(i, j) / c;
-  }
+  res.val_() = v.array() / c.val_;
+  res.d_() = (-1.0 * v.array() * c.d_) / (c.val_ * c.val_);
   return res;
 }
 
