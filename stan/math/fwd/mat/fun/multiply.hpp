@@ -70,27 +70,61 @@ inline Eigen::Matrix<fvar<T>, R1, C2> multiply(
 }
 
 template <typename T, int R1, int C1, int R2, int C2>
-inline Eigen::Matrix<fvar<T>, R1, C2> multiply(
+inline typename std::enable_if<std::is_same<T, double>::value,
+                               Eigen::Matrix<fvar<T>, R1, C2>>::type 
+  multiply(
     const Eigen::Matrix<fvar<T>, R1, C1>& m1,
     const Eigen::Matrix<double, R2, C2>& m2) {
   check_multiplicable("multiply", "m1", m1, "m2", m2);
   Eigen::Matrix<fvar<T>, R1, C2> result(m1.rows(), m2.cols());
 
-  result.val_() = m1.val_().lazyProduct(m2);
-  result.d_() = m1.d_().lazyProduct(m2);
+  result.val_() = m1.val_() * m2;
+  result.d_() = m1.d_() * m2;
   
   return result;
 }
 
 template <typename T, int R1, int C1, int R2, int C2>
-inline Eigen::Matrix<fvar<T>, R1, C2> multiply(
+inline typename std::enable_if<std::is_same<T, fvar<double>>::value,
+                               Eigen::Matrix<fvar<T>, R1, C2>>::type
+  multiply(
+    const Eigen::Matrix<fvar<T>, R1, C1>& m1,
+    const Eigen::Matrix<double, R2, C2>& m2) {
+  check_multiplicable("multiply", "m1", m1, "m2", m2);
+  Eigen::Matrix<fvar<T>, R1, C2> result(m1.rows(), m2.cols());
+
+  result.val_().val_() = m1.val_().val_() * m2;
+  result.d_().val_() = m1.d_().val_() * m2;
+  
+  return result;
+}
+
+template <typename T, int R1, int C1, int R2, int C2>
+inline typename std::enable_if<std::is_same<T, double>::value,
+                               Eigen::Matrix<fvar<T>, R1, C2>>::type
+  multiply(
     const Eigen::Matrix<double, R1, C1>& m1,
     const Eigen::Matrix<fvar<T>, R2, C2>& m2) {
   check_multiplicable("multiply", "m1", m1, "m2", m2);
   Eigen::Matrix<fvar<T>, R1, C2> result(m1.rows(), m2.cols());
 
-  result.val_() = m1.lazyProduct(m2.val_());
-  result.d_() = m1.lazyProduct(m2.d_());
+  result.val_() = m1 * m2.val_();
+  result.d_() = m1 * m2.d_();
+  
+  return result;
+}
+
+template <typename T, int R1, int C1, int R2, int C2>
+inline typename std::enable_if<std::is_same<T, fvar<double>>::value,
+                               Eigen::Matrix<fvar<T>, R1, C2>>::type
+  multiply(
+    const Eigen::Matrix<double, R1, C1>& m1,
+    const Eigen::Matrix<fvar<T>, R2, C2>& m2) {
+  check_multiplicable("multiply", "m1", m1, "m2", m2);
+  Eigen::Matrix<fvar<T>, R1, C2> result(m1.rows(), m2.cols());
+
+  result.val_().val_() = m1 * m2.val_().val_();
+  result.d_().val_() = m1 * m2.d_().val_();
   
   return result;
 }
