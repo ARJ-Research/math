@@ -18,10 +18,12 @@ inline fvar<T> dot_product(const Eigen::Matrix<fvar<T>, R1, C1>& v1,
   check_vector("dot_product", "v1", v1);
   check_vector("dot_product", "v2", v2);
   check_matching_sizes("dot_product", "v1", v1, "v2", v2);
+  Eigen::Map<const Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1>> v1vec(&v1(0,0),v1.size());
+  Eigen::Map<const Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1>> v2vec(&v2(0,0),v2.size());
 
-  fvar<T> ret(0, 0);
-  for (size_type i = 0; i < v1.size(); i++)
-    ret += v1(i) * v2(i);
+  fvar<T> ret(v1vec.val_().dot(v2vec.val_()),
+              v1vec.val_().dot(v2vec.d_()) + v1vec.d_().dot(v2vec.val_()));
+
   return ret;
 }
 
@@ -31,10 +33,11 @@ inline fvar<T> dot_product(const Eigen::Matrix<fvar<T>, R1, C1>& v1,
   check_vector("dot_product", "v1", v1);
   check_vector("dot_product", "v2", v2);
   check_matching_sizes("dot_product", "v1", v1, "v2", v2);
+  Eigen::Map<const Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1>> v1vec(&v1(0,0),v1.size());
+  Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, 1>> v2vec(&v2(0,0),v2.size());
 
-  fvar<T> ret(0, 0);
-  for (size_type i = 0; i < v1.size(); i++)
-    ret += v1(i) * v2(i);
+  fvar<T> ret(v1vec.val_().dot(v2vec), v1vec.d_().dot(v2vec));
+
   return ret;
 }
 
@@ -44,10 +47,12 @@ inline fvar<T> dot_product(const Eigen::Matrix<double, R1, C1>& v1,
   check_vector("dot_product", "v1", v1);
   check_vector("dot_product", "v2", v2);
   check_matching_sizes("dot_product", "v1", v1, "v2", v2);
+  Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, 1>> v1vec(&v1(0,0),v1.size());
+  Eigen::Map<const Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1>> v2vec(&v2(0,0),v2.size());
 
-  fvar<T> ret(0, 0);
-  for (size_type i = 0; i < v1.size(); i++)
-    ret += v1(i) * v2(i);
+  fvar<T> ret(v1vec.dot(v2vec.val_()),
+              v1vec.d_().dot(v2vec));
+
   return ret;
 }
 
