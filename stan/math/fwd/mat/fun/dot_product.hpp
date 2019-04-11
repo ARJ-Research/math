@@ -51,7 +51,7 @@ inline fvar<T> dot_product(const Eigen::Matrix<double, R1, C1>& v1,
   Eigen::Map<const Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1>> v2vec(&v2(0,0),v2.size());
 
   fvar<T> ret(v1vec.dot(v2vec.val_()),
-              v1vec.d_().dot(v2vec));
+              v1vec.dot(v2vec.d_()));
 
   return ret;
 }
