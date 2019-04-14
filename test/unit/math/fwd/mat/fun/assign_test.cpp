@@ -1,4 +1,5 @@
 #include <stan/math/fwd/mat.hpp>
+#include <test/unit/math/prim/mat/fun/expect_matrix_eq.hpp>
 #include <gtest/gtest.h>
 #include <stdexcept>
 #include <vector>
@@ -7,15 +8,14 @@ using stan::math::fvar;
 
 TEST(AgradFwdMatrixAssign, vector_fvar_double) {
   using stan::math::assign;
+  using stan::math::vector_fd;
+  using Eigen::Map;
   using std::vector;
 
   vector<fvar<double> > y(3);
-  y[0] = 1.2;
-  y[1] = 100;
-  y[2] = -5.1;
-  y[0].d_ = 1.0;
-  y[1].d_ = 2.0;
-  y[2].d_ = 3.0;
+  Map<vector_fd> y_vec(&y[0], 3);
+  y_vec.val_() << 1.2, 100, -5.1;
+  y_vec.d_() << 1.0, 2.0, 3.0;
 
   vector<fvar<double> > x(3);
   assign(x, y);
@@ -34,23 +34,18 @@ TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_double_to_fvar_double) {
   using Eigen::Dynamic;
   using Eigen::Matrix;
   using stan::math::assign;
+  using stan::math::row_vector_fd;
 
-  Matrix<fvar<double>, 1, Dynamic> y(3);
-  y[0] = 1.2;
-  y[1] = 100;
-  y[2] = -5.1;
-  y[0].d_ = 1.0;
-  y[1].d_ = 2.0;
-  y[2].d_ = 3.0;
+  row_vector_fd y(3);
+  y.val_() << 1.2, 100, -5.1;
+  y.d_() << 1.0, 2.0, 3.0;
 
-  Matrix<fvar<double>, 1, Dynamic> x(3);
+  row_vector_fd x(3);
   assign(x, y);
   EXPECT_EQ(3, x.size());
   EXPECT_EQ(3, y.size());
-  for (int i = 0; i < 3; ++i) {
-    EXPECT_FLOAT_EQ(y[i].val_, x[i].val_);
-    EXPECT_FLOAT_EQ(y[i].d_, x[i].d_);
-  }
+  expect_matrix_eq(y.val_(), x.val_());
+  expect_matrix_eq(y.d_(), x.d_());
 }
 
 TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_double_shape_mismatch) {
@@ -59,9 +54,7 @@ TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_double_shape_mismatch) {
   using stan::math::assign;
 
   Matrix<fvar<double>, 1, Dynamic> x(3);
-  x[0] = 1.2;
-  x[1] = 100;
-  x[2] = -5.1;
+  x.val_() << 1.2, 100, -5.1;
 
   Matrix<fvar<double>, 1, Dynamic> z(2);
   EXPECT_THROW(assign(x, z), std::invalid_argument);
@@ -85,12 +78,7 @@ TEST(AgradFwdMatrixAssign, eigen_matrix_fvar_double_to_fvar_double) {
 
   Matrix<fvar<double>, Dynamic, Dynamic> y(3, 2);
   y << 1.2, 100, -5.1, 12, 1000, -5100;
-  y(0, 0).d_ = 1.0;
-  y(0, 1).d_ = 2.0;
-  y(1, 0).d_ = 3.0;
-  y(1, 1).d_ = 4.0;
-  y(2, 0).d_ = 5.0;
-  y(2, 1).d_ = 6.0;
+  y.d_() << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   Matrix<fvar<double>, Dynamic, Dynamic> x(3, 2);
   assign(x, y);
@@ -100,10 +88,8 @@ TEST(AgradFwdMatrixAssign, eigen_matrix_fvar_double_to_fvar_double) {
   EXPECT_EQ(3, y.rows());
   EXPECT_EQ(2, x.cols());
   EXPECT_EQ(2, y.cols());
-  for (size_t i = 0; i < 6; ++i) {
-    EXPECT_FLOAT_EQ(y(i).val_, x(i).val_);
-    EXPECT_FLOAT_EQ(y(i).d_, x(i).d_);
-  }
+  expect_matrix_eq(y.val_(), x.val_());
+  expect_matrix_eq(y.d_(), x.d_());
 }
 
 TEST(AgradFwdMatrixAssign, eigen_matrix_fvar_double_shape_mismatch) {
@@ -249,32 +235,26 @@ TEST(AgradFwdMatrixAssign, get_assign_row_fvar_double) {
 
 TEST(AgradFwdMatrixAssign, vector_fvar_fvar_double) {
   using stan::math::assign;
+  using stan::math::vector_ffd;
+  using Eigen::Map;
   using std::vector;
 
   vector<fvar<fvar<double> > > y(3);
-  y[0] = 1.2;
-  y[1] = 100;
-  y[2] = -5.1;
-  y[0].val_.d_ = 1.0;
-  y[1].val_.d_ = 2.0;
-  y[2].val_.d_ = 3.0;
-  y[0].d_.d_ = 1.0;
-  y[1].d_.d_ = 2.0;
-  y[2].d_.d_ = 3.0;
-  y[0].d_ = 1.0;
-  y[1].d_ = 2.0;
-  y[2].d_ = 3.0;
+  Map<vector_ffd> y_vec(&y[0], 3);
+  y_vec.val_() << 1.2, 100, -5.1;
+  y_vec.val_().d_() << 1.0, 2.0, 3.0;
+  y_vec.d_().d_() << 1.0, 2.0, 3.0;
+  y_vec.d_() << 1.0, 2.0, 3.0;
 
   vector<fvar<fvar<double> > > x(3);
+  Map<vector_ffd> x_vec(&x[0], 3);
   assign(x, y);
   EXPECT_EQ(3U, x.size());
   EXPECT_EQ(3U, y.size());
-  for (size_t i = 0; i < 3; ++i) {
-    EXPECT_FLOAT_EQ(y[i].val_.val_, x[i].val_.val_);
-    EXPECT_FLOAT_EQ(y[i].d_.val_, x[i].d_.val_);
-    EXPECT_FLOAT_EQ(y[i].val_.d_, x[i].val_.d_);
-    EXPECT_FLOAT_EQ(y[i].d_.d_, x[i].d_.d_);
-  }
+  expect_matrix_eq(y_vec.val_().val_(), x_vec.val_().val_());
+  expect_matrix_eq(y_vec.d_().val_(), x_vec.d_().val_());
+  expect_matrix_eq(y_vec.val_().d_(), x_vec.val_().d_());
+  expect_matrix_eq(y_vec.d_().d_(), x_vec.d_().d_());
 
   vector<fvar<fvar<double> > > z(2);
   EXPECT_THROW(assign(x, z), std::invalid_argument);
@@ -287,29 +267,19 @@ TEST(AgradFwdMatrixAssign,
   using stan::math::assign;
 
   Matrix<fvar<fvar<double> >, 1, Dynamic> y(3);
-  y[0] = 1.2;
-  y[1] = 100;
-  y[2] = -5.1;
-  y[0].val_.d_ = 1.0;
-  y[1].val_.d_ = 2.0;
-  y[2].val_.d_ = 3.0;
-  y[0].d_.d_ = 1.0;
-  y[1].d_.d_ = 2.0;
-  y[2].d_.d_ = 3.0;
-  y[0].d_ = 1.0;
-  y[1].d_ = 2.0;
-  y[2].d_ = 3.0;
+  y.val_() << 1.2, 100, -5.1;
+  y.val_().d_() << 1.0, 2.0, 3.0;
+  y.d_().d_() << 1.0, 2.0, 3.0;
+  y.d_() << 1.0, 2.0, 3.0;
 
   Matrix<fvar<fvar<double> >, 1, Dynamic> x(3);
   assign(x, y);
   EXPECT_EQ(3, x.size());
   EXPECT_EQ(3, y.size());
-  for (int i = 0; i < 3; ++i) {
-    EXPECT_FLOAT_EQ(y[i].val_.val_, x[i].val_.val_);
-    EXPECT_FLOAT_EQ(y[i].d_.val_, x[i].d_.val_);
-    EXPECT_FLOAT_EQ(y[i].val_.d_, x[i].val_.d_);
-    EXPECT_FLOAT_EQ(y[i].d_.d_, x[i].d_.d_);
-  }
+  expect_matrix_eq(y.val_().val_(), x.val_().val_());
+  expect_matrix_eq(y.d_().val_(), x.d_().val_());
+  expect_matrix_eq(y.val_().d_(), x.val_().d_());
+  expect_matrix_eq(y.d_().d_(), x.d_().d_());
 }
 
 TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_fvar_double_shape_mismatch) {
@@ -318,10 +288,8 @@ TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_fvar_double_shape_mismatch) {
   using stan::math::assign;
 
   Matrix<fvar<fvar<double> >, 1, Dynamic> x(3);
-  x[0] = 1.2;
-  x[1] = 100;
-  x[2] = -5.1;
-
+  x.val_() << 1.2, 100, -5.1;
+  
   Matrix<fvar<fvar<double> >, 1, Dynamic> z(2);
   EXPECT_THROW(assign(x, z), std::invalid_argument);
 
@@ -344,24 +312,9 @@ TEST(AgradFwdMatrixAssign, eigen_matrix_fvar_fvar_double_to_fvar_fvar_double) {
 
   Matrix<fvar<fvar<double> >, Dynamic, Dynamic> y(3, 2);
   y << 1.2, 100, -5.1, 12, 1000, -5100;
-  y(0, 0).val_.d_ = 1.0;
-  y(0, 1).val_.d_ = 2.0;
-  y(1, 0).val_.d_ = 3.0;
-  y(1, 1).val_.d_ = 4.0;
-  y(2, 0).val_.d_ = 5.0;
-  y(2, 1).val_.d_ = 6.0;
-  y(0, 0).d_.d_ = 1.0;
-  y(0, 1).d_.d_ = 2.0;
-  y(1, 0).d_.d_ = 3.0;
-  y(1, 1).d_.d_ = 4.0;
-  y(2, 0).d_.d_ = 5.0;
-  y(2, 1).d_.d_ = 6.0;
-  y(0, 0).d_.val_ = 1.0;
-  y(0, 1).d_.val_ = 2.0;
-  y(1, 0).d_.val_ = 3.0;
-  y(1, 1).d_.val_ = 4.0;
-  y(2, 0).d_.val_ = 5.0;
-  y(2, 1).d_.val_ = 6.0;
+  y.val_().d_() << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
+  y.d_().d_() << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
+  y.d_().val_() << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
 
   Matrix<fvar<fvar<double> >, Dynamic, Dynamic> x(3, 2);
   assign(x, y);
@@ -371,12 +324,10 @@ TEST(AgradFwdMatrixAssign, eigen_matrix_fvar_fvar_double_to_fvar_fvar_double) {
   EXPECT_EQ(3, y.rows());
   EXPECT_EQ(2, x.cols());
   EXPECT_EQ(2, y.cols());
-  for (size_t i = 0; i < 6; ++i) {
-    EXPECT_FLOAT_EQ(y(i).val_.val_, x(i).val_.val_);
-    EXPECT_FLOAT_EQ(y(i).d_.val_, x(i).d_.val_);
-    EXPECT_FLOAT_EQ(y(i).val_.d_, x(i).val_.d_);
-    EXPECT_FLOAT_EQ(y(i).d_.d_, x(i).d_.d_);
-  }
+  expect_matrix_eq(y.val_().val_(), x.val_().val_());
+  expect_matrix_eq(y.d_().val_(), x.d_().val_());
+  expect_matrix_eq(y.val_().d_(), x.val_().d_());
+  expect_matrix_eq(y.d_().d_(), x.d_().d_());
 }
 
 TEST(AgradFwdMatrixAssign, eigen_matrix_fvar_fvar_double_shape_mismatch) {
