@@ -6,7 +6,8 @@
  */
 struct val__Op {
   EIGEN_EMPTY_STRUCT_CTOR(val__Op)
-  typedef typename Scalar::type result_type;
+  typedef decltype(Scalar::val_) result_type;
+
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE const result_type& 
     operator()(const Scalar &v) const { return v.val_; }
@@ -43,7 +44,7 @@ val_() { return CwiseUnaryView<val__Op, Derived>
  */
 struct d__Op {
   EIGEN_EMPTY_STRUCT_CTOR(d__Op)
-  typedef typename Scalar::type result_type;
+  typedef decltype(Scalar::d_) result_type;
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE const result_type& 
     operator()(const Scalar &v) const { return v.d_; }
