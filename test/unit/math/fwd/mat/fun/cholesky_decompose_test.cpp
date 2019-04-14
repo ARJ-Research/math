@@ -73,10 +73,7 @@ TEST(AgradFwdMatrixCholeskyDecompose, exception_mat_ffd) {
 TEST(AgradFwdMatrixCholeskyDecompose, mat_fd) {
   stan::math::matrix_fd m0(2, 2);
   m0 << 2, 1, 1, 2;
-  m0(0, 0).d_ = 1.0;
-  m0(0, 1).d_ = 1.0;
-  m0(1, 0).d_ = 1.0;
-  m0(1, 1).d_ = 1.0;
+  m0.d_() << 1.0, 1.0, 1.0, 1.0;
 
   using stan::math::cholesky_decompose;
 
@@ -95,10 +92,7 @@ TEST(AgradFwdMatrixCholeskyDecompose, mat_fd) {
 TEST(AgradFwdMatrixCholeskyDecompose, mat_ffd) {
   stan::math::matrix_ffd m0(2, 2);
   m0 << 4, 1, 1, 4;
-  m0(0, 0).d_ = 1.0;
-  m0(0, 1).d_ = 1.0;
-  m0(1, 0).d_ = 1.0;
-  m0(1, 1).d_ = 1.0;
+  m0.d_() << 1.0, 1.0, 1.0, 1.0;
 
   using stan::math::cholesky_decompose;
 
