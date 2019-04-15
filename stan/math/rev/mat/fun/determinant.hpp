@@ -37,7 +37,7 @@ class determinant_vari : public vari {
   }
   virtual void chain() {
     Eigen::Map<Eigen::Matrix<vari*,-1,-1>>(adjARef_,rows_,cols_).adj()
-      = (adj_ * val_)
+      += (adj_ * val_)
         * Eigen::Map<Eigen::MatrixXd>(A_, rows_, cols_).inverse().transpose();
   }
 };
