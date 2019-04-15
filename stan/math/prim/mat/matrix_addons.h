@@ -103,11 +103,11 @@ struct adj_Op {
   EIGEN_EMPTY_STRUCT_CTOR(adj_Op)
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE const double& 
-    operator()(const Scalar &v) const { return v.vi_->adj_; }
+    operator()(const Scalar &v) const { return v->adj_; }
 
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE double& 
-    operator()(Scalar &v) const { return v.vi_->adj_; }
+    operator()(Scalar &v) const { return v->adj_; }
 };
 
 /**
@@ -127,4 +127,40 @@ adj() const { return CwiseUnaryOp<adj_Op, const Derived>
 inline CwiseUnaryView<adj_Op, Derived>
 adj() { return CwiseUnaryView<adj_Op, Derived>
     (derived(), adj_Op());
+}
+/**
+ * Structure to return vari* from a var. The first definition takes
+ * a const var and returns a const vari* (for reading from a const matrix).
+ * The second definition takes a non-const var and returns a non-const
+ * vari* (for writing to a non-const matrix)
+ */
+struct vi_Op {
+  typedef decltype(Scalar::vi_) result_type;
+  EIGEN_EMPTY_STRUCT_CTOR(vi_Op)
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE const result_type& 
+    operator()(const Scalar &v) const { return v.vi_; }
+
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE result_type& 
+    operator()(Scalar &v) const { return v.vi_; }
+};
+
+/**
+ * Coefficient-wise function applying adj_Op struct to a matrix of const var
+ * and returning a const matrix of type T containing the values
+ */
+inline const CwiseUnaryOp<vi_Op, const Derived>
+vi() const { return CwiseUnaryOp<vi_Op, const Derived>
+    (derived(), vi_Op());
+}
+
+/**
+ * Coefficient-wise function applying adj_Op struct to a matrix of var
+ * and returning a view to a matrix of type T of the adjoints that can
+ * be modified
+ */
+inline CwiseUnaryView<vi_Op, Derived>
+vi() { return CwiseUnaryView<vi_Op, Derived>
+    (derived(), vi_Op());
 }

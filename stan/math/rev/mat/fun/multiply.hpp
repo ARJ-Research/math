@@ -81,14 +81,12 @@ class multiply_mat_vari : public vari {
             A_rows_ * B_cols_)) {
     using Eigen::Map;
     using Eigen::MatrixXd;
-    for (size_type i = 0; i < A.size(); ++i)
-      variRefA_[i] = A.coeffRef(i).vi_;
-    for (size_type i = 0; i < B.size(); ++i)
-      variRefB_[i] = B.coeffRef(i).vi_;
-
+    using Eigen::Matrix;
+    Map<Matrix<vari*,-1,-1>>(variRefA_, A_rows_, A_cols_) = A.vi();
+    Map<Matrix<vari*,-1,-1>>(variRefB_, B.rows(), B_cols_) = B.vi();
     Map<MatrixXd> Ad_map(Ad_, A_rows_, A_cols_);
-    Ad_map = A.val();
     Map<MatrixXd> Bd_map(Bd_, A_cols_, B_cols_);
+    Ad_map = A.val();
     Bd_map = B.val();
     MatrixXd AB = Ad_map * Bd_map;
     for (size_type i = 0; i < AB.size(); ++i)
@@ -98,18 +96,13 @@ class multiply_mat_vari : public vari {
   virtual void chain() {
     using Eigen::Map;
     using Eigen::MatrixXd;
-    MatrixXd adjAB(A_rows_, B_cols_);
-    MatrixXd adjA(A_rows_, A_cols_);
-    MatrixXd adjB(A_cols_, B_cols_);
+    using Eigen::Matrix;
+    MatrixXd adjAB = Map<Matrix<vari*,-1,-1>>(variRefAB_, A_rows_, B_cols_).adj();
 
-    for (size_type i = 0; i < adjAB.size(); ++i)
-      adjAB(i) = variRefAB_[i]->adj_;
-    adjA = adjAB * Map<MatrixXd>(Bd_, A_cols_, B_cols_).transpose();
-    adjB = Map<MatrixXd>(Ad_, A_rows_, A_cols_).transpose() * adjAB;
-    for (size_type i = 0; i < A_size_; ++i)
-      variRefA_[i]->adj_ += adjA(i);
-    for (size_type i = 0; i < B_size_; ++i)
-      variRefB_[i]->adj_ += adjB(i);
+    Map<Matrix<vari*,-1,-1>>(variRefA_, A_rows_, A_cols_).adj()
+       += adjAB * Map<MatrixXd>(Bd_, A_cols_, B_cols_).transpose();
+    Map<Matrix<vari*,-1,-1>>(variRefB_, A_cols_, B_cols_).adj()
+       += Map<MatrixXd>(Ad_, A_rows_, A_cols_).transpose() * adjAB;
   }
 };
 
