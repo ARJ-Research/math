@@ -80,6 +80,11 @@ struct NumTraits<stan::math::var> : GenericNumTraits<stan::math::var> {
 
 namespace internal {
 
+template <>
+struct remove_all<stan::math::vari*> {
+  typedef stan::math::vari* type;
+};
+
 #if EIGEN_VERSION_AT_LEAST(3, 3, 0)
 /**
  * Scalar product traits specialization for Eigen for reverse-mode
@@ -90,13 +95,18 @@ struct scalar_product_traits<stan::math::var, double> {
   typedef stan::math::var ReturnType;
 };
 
+template <>
+struct scalar_product_traits<stan::math::vari*, double> {
+  typedef stan::math::vari* ReturnType;
+};
+
 /**
  * Scalar product traits specialization for Eigen for reverse-mode
  * autodiff variables.
  */
 template <>
-struct scalar_product_traits<double, stan::math::var> {
-  typedef stan::math::var ReturnType;
+struct scalar_product_traits<double, stan::math::vari*> {
+  typedef stan::math::vari* ReturnType;
 };
 
 /**
@@ -262,6 +272,11 @@ struct scalar_product_traits<stan::math::var, double> {
   typedef stan::math::var ReturnType;
 };
 
+template <>
+struct scalar_product_traits<stan::math::vari*, double> {
+  typedef stan::math::vari* ReturnType;
+};
+
 /**
  * Scalar product traits override for Eigen for automatic
  * gradient variables.
@@ -269,6 +284,11 @@ struct scalar_product_traits<stan::math::var, double> {
 template <>
 struct scalar_product_traits<double, stan::math::var> {
   typedef stan::math::var ReturnType;
+};
+
+template <>
+struct scalar_product_traits<double, stan::math::vari*> {
+  typedef stan::math::vari* ReturnType;
 };
 
 /**

@@ -81,16 +81,16 @@ class multiply_mat_vari : public vari {
             A_rows_ * B_cols_)) {
     using Eigen::Map;
     using Eigen::MatrixXd;
-    for (size_type i = 0; i < A.size(); ++i) {
+    for (size_type i = 0; i < A.size(); ++i)
       variRefA_[i] = A.coeffRef(i).vi_;
-      Ad_[i] = A.coeffRef(i).val();
-    }
-    for (size_type i = 0; i < B.size(); ++i) {
+    for (size_type i = 0; i < B.size(); ++i)
       variRefB_[i] = B.coeffRef(i).vi_;
-      Bd_[i] = B.coeffRef(i).val();
-    }
-    MatrixXd AB = Map<MatrixXd>(Ad_, A_rows_, A_cols_)
-                  * Map<MatrixXd>(Bd_, A_cols_, B_cols_);
+
+    Map<MatrixXd> Ad_map(Ad_, A_rows_, A_cols_);
+    Ad_map = A.val();
+    Map<MatrixXd> Bd_map(Bd_, A_cols_, B_cols_);
+    Bd_map = B.val();
+    MatrixXd AB = Ad_map * Bd_map;
     for (size_type i = 0; i < AB.size(); ++i)
       variRefAB_[i] = new vari(AB.coeffRef(i), false);
   }
