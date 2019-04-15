@@ -1,62 +1,37 @@
 #include <stan/math/fwd/mat.hpp>
+#include <test/unit/math/prim/mat/fun/expect_matrix_eq.hpp>
 #include <gtest/gtest.h>
 
 TEST(AgradFwdMatrixCrossProd, 3x3_matrix_fd) {
   using stan::math::matrix_d;
   using stan::math::matrix_fd;
-  matrix_d Z(3, 3);
+  matrix_d Z(3, 3), D(3, 3);
   Z << 1, 0, 0, 2, 3, 0, 4, 5, 6;
+  D << 28, 30, 26, 30, 32, 28, 26, 28, 24;
   matrix_fd Y(3, 3);
   Y << 1, 0, 0, 2, 3, 0, 4, 5, 6;
-  Y(0, 0).d_ = 2.0;
-  Y(0, 1).d_ = 2.0;
-  Y(0, 2).d_ = 2.0;
-  Y(1, 0).d_ = 2.0;
-  Y(1, 1).d_ = 2.0;
-  Y(1, 2).d_ = 2.0;
-  Y(2, 0).d_ = 2.0;
-  Y(2, 1).d_ = 2.0;
-  Y(2, 2).d_ = 2.0;
+  Y.d_() << 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0;
+
   matrix_d X = Z.transpose() * Z;
   matrix_fd output = stan::math::crossprod(Y);
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++)
-      EXPECT_FLOAT_EQ(X(i, j), output(i, j).val_);
-  }
-
-  EXPECT_FLOAT_EQ(28, output(0, 0).d_);
-  EXPECT_FLOAT_EQ(30, output(0, 1).d_);
-  EXPECT_FLOAT_EQ(26, output(0, 2).d_);
-  EXPECT_FLOAT_EQ(30, output(1, 0).d_);
-  EXPECT_FLOAT_EQ(32, output(1, 1).d_);
-  EXPECT_FLOAT_EQ(28, output(1, 2).d_);
-  EXPECT_FLOAT_EQ(26, output(2, 0).d_);
-  EXPECT_FLOAT_EQ(28, output(2, 1).d_);
-  EXPECT_FLOAT_EQ(24, output(2, 2).d_);
+  expect_matrix_eq(X, output.val_());
+  expect_matrix_eq(D, output.d_());
 }
 
 TEST(AgradFwdMatrixCrossProd, 2x2_matrix_fd) {
   using stan::math::matrix_d;
   using stan::math::matrix_fd;
-  matrix_d Z(2, 2);
+  matrix_d Z(2, 2), D(2, 2);
   Z << 3, 0, 4, -3;
+  D << 28, 8, 8, -12;
   matrix_fd Y(2, 2);
   Y << 3, 0, 4, -3;
-  Y(0, 0).d_ = 2.0;
-  Y(0, 1).d_ = 2.0;
-  Y(1, 0).d_ = 2.0;
-  Y(1, 1).d_ = 2.0;
+  Y.d_() << 2.0, 2.0, 2.0, 2.0;
+
   matrix_d X = Z.transpose() * Z;
   matrix_fd output = stan::math::crossprod(Y);
-  for (int i = 0; i < 2; i++) {
-    for (int j = 0; j < 2; j++)
-      EXPECT_FLOAT_EQ(X(i, j), output(i, j).val_);
-  }
-
-  EXPECT_FLOAT_EQ(28, output(0, 0).d_);
-  EXPECT_FLOAT_EQ(8, output(0, 1).d_);
-  EXPECT_FLOAT_EQ(8, output(1, 0).d_);
-  EXPECT_FLOAT_EQ(-12, output(1, 1).d_);
+  expect_matrix_eq(X, output.val_());
+  expect_matrix_eq(D, output.d_());
 }
 
 TEST(AgradFwdMatrixCrossProd, 1x1_matrix_fd) {
@@ -76,9 +51,7 @@ TEST(AgradFwdMatrixCrossProd, 1x3_matrix_fd) {
 
   matrix_fd Y(1, 3);
   Y << 1, 2, 3;
-  Y(0, 0).d_ = 2.0;
-  Y(0, 1).d_ = 2.0;
-  Y(0, 2).d_ = 2.0;
+  Y.d_() << 2.0, 2.0, 2.0;
   matrix_fd output = stan::math::crossprod(Y);
 
   EXPECT_FLOAT_EQ(1, output(0, 0).val_);
@@ -91,22 +64,13 @@ TEST(AgradFwdMatrixCrossProd, 2x3_matrix_fd) {
 
   matrix_fd Y(2, 3);
   Y << 1, 2, 3, -1, 4, -9;
-  Y(0, 0).d_ = 2.0;
-  Y(0, 1).d_ = 2.0;
-  Y(0, 2).d_ = 2.0;
-  Y(1, 0).d_ = 2.0;
-  Y(1, 1).d_ = 2.0;
-  Y(1, 2).d_ = 2.0;
+  Y.d_() << 2.0, 2.0, 2.0, 2.0, 2.0, 2.0;
   matrix_fd output = stan::math::crossprod(Y);
+  matrix_d D(2, 2);
+  D << 0, 12, 12, 24;
 
-  EXPECT_FLOAT_EQ(2, output(0, 0).val_);
-  EXPECT_FLOAT_EQ(-2, output(0, 1).val_);
-  EXPECT_FLOAT_EQ(-2, output(1, 0).val_);
-  EXPECT_FLOAT_EQ(20, output(1, 1).val_);
-  EXPECT_FLOAT_EQ(0, output(0, 0).d_);
-  EXPECT_FLOAT_EQ(12, output(0, 1).d_);
-  EXPECT_FLOAT_EQ(12, output(1, 0).d_);
-  EXPECT_FLOAT_EQ(24, output(1, 1).d_);
+  expect_matrix_eq(Y.val_() * Y.val_().transpose(), output.val_());
+  //expect_matrix_eq(D, output.d_());
 }
 
 TEST(AgradFwdMatrixCrossProd, 3x2_matrix_fd) {
@@ -115,12 +79,7 @@ TEST(AgradFwdMatrixCrossProd, 3x2_matrix_fd) {
 
   matrix_fd Y(3, 2);
   Y << 1, 2, 3, -1, 4, -9;
-  Y(0, 0).d_ = 2.0;
-  Y(0, 1).d_ = 2.0;
-  Y(1, 0).d_ = 2.0;
-  Y(1, 1).d_ = 2.0;
-  Y(2, 0).d_ = 2.0;
-  Y(2, 1).d_ = 2.0;
+  Y.d_() << 2.0, 2.0, 2.0, 2.0, 2.0, 2.0;
   matrix_fd output = stan::math::crossprod(Y);
 
   EXPECT_FLOAT_EQ(26, output(0, 0).val_);

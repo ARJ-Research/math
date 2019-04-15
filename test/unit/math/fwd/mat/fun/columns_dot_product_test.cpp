@@ -1,4 +1,5 @@
 #include <stan/math/fwd/mat.hpp>
+#include <test/unit/math/prim/mat/fun/expect_matrix_eq.hpp>
 #include <gtest/gtest.h>
 
 TEST(AgradFwdMatrixColumnsDotProduct, vector_vector_fd) {
@@ -10,14 +11,10 @@ TEST(AgradFwdMatrixColumnsDotProduct, vector_vector_fd) {
 
   vd_1 << 1, 3, -5;
   vv_1 << 1, 3, -5;
-  vv_1(0).d_ = 1.0;
-  vv_1(1).d_ = 1.0;
-  vv_1(2).d_ = 1.0;
+  vv_1.d_() << 1.0, 1.0, 1.0;
   vd_2 << 4, -2, -1;
   vv_2 << 4, -2, -1;
-  vv_2(0).d_ = 1.0;
-  vv_2(1).d_ = 1.0;
-  vv_2(2).d_ = 1.0;
+  vv_2.d_() << 1.0, 1.0, 1.0;
 
   EXPECT_FLOAT_EQ(3, columns_dot_product(vv_1, vd_2)(0).val_);
   EXPECT_FLOAT_EQ(3, columns_dot_product(vd_1, vv_2)(0).val_);
@@ -82,14 +79,10 @@ TEST(AgradFwdMatrixColumnsDotProduct, rowvector_rowvector_fd) {
 
   d1 << 1, 3, -5;
   v1 << 1, 3, -5;
-  v1(0).d_ = 1.0;
-  v1(1).d_ = 1.0;
-  v1(2).d_ = 1.0;
+  v1.d_() << 1.0, 1.0, 1.0;
   d2 << 4, -2, -1;
   v2 << 4, -2, -1;
-  v2(0).d_ = 1.0;
-  v2(1).d_ = 1.0;
-  v2(2).d_ = 1.0;
+  v2.d_() << 1.0, 1.0, 1.0;
 
   row_vector_fd output;
   output = columns_dot_product(v1, d2);
@@ -112,26 +105,10 @@ TEST(AgradFwdMatrixColumnsDotProduct, matrix_matrix_fd) {
 
   d1 << 1, 1, 1, 3, 3, 3, -5, -5, -5;
   v1 << 1, 1, 1, 3, 3, 3, -5, -5, -5;
-  v1(0, 0).d_ = 1.0;
-  v1(0, 1).d_ = 1.0;
-  v1(0, 2).d_ = 1.0;
-  v1(1, 0).d_ = 1.0;
-  v1(1, 1).d_ = 1.0;
-  v1(1, 2).d_ = 1.0;
-  v1(2, 0).d_ = 1.0;
-  v1(2, 1).d_ = 1.0;
-  v1(2, 2).d_ = 1.0;
+  v1.d_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
   d2 << 4, 4, 4, -2, -2, -2, -1, -1, -1;
   v2 << 4, 4, 4, -2, -2, -2, -1, -1, -1;
-  v2(0, 0).d_ = 1.0;
-  v2(0, 1).d_ = 1.0;
-  v2(0, 2).d_ = 1.0;
-  v2(1, 0).d_ = 1.0;
-  v2(1, 1).d_ = 1.0;
-  v2(1, 2).d_ = 1.0;
-  v2(2, 0).d_ = 1.0;
-  v2(2, 1).d_ = 1.0;
-  v2(2, 2).d_ = 1.0;
+  v2.d_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
 
   row_vector_fd output;
   output = columns_dot_product(v1, d2);
@@ -212,32 +189,15 @@ TEST(AgradFwdMatrixColumnsDotProduct, vector_vector_ffd) {
   using stan::math::vector_d;
   using stan::math::vector_ffd;
 
-  fvar<fvar<double> > a;
-  fvar<fvar<double> > b;
-  fvar<fvar<double> > c;
-  fvar<fvar<double> > d;
-  fvar<fvar<double> > e;
-  fvar<fvar<double> > f;
-  a.val_.val_ = 1.0;
-  a.d_.val_ = 1.0;
-  b.val_.val_ = 3.0;
-  b.d_.val_ = 1.0;
-  c.val_.val_ = -5.0;
-  c.d_.val_ = 1.0;
-  d.val_.val_ = 4.0;
-  d.d_.val_ = 1.0;
-  e.val_.val_ = -2.0;
-  e.d_.val_ = 1.0;
-  f.val_.val_ = -1.0;
-  f.d_.val_ = 1.0;
-
   vector_d vd_1(3), vd_2(3);
   vector_ffd vv_1(3), vv_2(3);
 
   vd_1 << 1, 3, -5;
-  vv_1 << a, b, c;
+  vv_1.val_().val_() << 1.0, 3.0, -5.0;
+  vv_1.d_().val_() << 1.0, 1.0, 1.0;
   vd_2 << 4, -2, -1;
-  vv_2 << d, e, f;
+  vv_2.val_().val_() << 4.0, -2.0, -1.0;
+  vv_2.d_().val_() << 1.0, 1.0, 1.0;
 
   EXPECT_FLOAT_EQ(3, columns_dot_product(vv_1, vd_2)(0).val_.val());
   EXPECT_FLOAT_EQ(3, columns_dot_product(vd_1, vv_2)(0).val_.val());
@@ -323,9 +283,11 @@ TEST(AgradFwdMatrixColumnsDotProduct, rowvector_rowvector_ffd) {
   row_vector_ffd v1(3), v2(3);
 
   d1 << 1, 3, -5;
-  v1 << a, b, c;
+  v1.val_().val_() << 1.0, 3.0, -5.0;
+  v1.d_().val_() << 1.0, 1.0, 1.0;
   d2 << 4, -2, -1;
-  v2 << d, e, f;
+  v2.val_().val_() << 4.0, -2.0, -1.0;
+  v2.d_().val_() << 1.0, 1.0, 1.0;
 
   row_vector_ffd output;
   output = columns_dot_product(v1, d2);
@@ -403,44 +365,30 @@ TEST(AgradFwdMatrixColumnsDotProduct, matrix_matrix_ffd_exception) {
   using stan::math::matrix_d;
   using stan::math::matrix_ffd;
 
-  fvar<fvar<double> > a;
-  fvar<fvar<double> > b;
-  fvar<fvar<double> > c;
-  fvar<fvar<double> > d;
-  fvar<fvar<double> > e;
-  fvar<fvar<double> > f;
-  a.val_.val_ = 1.0;
-  a.d_.val_ = 1.0;
-  b.val_.val_ = 3.0;
-  b.d_.val_ = 1.0;
-  c.val_.val_ = -5.0;
-  c.d_.val_ = 1.0;
-  d.val_.val_ = 4.0;
-  d.d_.val_ = 1.0;
-  e.val_.val_ = -2.0;
-  e.d_.val_ = 1.0;
-  f.val_.val_ = -1.0;
-  f.d_.val_ = 1.0;
-
-  matrix_d d1(3, 3);
-  matrix_d d2(3, 2);
-  matrix_d d3(2, 3);
-  matrix_ffd v1(3, 3);
-  matrix_ffd v2(3, 3);
-  matrix_ffd v3(3, 2);
-  matrix_ffd v4(3, 2);
-  matrix_ffd v5(2, 3);
-  matrix_ffd v6(2, 3);
+  matrix_d d1(3, 3), d2(3, 2), d3(2, 3);
+  matrix_ffd v1(3, 3), v2(3, 3), v3(3, 2), v4(3, 2), v5(2, 3), v6(2, 3);
 
   d1 << 1, 3, -5, 1, 3, -5, 1, 3, -5;
   d2 << 1, 3, -5, 1, 3, -5;
   d2 << 1, 3, -5, 1, 3, -5;
-  v1 << a, b, c, a, b, c, a, b, c;
-  v2 << d, e, f, d, e, f, d, e, f;
-  v3 << d, e, f, d, e, f;
-  v4 << d, e, f, d, e, f;
-  v5 << d, e, f, d, e, f;
-  v6 << d, e, f, d, e, f;
+  v1.val_().val_() = d1;
+  v1.d_().val_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+
+  v2.val_().val_() << 4.0, -2.0, -1.0, 4.0, -2.0, -1.0, 4.0, -2.0, -1.0;
+  v2.d_().val_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+
+  v3.val_().val_() << 4.0, -2.0, -1.0, 4.0, -2.0, -1.0;
+  v3.d_().val_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+
+  v4.val_().val_() << 4.0, -2.0, -1.0, 4.0, -2.0, -1.0;
+  v4.d_().val_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+  
+  v5.val_().val_() << 4.0, -2.0, -1.0, 4.0, -2.0, -1.0;
+  v5.d_().val_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+  
+  v6.val_().val_() << 4.0, -2.0, -1.0, 4.0, -2.0, -1.0;
+  v6.d_().val_() << 1.0, 1.0, 1.0, 1.0, 1.0, 1.0;
+  
 
   EXPECT_THROW(columns_dot_product(v1, d2), std::invalid_argument);
   EXPECT_THROW(columns_dot_product(v1, d3), std::invalid_argument);
