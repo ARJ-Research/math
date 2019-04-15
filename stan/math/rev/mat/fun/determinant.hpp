@@ -29,21 +29,16 @@ class determinant_vari : public vari {
         adjARef_(
             reinterpret_cast<vari**>(ChainableStack::instance().memalloc_.alloc(
                 sizeof(vari*) * A.rows() * A.cols()))) {
-    Eigen::Map<Eigen::MatrixXd> Ad_(A_,rows_,cols_);
-    Eigen::Map<Eigen::Matrix<vari*,-1,-1>> AdRef_(adjARef_,rows_,cols_);
-    Ad_ = A.val();
-    AdRef_ = A.vi();
+    Eigen::Map<Eigen::MatrixXd>(A_,rows_,cols_) = A.val();
+    Eigen::Map<Eigen::Matrix<vari*,-1,-1>>(adjARef_,rows_,cols_)= A.vi();
   }
   static double determinant_vari_calc(const Eigen::Matrix<var, R, C>& A) {
     return A.val().determinant();
   }
   virtual void chain() {
-    using Eigen::Map;
-    using Eigen::Matrix;
-    Matrix<double, R, C> adjA(rows_, cols_);
-    Eigen::Map<Eigen::Matrix<vari*,-1,-1>> AdRef_(adjARef_,rows_,cols_);
-    AdRef_.adj() = (adj_ * val_)
-           * Map<Matrix<double, R, C> >(A_, rows_, cols_).inverse().transpose();
+    Eigen::Map<Eigen::Matrix<vari*,-1,-1>>(adjARef_,rows_,cols_).adj()
+      = (adj_ * val_)
+        * Eigen::Map<Eigen::MatrixXd>(A_, rows_, cols_).inverse().transpose();
   }
 };
 }  // namespace internal
