@@ -95,20 +95,6 @@ struct scalar_product_traits<stan::math::var, double> {
   typedef stan::math::var ReturnType;
 };
 
-template <>
-struct scalar_product_traits<stan::math::vari*, double> {
-  typedef stan::math::vari* ReturnType;
-};
-
-/**
- * Scalar product traits specialization for Eigen for reverse-mode
- * autodiff variables.
- */
-template <>
-struct scalar_product_traits<double, stan::math::vari*> {
-  typedef stan::math::vari* ReturnType;
-};
-
 /**
  * Specialization of matrix-vector products for reverse-mode
  * autodiff variables.
@@ -272,11 +258,6 @@ struct scalar_product_traits<stan::math::var, double> {
   typedef stan::math::var ReturnType;
 };
 
-template <>
-struct scalar_product_traits<stan::math::vari*, double> {
-  typedef stan::math::vari* ReturnType;
-};
-
 /**
  * Scalar product traits override for Eigen for automatic
  * gradient variables.
@@ -284,11 +265,6 @@ struct scalar_product_traits<stan::math::vari*, double> {
 template <>
 struct scalar_product_traits<double, stan::math::var> {
   typedef stan::math::var ReturnType;
-};
-
-template <>
-struct scalar_product_traits<double, stan::math::vari*> {
-  typedef stan::math::vari* ReturnType;
 };
 
 /**
