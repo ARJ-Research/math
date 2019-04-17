@@ -5,7 +5,7 @@
  * double (for writing to a non-const matrix)
  */
 struct val__Op {
-  EIGEN_EMPTY_STRUCT_CTOR(val__Op)
+  EIGEN_EMPTY_STRUCT_CTOR(val__Op);
   typedef decltype(Scalar::val_) result_type;
 
   EIGEN_DEVICE_FUNC
@@ -43,7 +43,7 @@ val_() { return CwiseUnaryView<val__Op, Derived>
  * double (for writing to a non-const matrix)
  */
 struct d__Op {
-  EIGEN_EMPTY_STRUCT_CTOR(d__Op)
+  EIGEN_EMPTY_STRUCT_CTOR(d__Op);
   typedef decltype(Scalar::d_) result_type;
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE const result_type& 
@@ -77,11 +77,27 @@ d_() { return CwiseUnaryView<d__Op, Derived>
  * Structure to return value from a var. The definition takes
  * a const var and returns a const double (for reading from a const matrix).
  */
-struct val_Op {
-  EIGEN_EMPTY_STRUCT_CTOR(val_Op)
+struct val_Op{
+  EIGEN_EMPTY_STRUCT_CTOR(val_Op);
+  template<typename T = Scalar>
   EIGEN_DEVICE_FUNC
-  EIGEN_STRONG_INLINE const double& 
+  EIGEN_STRONG_INLINE typename std::enable_if<std::is_pointer<T>::value,const double&>::type const 
+    operator()(const Scalar &v) const { return v->val_; }
+
+  template<typename T = Scalar>
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE typename std::enable_if<!std::is_pointer<T>::value,const double&>::type const 
     operator()(const Scalar &v) const { return v.vi_->val_; }
+
+  template<typename T = Scalar>
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE typename std::enable_if<std::is_pointer<T>::value,double&>::type 
+    operator()(Scalar &v) const { return v->val_; }
+
+  template<typename T = Scalar>
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE typename std::enable_if<!std::is_pointer<T>::value,double&>::type 
+    operator()(Scalar &v) const { return v.vi_->val_; }
 };
 
 /**
@@ -94,20 +110,45 @@ val() const { return CwiseUnaryOp<val_Op, const Derived>
 }
 
 /**
+ * Coefficient-wise function applying val_Op struct to a matrix of const var
+ * and returning a const matrix of type T containing the values
+ */
+inline CwiseUnaryOp<val_Op, Derived>
+val() { return CwiseUnaryOp<val_Op, Derived>
+    (derived(), val_Op());
+}
+
+/**
  * Structure to return adjoint from a var. The first definition takes
  * a const var and returns a const double (for reading from a const matrix).
  * The second definition takes a non-const var and returns a non-const
  * double (for writing to a non-const matrix)
  */
 struct adj_Op {
-  EIGEN_EMPTY_STRUCT_CTOR(adj_Op)
+  EIGEN_EMPTY_STRUCT_CTOR(adj_Op);
+  template<typename T = Scalar>
   EIGEN_DEVICE_FUNC
-  EIGEN_STRONG_INLINE const double& 
+  EIGEN_STRONG_INLINE typename
+    std::enable_if<std::is_pointer<T>::value,const double&>::type const 
     operator()(const Scalar &v) const { return v->adj_; }
 
+  template<typename T = Scalar>
   EIGEN_DEVICE_FUNC
-  EIGEN_STRONG_INLINE double& 
+  EIGEN_STRONG_INLINE typename
+    std::enable_if<!std::is_pointer<T>::value,const double&>::type const 
+    operator()(const Scalar &v) const { return v.vi_->adj_; }
+
+  template<typename T = Scalar>
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE typename
+    std::enable_if<std::is_pointer<T>::value,double&>::type 
     operator()(Scalar &v) const { return v->adj_; }
+
+  template<typename T = Scalar>
+  EIGEN_DEVICE_FUNC
+  EIGEN_STRONG_INLINE typename
+    std::enable_if<!std::is_pointer<T>::value,double&>::type 
+    operator()(Scalar &v) const { return v.vi_->adj_; }
 };
 
 /**
@@ -136,7 +177,7 @@ adj() { return CwiseUnaryView<adj_Op, Derived>
  */
 struct vi_Op {
   typedef decltype(Scalar::vi_) result_type;
-  EIGEN_EMPTY_STRUCT_CTOR(vi_Op)
+  EIGEN_EMPTY_STRUCT_CTOR(vi_Op);
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE const result_type& 
     operator()(const Scalar &v) const { return v.vi_; }
