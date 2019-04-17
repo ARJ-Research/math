@@ -97,7 +97,7 @@ struct val_Op{
   template<typename T = Scalar>
   EIGEN_DEVICE_FUNC
   EIGEN_STRONG_INLINE typename std::enable_if<!std::is_pointer<T>::value,double&>::type 
-    operator()(Scalar &v) const { return v.vi_->val_; }
+    operator()(Scalar &v) { return v.vi_->val_; }
 };
 
 /**
@@ -113,8 +113,8 @@ val() const { return CwiseUnaryOp<val_Op, const Derived>
  * Coefficient-wise function applying val_Op struct to a matrix of const var
  * and returning a const matrix of type T containing the values
  */
-inline CwiseUnaryOp<val_Op, Derived>
-val() { return CwiseUnaryOp<val_Op, Derived>
+inline CwiseUnaryView<val_Op, Derived>
+val() { return CwiseUnaryView<val_Op, Derived>
     (derived(), val_Op());
 }
 

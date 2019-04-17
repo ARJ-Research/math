@@ -33,13 +33,8 @@ class LDLT_alloc : public chainable_alloc {
     N_ = A.rows();
     variA_.resize(A.rows(), A.cols());
 
-    for (size_t j = 0; j < N_; j++) {
-      for (size_t i = 0; i < N_; i++) {
-        Ad(i, j) = A(i, j).val();
-        variA_(i, j) = A(i, j).vi_;
-      }
-    }
-
+    Ad = A.val();
+    variA_ = A.vi();
     ldlt_.compute(Ad);
   }
 

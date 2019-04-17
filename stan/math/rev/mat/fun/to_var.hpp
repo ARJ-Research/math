@@ -19,10 +19,7 @@ namespace math {
  * @return A Matrix with automatic differentiation variables
  */
 inline matrix_v to_var(const matrix_d& m) {
-  matrix_v m_v(m.rows(), m.cols());
-  for (int j = 0; j < m.cols(); ++j)
-    for (int i = 0; i < m.rows(); ++i)
-      m_v(i, j) = m(i, j);
+  matrix_v m_v = m;
   return m_v;
 }
 /**

@@ -162,11 +162,12 @@ class multiply_mat_vari<Ta, 1, Ca, Tb, 1> : public vari {
     using Eigen::VectorXd;
     Map<Matrix<vari*,1,-1>>(variRefA_, 1, size_) = A.vi();
     Map<Matrix<vari*,-1,1>>(variRefB_, size_, 1) = B.vi();
-    Map<RowVectorXd>(Ad_, 1, size_) = A.val();
-    Map<VectorXd>(Bd_, size_, 1) = B.val();
+    Map<RowVectorXd> Ad_map(Ad_, 1, size_);
+    Map<VectorXd> Bd_map(Bd_, size_, 1);
+    Ad_map = A.val();
+    Bd_map = B.val();
 
-    double AB = Map<RowVectorXd>(Ad_, 1, size_) * Map<VectorXd>(Bd_, size_, 1);
-    variRefAB_ = new vari(AB, false);
+    variRefAB_ = new vari(Ad_map.dot(Bd_map), false);
   }
 
   virtual void chain() {
@@ -245,12 +246,14 @@ class multiply_mat_vari<double, Ra, Ca, Tb, Cb> : public vari {
     using Eigen::MatrixXd;
     using Eigen::Matrix;
 
-    Map<MatrixXd>(Ad_, A_rows_, A_cols_) = A;
-    Map<MatrixXd>(Bd_, A_cols_, B_cols_) = B.val();
+    Map<MatrixXd> Ad_map(Ad_, A_rows_, A_cols_);
+    Map<MatrixXd> Bd_map(Bd_, A_cols_, B_cols_);
     Map<Matrix<vari*,-1,-1>>(variRefB_, A_cols_, B_cols_) = B.vi();
 
-    MatrixXd AB = Map<MatrixXd>(Ad_, A_rows_, A_cols_)
-                  * Map<MatrixXd>(Bd_, A_cols_, B_cols_);
+    Ad_map = A;
+    Bd_map = B.val();
+
+    MatrixXd AB = Ad_map * Bd_map;
     for (size_type i = 0; i < AB.size(); ++i)
       variRefAB_[i] = new vari(AB.coeffRef(i), false);
   }
@@ -318,13 +321,13 @@ class multiply_mat_vari<double, 1, Ca, Tb, 1> : public vari {
     using Eigen::Matrix;
     using Eigen::RowVectorXd;
     using Eigen::VectorXd;
-    Map<RowVectorXd>(Ad_, 1, size_) = A;
-    Map<VectorXd>(Bd_, size_, 1) = B.val();
+    Map<RowVectorXd> Ad_map(Ad_, 1, size_);
+    Map<VectorXd> Bd_map(Bd_, size_, 1);
     Map<Matrix<vari*,-1,1>>(variRefB_, size_, 1) = B.vi();
+    Ad_map = A;
+    Bd_map = B.val();
 
-    double AB = Eigen::Map<RowVectorXd>(Ad_, 1, size_)
-                * Eigen::Map<VectorXd>(Bd_, size_, 1);
-    variRefAB_ = new vari(AB, false);
+    variRefAB_ = new vari(Ad_map.dot(Bd_map), false);
   }
 
   virtual void chain() {
@@ -398,11 +401,12 @@ class multiply_mat_vari<Ta, Ra, Ca, double, Cb> : public vari {
     using Eigen::Matrix;
     using Eigen::MatrixXd;
     Map<Matrix<vari*,-1,-1>>(variRefA_, A_rows_, A_cols_) = A.vi();
-    Map<MatrixXd>(Ad_, A_rows_, A_cols_) = A.val();
-    Map<MatrixXd>(Bd_, A_cols_, B_cols_) = B;
+    Map<MatrixXd> Ad_map(Ad_, A_rows_, A_cols_);
+    Map<MatrixXd> Bd_map(Bd_, A_cols_, B_cols_);
+    Ad_map = A.val();
+    Bd_map = B;
 
-    MatrixXd AB = Map<MatrixXd>(Ad_, A_rows_, A_cols_)
-                  * Map<MatrixXd>(Bd_, A_cols_, B_cols_);
+    MatrixXd AB = Ad_map * Bd_map;
     for (size_type i = 0; i < AB.size(); ++i)
       variRefAB_[i] = new vari(AB.coeffRef(i), false);
   }
@@ -474,10 +478,11 @@ class multiply_mat_vari<Ta, 1, Ca, double, 1> : public vari {
     using Eigen::RowVectorXd;
     using Eigen::VectorXd;
     Map<Matrix<vari*,1,-1>>(variRefA_,1,size_) = A.vi();
-    Map<RowVectorXd>(Ad_,1,size_) = A.val();
-    Map<VectorXd>(Bd_,size_,1) = B;
-    double AB = Map<RowVectorXd>(Ad_, 1, size_) * Map<VectorXd>(Bd_, size_, 1);
-    variRefAB_ = new vari(AB, false);
+    Map<RowVectorXd> Ad_map(Ad_,1,size_);
+    Map<VectorXd> Bd_map(Bd_,size_,1);
+    Ad_map = A.val();
+    Bd_map = B;
+    variRefAB_ = new vari(Ad_map.dot(Bd_map), false);
   }
 
   virtual void chain() {

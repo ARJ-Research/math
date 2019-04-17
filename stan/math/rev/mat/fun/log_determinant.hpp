@@ -14,25 +14,18 @@ inline var log_determinant(const Eigen::Matrix<var, R, C>& m) {
 
   math::check_square("log_determinant", "m", m);
 
-  Matrix<double, R, C> m_d(m.rows(), m.cols());
-  for (int i = 0; i < m.size(); ++i)
-    m_d(i) = m(i).val();
-
   Eigen::FullPivHouseholderQR<Matrix<double, R, C> > hh
-      = m_d.fullPivHouseholderQr();
+      = m.val().fullPivHouseholderQr();
 
   double val = hh.logAbsDeterminant();
 
   vari** varis
       = ChainableStack::instance().memalloc_.alloc_array<vari*>(m.size());
-  for (int i = 0; i < m.size(); ++i)
-    varis[i] = m(i).vi_;
+  Eigen::Map<Matrix<vari*,-1,-1>>(varis,m.rows(),m.cols()) = m.vi();
 
-  Matrix<double, R, C> m_inv_transpose = hh.inverse().transpose();
   double* gradients
       = ChainableStack::instance().memalloc_.alloc_array<double>(m.size());
-  for (int i = 0; i < m.size(); ++i)
-    gradients[i] = m_inv_transpose(i);
+  Eigen::Map<Matrix<double,-1,-1>>(gradients,m.rows(),m.cols()) = hh.inverse().transpose();
 
   return var(new precomputed_gradients_vari(val, m.size(), varis, gradients));
 }
