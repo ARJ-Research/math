@@ -3,6 +3,8 @@
 
 #include <stan/math/rev/core.hpp>
 #include <stan/math/prim/scal/fun/inv_logit.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
+#include <cmath>
 
 namespace stan {
 namespace math {
@@ -43,11 +45,11 @@ namespace math {
  * @return The corresponding unit normal cdf approximation.
  */
 inline var Phi_approx(const var& a) {
+  using std::pow;
+
   double av = a.vi_->val_;
-  double av_squared = av * av;
-  double av_cubed = av * av_squared;
-  double f = inv_logit(0.07056 * av_cubed + 1.5976 * av);
-  double da = f * (1 - f) * (3.0 * 0.07056 * av_squared + 1.5976);
+  double f = inv_logit(0.07056 * pow(av, 3) + 1.5976 * av);
+  double da = f * (1 - f) * (3.0 * 0.07056 * square(av) + 1.5976);
   return var(new precomp_v_vari(f, a.vi_, da));
 }
 

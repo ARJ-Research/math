@@ -2,6 +2,7 @@
 #define STAN_MATH_REV_SCAL_FUN_ERFC_HPP
 
 #include <stan/math/prim/scal/fun/constants.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <stan/math/prim/scal/fun/erfc.hpp>
 #include <stan/math/rev/core.hpp>
 #include <cmath>
@@ -15,7 +16,7 @@ class erfc_vari : public op_v_vari {
   explicit erfc_vari(vari* avi) : op_v_vari(erfc(avi->val_), avi) {}
   void chain() {
     avi_->adj_
-        += adj_ * NEG_TWO_OVER_SQRT_PI * std::exp(-avi_->val_ * avi_->val_);
+        += adj_ * NEG_TWO_OVER_SQRT_PI * std::exp(-square(avi_->val_));
   }
 };
 }  // namespace internal

@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_REV_SCAL_FUN_ASIN_HPP
 #define STAN_MATH_REV_SCAL_FUN_ASIN_HPP
 
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <stan/math/rev/core.hpp>
 #include <cmath>
 
@@ -12,7 +13,7 @@ class asin_vari : public op_v_vari {
  public:
   explicit asin_vari(vari* avi) : op_v_vari(std::asin(avi->val_), avi) {}
   void chain() {
-    avi_->adj_ += adj_ / std::sqrt(1.0 - (avi_->val_ * avi_->val_));
+    avi_->adj_ += adj_ / std::sqrt(1.0 - square(avi_->val_));
   }
 };
 }  // namespace internal

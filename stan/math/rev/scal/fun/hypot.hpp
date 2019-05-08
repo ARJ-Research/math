@@ -13,8 +13,9 @@ class hypot_vv_vari : public op_vv_vari {
   hypot_vv_vari(vari* avi, vari* bvi)
       : op_vv_vari(hypot(avi->val_, bvi->val_), avi, bvi) {}
   void chain() {
-    avi_->adj_ += adj_ * avi_->val_ / val_;
-    bvi_->adj_ += adj_ * bvi_->val_ / val_;
+    const double adj_val = adj_ / val_;
+    avi_->adj_ += adj_val * avi_->val_;
+    bvi_->adj_ += adj_val * bvi_->val_;
   }
 };
 

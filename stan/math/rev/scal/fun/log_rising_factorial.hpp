@@ -16,9 +16,9 @@ class log_rising_factorial_vv_vari : public op_vv_vari {
   log_rising_factorial_vv_vari(vari* avi, vari* bvi)
       : op_vv_vari(log_rising_factorial(avi->val_, bvi->val_), avi, bvi) {}
   void chain() {
-    avi_->adj_
-        += adj_ * (digamma(avi_->val_ + bvi_->val_) - digamma(avi_->val_));
-    bvi_->adj_ += adj_ * digamma(avi_->val_ + bvi_->val_);
+    const double digamma_ab = digamma(avi_->val_ + bvi_->val_);
+    avi_->adj_ += adj_ * (digamma_ab - digamma(avi_->val_));
+    bvi_->adj_ += adj_ * digamma_ab;
   }
 };
 

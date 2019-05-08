@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_REV_SCAL_FUN_TANH_HPP
 #define STAN_MATH_REV_SCAL_FUN_TANH_HPP
 
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <stan/math/rev/core.hpp>
 #include <cmath>
 
@@ -12,8 +13,7 @@ class tanh_vari : public op_v_vari {
  public:
   explicit tanh_vari(vari* avi) : op_v_vari(std::tanh(avi->val_), avi) {}
   void chain() {
-    double cosh = std::cosh(avi_->val_);
-    avi_->adj_ += adj_ / (cosh * cosh);
+    avi_->adj_ += adj_ / square(std::cosh(avi_->val_));
   }
 };
 }  // namespace internal

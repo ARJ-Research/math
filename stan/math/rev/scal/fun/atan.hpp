@@ -2,6 +2,7 @@
 #define STAN_MATH_REV_SCAL_FUN_ATAN_HPP
 
 #include <stan/math/rev/core.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <cmath>
 
 namespace stan {
@@ -11,7 +12,7 @@ namespace internal {
 class atan_vari : public op_v_vari {
  public:
   explicit atan_vari(vari* avi) : op_v_vari(std::atan(avi->val_), avi) {}
-  void chain() { avi_->adj_ += adj_ / (1.0 + (avi_->val_ * avi_->val_)); }
+  void chain() { avi_->adj_ += adj_ / (1.0 + square(avi_->val_)); }
 };
 }  // namespace internal
 

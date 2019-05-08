@@ -3,6 +3,7 @@
 
 #include <stan/math/rev/core.hpp>
 #include <stan/math/prim/scal/fun/fma.hpp>
+#include <stan/math/prim/scal/fun/constants.hpp>
 #include <stan/math/prim/scal/fun/is_nan.hpp>
 #include <stan/math/prim/scal/meta/likely.hpp>
 #include <limits>
@@ -18,9 +19,9 @@ class fma_vvv_vari : public op_vvv_vari {
   void chain() {
     if (unlikely(is_nan(avi_->val_) || is_nan(bvi_->val_)
                  || is_nan(cvi_->val_))) {
-      avi_->adj_ = std::numeric_limits<double>::quiet_NaN();
-      bvi_->adj_ = std::numeric_limits<double>::quiet_NaN();
-      cvi_->adj_ = std::numeric_limits<double>::quiet_NaN();
+      avi_->adj_ = NOT_A_NUMBER;
+      bvi_->adj_ = NOT_A_NUMBER;
+      cvi_->adj_ = NOT_A_NUMBER;
     } else {
       avi_->adj_ += adj_ * bvi_->val_;
       bvi_->adj_ += adj_ * avi_->val_;
@@ -35,8 +36,8 @@ class fma_vvd_vari : public op_vvd_vari {
       : op_vvd_vari(fma(avi->val_, bvi->val_, c), avi, bvi, c) {}
   void chain() {
     if (unlikely(is_nan(avi_->val_) || is_nan(bvi_->val_) || is_nan(cd_))) {
-      avi_->adj_ = std::numeric_limits<double>::quiet_NaN();
-      bvi_->adj_ = std::numeric_limits<double>::quiet_NaN();
+      avi_->adj_ = NOT_A_NUMBER;
+      bvi_->adj_ = NOT_A_NUMBER;
     } else {
       avi_->adj_ += adj_ * bvi_->val_;
       bvi_->adj_ += adj_ * avi_->val_;
@@ -50,8 +51,8 @@ class fma_vdv_vari : public op_vdv_vari {
       : op_vdv_vari(fma(avi->val_, b, cvi->val_), avi, b, cvi) {}
   void chain() {
     if (unlikely(is_nan(avi_->val_) || is_nan(cvi_->val_) || is_nan(bd_))) {
-      avi_->adj_ = std::numeric_limits<double>::quiet_NaN();
-      cvi_->adj_ = std::numeric_limits<double>::quiet_NaN();
+      avi_->adj_ = NOT_A_NUMBER;
+      cvi_->adj_ = NOT_A_NUMBER;
     } else {
       avi_->adj_ += adj_ * bd_;
       cvi_->adj_ += adj_;
@@ -65,7 +66,7 @@ class fma_vdd_vari : public op_vdd_vari {
       : op_vdd_vari(fma(avi->val_, b, c), avi, b, c) {}
   void chain() {
     if (unlikely(is_nan(avi_->val_) || is_nan(bd_) || is_nan(cd_)))
-      avi_->adj_ = std::numeric_limits<double>::quiet_NaN();
+      avi_->adj_ = NOT_A_NUMBER;
     else
       avi_->adj_ += adj_ * bd_;
   }
@@ -77,7 +78,7 @@ class fma_ddv_vari : public op_ddv_vari {
       : op_ddv_vari(fma(a, b, cvi->val_), a, b, cvi) {}
   void chain() {
     if (unlikely(is_nan(cvi_->val_) || is_nan(ad_) || is_nan(bd_)))
-      cvi_->adj_ = std::numeric_limits<double>::quiet_NaN();
+      cvi_->adj_ = NOT_A_NUMBER;
     else
       cvi_->adj_ += adj_;
   }

@@ -3,6 +3,7 @@
 
 #include <stan/math/rev/core.hpp>
 #include <stan/math/prim/scal/fun/inv.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
 
 namespace stan {
 namespace math {
@@ -11,7 +12,7 @@ namespace internal {
 class inv_vari : public op_v_vari {
  public:
   explicit inv_vari(vari* avi) : op_v_vari(inv(avi->val_), avi) {}
-  void chain() { avi_->adj_ -= adj_ / (avi_->val_ * avi_->val_); }
+  void chain() { avi_->adj_ -= adj_ / square(avi_->val_); }
 };
 }  // namespace internal
 

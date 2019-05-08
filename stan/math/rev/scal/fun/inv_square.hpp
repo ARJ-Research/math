@@ -12,7 +12,8 @@ class inv_square_vari : public op_v_vari {
  public:
   explicit inv_square_vari(vari* avi) : op_v_vari(inv_square(avi->val_), avi) {}
   void chain() {
-    avi_->adj_ -= 2 * adj_ / (avi_->val_ * avi_->val_ * avi_->val_);
+    using std::pow;
+    avi_->adj_ -= 2 * adj_ / pow(avi_->val_, 3);
   }
 };
 }  // namespace internal

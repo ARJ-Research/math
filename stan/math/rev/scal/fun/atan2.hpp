@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_REV_SCAL_FUN_ATAN2_HPP
 #define STAN_MATH_REV_SCAL_FUN_ATAN2_HPP
 
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <stan/math/rev/core.hpp>
 #include <cmath>
 
@@ -13,10 +14,10 @@ class atan2_vv_vari : public op_vv_vari {
   atan2_vv_vari(vari* avi, vari* bvi)
       : op_vv_vari(std::atan2(avi->val_, bvi->val_), avi, bvi) {}
   void chain() {
-    double a_sq_plus_b_sq
-        = (avi_->val_ * avi_->val_) + (bvi_->val_ * bvi_->val_);
-    avi_->adj_ += adj_ * bvi_->val_ / a_sq_plus_b_sq;
-    bvi_->adj_ -= adj_ * avi_->val_ / a_sq_plus_b_sq;
+    double adj_div_a_sq_plus_b_sq =
+              adj_ / (square(avi_->val_) + square(bvi_->val_));
+    avi_->adj_ += bvi_->val_ * adj_div_a_sq_plus_b_sq;
+    bvi_->adj_ -= avi_->val_ * adj_div_a_sq_plus_b_sq;
   }
 };
 
@@ -25,8 +26,7 @@ class atan2_vd_vari : public op_vd_vari {
   atan2_vd_vari(vari* avi, double b)
       : op_vd_vari(std::atan2(avi->val_, b), avi, b) {}
   void chain() {
-    double a_sq_plus_b_sq = (avi_->val_ * avi_->val_) + (bd_ * bd_);
-    avi_->adj_ += adj_ * bd_ / a_sq_plus_b_sq;
+    avi_->adj_ += adj_ * bd_ / (square(avi_->val_) + square(bd_ ));
   }
 };
 
@@ -35,8 +35,7 @@ class atan2_dv_vari : public op_dv_vari {
   atan2_dv_vari(double a, vari* bvi)
       : op_dv_vari(std::atan2(a, bvi->val_), a, bvi) {}
   void chain() {
-    double a_sq_plus_b_sq = (ad_ * ad_) + (bvi_->val_ * bvi_->val_);
-    bvi_->adj_ -= adj_ * ad_ / a_sq_plus_b_sq;
+    bvi_->adj_ -= adj_ * ad_ / (square(ad_) + square(bvi_->val_));
   }
 };
 }  // namespace internal

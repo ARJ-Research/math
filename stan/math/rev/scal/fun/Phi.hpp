@@ -3,6 +3,7 @@
 
 #include <stan/math/rev/core.hpp>
 #include <stan/math/prim/scal/fun/Phi.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
 
 namespace stan {
 namespace math {
@@ -14,7 +15,7 @@ class Phi_vari : public op_v_vari {
   void chain() {
     static const double NEG_HALF = -0.5;
     avi_->adj_ += adj_ * INV_SQRT_TWO_PI
-                  * std::exp(NEG_HALF * avi_->val_ * avi_->val_);
+                  * std::exp(NEG_HALF * square(avi_->val_));
   }
 };
 }  // namespace internal

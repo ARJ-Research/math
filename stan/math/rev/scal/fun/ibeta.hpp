@@ -5,6 +5,7 @@
 #include <stan/math/prim/scal/fun/ibeta.hpp>
 #include <stan/math/prim/scal/fun/digamma.hpp>
 #include <stan/math/prim/scal/fun/tgamma.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
 
 namespace stan {
 namespace math {
@@ -21,7 +22,7 @@ inline double ibeta_hypergeometric_helper(double a, double b, double z,
   double val = 0;
   double diff = 1;
   double k = 0;
-  double a_2 = a * a;
+  double a_2 = square(a);
   double bprod = 1;
   while (std::abs(diff) > precision && ++k < max_steps) {
     val += diff;
@@ -44,16 +45,24 @@ class ibeta_vvv_vari : public op_vvv_vari {
     using std::log;
     using std::pow;
     using std::sin;
-    avi_->adj_ += adj_ * (log(c) - digamma(a) + digamma(a + b)) * val_
-                  - tgamma(a) * tgamma(a + b) / tgamma(b) * pow(c, a)
-                        / tgamma(1 + a) / tgamma(1 + a)
+
+    const double digamma_ab = digamma(a + b);
+    const double tgamma_a = tgamma(a);
+    const double tgamma_b = tgamma(b);
+    const double tgamma_apb = tgamma(a + b);
+    const double tgamma_1pa = tgamma(1 + a);
+    const double tgamma_1pb = tgamma(1 + b);
+
+    avi_->adj_ += adj_ * (log(c) - digamma(a) + digamma_ab) * val_
+                  - tgamma_a * tgamma_apb / tgamma_b  * pow(c, a)
+                        / tgamma_1pa / tgamma_1pa
                         * ibeta_hypergeometric_helper(a, 1 - b, c);
     bvi_->adj_ += adj_
-                  * (tgamma(b) * tgamma(a + b) / tgamma(a) * pow(1 - c, b)
+                  * (tgamma_b  * tgamma_apb / tgamma_a * pow(1 - c, b)
                          * ibeta_hypergeometric_helper(b, 1 - a, 1 - c)
-                         / tgamma(b + 1) / tgamma(b + 1)
+                         / tgamma_1pb / tgamma_1pb
                      + ibeta(b, a, 1 - c)
-                           * (digamma(b) - digamma(a + b) - log(1 - c)));
+                           * (digamma(b) - digamma_ab - log(1 - c)));
     cvi_->adj_ += adj_ * boost::math::ibeta_derivative(a, b, c);
   }
 };
@@ -70,16 +79,24 @@ class ibeta_vvd_vari : public op_vvd_vari {
     using std::log;
     using std::pow;
     using std::sin;
-    avi_->adj_ += adj_ * (log(c) - digamma(a) + digamma(a + b)) * val_
-                  - tgamma(a) * tgamma(a + b) / tgamma(b) * pow(c, a)
-                        / tgamma(1 + a) / tgamma(1 + a)
+
+    const double digamma_ab = digamma(a + b);
+    const double tgamma_a = tgamma(a);
+    const double tgamma_b = tgamma(b);
+    const double tgamma_apb = tgamma(a + b);
+    const double tgamma_1pa = tgamma(1 + a);
+    const double tgamma_1pb = tgamma(1 + b);
+
+    avi_->adj_ += adj_ * (log(c) - digamma(a) + digamma_ab) * val_
+                  - tgamma_a * tgamma_apb / tgamma_b * pow(c, a)
+                        / tgamma_1pa / tgamma_1pa
                         * ibeta_hypergeometric_helper(a, 1 - b, c);
     bvi_->adj_ += adj_
-                  * (tgamma(b) * tgamma(a + b) / tgamma(a) * pow(1 - c, b)
+                  * (tgamma_b * tgamma_apb / tgamma_a * pow(1 - c, b)
                          * ibeta_hypergeometric_helper(b, 1 - a, 1 - c)
-                         / tgamma(b + 1) / tgamma(b + 1)
+                         / tgamma_1pb / tgamma_1pb
                      + ibeta(b, a, 1 - c)
-                           * (digamma(b) - digamma(a + b) - log(1 - c)));
+                           * (digamma(b) - digamma_ab - log(1 - c)));
   }
 };
 class ibeta_vdv_vari : public op_vdv_vari {
@@ -97,9 +114,12 @@ class ibeta_vdv_vari : public op_vdv_vari {
     using std::log;
     using std::pow;
     using std::sin;
+
+    const double tgamma_1pa = tgamma(1 + a);
+
     avi_->adj_ += adj_ * (log(c) - digamma(a) + digamma(a + b)) * val_
                   - tgamma(a) * tgamma(a + b) / tgamma(b) * pow(c, a)
-                        / tgamma(1 + a) / tgamma(1 + a)
+                        / tgamma_1pa / tgamma_1pa
                         * ibeta_hypergeometric_helper(a, 1 - b, c);
     cvi_->adj_ += adj_ * boost::math::ibeta_derivative(a, b, c);
   }
@@ -119,9 +139,12 @@ class ibeta_vdd_vari : public op_vdd_vari {
     using std::log;
     using std::pow;
     using std::sin;
+
+    const double tgamma_1pa = tgamma(1 + a);
+
     avi_->adj_ += adj_ * (log(c) - digamma(a) + digamma(a + b)) * val_
                   - tgamma(a) * tgamma(a + b) / tgamma(b) * pow(c, a)
-                        / tgamma(1 + a) / tgamma(1 + a)
+                        / tgamma_1pa / tgamma_1pa
                         * ibeta_hypergeometric_helper(a, 1 - b, c);
   }
 };
@@ -140,10 +163,13 @@ class ibeta_dvv_vari : public op_dvv_vari {
     using std::log;
     using std::pow;
     using std::sin;
+
+    const double tgamma_1pb = tgamma(1 + b);
+
     bvi_->adj_ += adj_
                   * (tgamma(b) * tgamma(a + b) / tgamma(a) * pow(1 - c, b)
                          * ibeta_hypergeometric_helper(b, 1 - a, 1 - c)
-                         / tgamma(b + 1) / tgamma(b + 1)
+                         / tgamma_1pb / tgamma_1pb
                      + ibeta(b, a, 1 - c)
                            * (digamma(b) - digamma(a + b) - log(1 - c)));
     cvi_->adj_ += adj_ * boost::math::ibeta_derivative(a, b, c);
@@ -164,10 +190,13 @@ class ibeta_dvd_vari : public op_dvd_vari {
     using std::log;
     using std::pow;
     using std::sin;
+
+    const double tgamma_1pb = tgamma(1 + b);
+
     bvi_->adj_ += adj_
                   * (tgamma(b) * tgamma(a + b) / tgamma(a) * pow(1 - c, b)
                          * ibeta_hypergeometric_helper(b, 1 - a, 1 - c)
-                         / tgamma(b + 1) / tgamma(b + 1)
+                         / tgamma_1pb / tgamma_1pb
                      + ibeta(b, a, 1 - c)
                            * (digamma(b) - digamma(a + b) - log(1 - c)));
   }

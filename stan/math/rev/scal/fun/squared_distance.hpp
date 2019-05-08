@@ -12,9 +12,9 @@ class scal_squared_distance_vv_vari : public op_vv_vari {
   scal_squared_distance_vv_vari(vari* avi, vari* bvi)
       : op_vv_vari(squared_distance(avi->val_, bvi->val_), avi, bvi) {}
   void chain() {
-    double diff = avi_->val_ - bvi_->val_;
-    avi_->adj_ += adj_ * 2.0 * diff;
-    bvi_->adj_ -= adj_ * 2.0 * diff;
+    double adj_times_2_diff = adj_ * 2.0 * (avi_->val_ - bvi_->val_);
+    avi_->adj_ += adj_times_2_diff;
+    bvi_->adj_ -= adj_times_2_diff;
   }
 };
 class scal_squared_distance_vd_vari : public op_vd_vari {

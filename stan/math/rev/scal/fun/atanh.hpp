@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_REV_SCAL_FUN_ATANH_HPP
 #define STAN_MATH_REV_SCAL_FUN_ATANH_HPP
 
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <stan/math/prim/scal/fun/atanh.hpp>
 #include <stan/math/rev/core.hpp>
 
@@ -11,7 +12,7 @@ namespace internal {
 class atanh_vari : public op_v_vari {
  public:
   atanh_vari(double val, vari* avi) : op_v_vari(val, avi) {}
-  void chain() { avi_->adj_ += adj_ / (1.0 - avi_->val_ * avi_->val_); }
+  void chain() { avi_->adj_ += adj_ / (1.0 - square(avi_->val_)); }
 };
 }  // namespace internal
 

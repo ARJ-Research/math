@@ -4,6 +4,7 @@
 #include <stan/math/rev/core.hpp>
 #include <stan/math/prim/scal/fun/constants.hpp>
 #include <stan/math/prim/scal/fun/erf.hpp>
+#include <stan/math/prim/scal/fun/square.hpp>
 #include <cmath>
 
 namespace stan {
@@ -14,7 +15,7 @@ class erf_vari : public op_v_vari {
  public:
   explicit erf_vari(vari* avi) : op_v_vari(erf(avi->val_), avi) {}
   void chain() {
-    avi_->adj_ += adj_ * TWO_OVER_SQRT_PI * std::exp(-avi_->val_ * avi_->val_);
+    avi_->adj_ += adj_ * TWO_OVER_SQRT_PI * std::exp(-square(avi_->val_));
   }
 };
 }  // namespace internal

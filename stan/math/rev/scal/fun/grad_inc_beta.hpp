@@ -5,6 +5,7 @@
 #include <stan/math/prim/scal/fun/lbeta.hpp>
 #include <stan/math/prim/scal/fun/grad_2F1.hpp>
 #include <stan/math/prim/scal/fun/value_of.hpp>
+#include <stan/math/prim/scal/fun/inv.hpp>
 #include <stan/math/rev/scal/fun/exp.hpp>
 #include <stan/math/rev/scal/fun/fabs.hpp>
 #include <stan/math/rev/scal/fun/floor.hpp>
@@ -42,7 +43,7 @@ inline void grad_inc_beta(var& g1, var& g2, const var& a, const var& b,
   var dF2 = 0;
   if (value_of(value_of(C)))
     grad_2F1(dF1, dF2, a + b, var(1.0), a + 1, z);
-  g1 = (c1 - 1.0 / a) * c3 + C * (dF1 + dF2);
+  g1 = (c1 - inv(a)) * c3 + C * (dF1 + dF2);
   g2 = c2 * c3 + C * dF1;
 }
 

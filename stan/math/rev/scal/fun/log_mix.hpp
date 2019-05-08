@@ -4,6 +4,7 @@
 #include <stan/math/prim/scal/fun/value_of.hpp>
 #include <stan/math/prim/scal/fun/log_mix.hpp>
 #include <stan/math/rev/scal/fun/value_of.hpp>
+#include <stan/math/rev/scal/fun/inv.hpp>
 #include <stan/math/prim/scal/meta/is_constant_struct.hpp>
 #include <stan/math/prim/scal/meta/operands_and_partials.hpp>
 #include <cmath>
@@ -32,7 +33,7 @@ inline void log_mix_partial_helper(
   double one_m_t = 1 - theta_val;
   one_m_t_prod_exp_lam2_m_lam1 = one_m_t * exp_lam2_m_lam1;
   one_d_t_plus_one_m_t_prod_exp_lam2_m_lam1
-      = 1 / (theta_val + one_m_t_prod_exp_lam2_m_lam1);
+      = inv(theta_val + one_m_t_prod_exp_lam2_m_lam1);
 }
 
 /**
