@@ -101,7 +101,7 @@ normal_id_glm_lpdf(const T_y &y, const T_x &x, const T_alpha &alpha,
   const auto &sigma_val_vec = as_column_vector_or_scalar(sigma_val);
   const auto &y_val_vec = as_column_vector_or_scalar(y_val);
 
-  T_scale_val inv_sigma = 1 / as_array_or_scalar(sigma_val_vec);
+  T_scale_val inv_sigma = inv(as_array_or_scalar(sigma_val_vec));
 
   Array<T_partials_return, Dynamic, 1> y_minus_mu_over_sigma
       = x_val * beta_val_vec;

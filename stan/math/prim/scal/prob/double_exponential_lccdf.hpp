@@ -58,7 +58,6 @@ typename return_type<T_y, T_loc, T_scale>::type double_exponential_lccdf(
   scalar_seq_view<T_y> y_vec(y);
   scalar_seq_view<T_loc> mu_vec(mu);
   scalar_seq_view<T_scale> sigma_vec(sigma);
-  const double log_half = std::log(0.5);
   size_t N = max_size(y, mu, sigma);
 
   for (size_t n = 0; n < N; n++) {
@@ -66,11 +65,11 @@ typename return_type<T_y, T_loc, T_scale>::type double_exponential_lccdf(
     const T_partials_return mu_dbl = value_of(mu_vec[n]);
     const T_partials_return sigma_dbl = value_of(sigma_vec[n]);
     const T_partials_return scaled_diff = (y_dbl - mu_dbl) / sigma_dbl;
-    const T_partials_return inv_sigma = 1.0 / sigma_dbl;
+    const T_partials_return inv_sigma = inv(sigma_dbl);
     if (y_dbl < mu_dbl) {
       ccdf_log += log1m(0.5 * exp(scaled_diff));
 
-      const T_partials_return rep_deriv = 1.0 / (2.0 * exp(-scaled_diff) - 1.0);
+      const T_partials_return rep_deriv = inv(2.0 * exp(-scaled_diff) - 1.0);
       if (!is_constant_struct<T_y>::value)
         ops_partials.edge1_.partials_[n] -= rep_deriv * inv_sigma;
       if (!is_constant_struct<T_loc>::value)
@@ -78,7 +77,7 @@ typename return_type<T_y, T_loc, T_scale>::type double_exponential_lccdf(
       if (!is_constant_struct<T_scale>::value)
         ops_partials.edge3_.partials_[n] += rep_deriv * scaled_diff * inv_sigma;
     } else {
-      ccdf_log += log_half - scaled_diff;
+      ccdf_log += LOG_HALF - scaled_diff;
 
       if (!is_constant_struct<T_y>::value)
         ops_partials.edge1_.partials_[n] -= inv_sigma;

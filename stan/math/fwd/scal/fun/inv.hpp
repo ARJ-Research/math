@@ -9,7 +9,7 @@ namespace math {
 
 template <typename T>
 inline fvar<T> inv(const fvar<T>& x) {
-  return fvar<T>(1 / x.val_, -x.d_ / square(x.val_));
+  return fvar<T>(inv(x.val_), -x.d_ / square(x.val_));
 }
 }  // namespace math
 }  // namespace stan

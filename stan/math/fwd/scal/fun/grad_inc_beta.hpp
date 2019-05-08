@@ -43,7 +43,7 @@ void grad_inc_beta(fvar<T>& g1, fvar<T>& g2, fvar<T> a, fvar<T> b, fvar<T> z) {
   if (value_of(value_of(C)))
     grad_2F1(dF1, dF2, a + b, fvar<T>(1.0), a + 1, z);
 
-  g1 = (c1 - 1.0 / a) * c3 + C * (dF1 + dF2);
+  g1 = (c1 - inv(a)) * c3 + C * (dF1 + dF2);
   g2 = c2 * c3 + C * dF1;
 }
 

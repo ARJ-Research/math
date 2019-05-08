@@ -16,7 +16,7 @@
 #include <stan/math/prim/scal/fun/log1p.hpp>
 #include <stan/math/prim/scal/fun/log1p_exp.hpp>
 #include <stan/math/prim/scal/fun/square.hpp>
-#include <limits>
+#include <stan/math/prim/scal/fun/constants.hpp>
 
 namespace stan {
 namespace math {
@@ -56,8 +56,8 @@ log_modified_bessel_first_kind(const T1 v, const T2 z) {
     if (v == 0)
       return 0.0;
     if (v > 0)
-      return -std::numeric_limits<T>::infinity();
-    return std::numeric_limits<T>::infinity();
+      return NEGATIVE_INFTY;
+    return INFTY;
   }
   if (is_inf(z))
     return z;
@@ -134,7 +134,7 @@ log_modified_bessel_first_kind(const T1 v, const T2 z) {
              1.332898928162290861e-23};
       T a = square(z) * 0.25;
       T Q[3] = {1, 0.5, evaluate_polynomial(P, a)};
-      return log(z) + log(evaluate_polynomial(Q, a)) - log(2.0);
+      return log(z) + log(evaluate_polynomial(Q, a)) - LOG_2;
     }
     if (z < 500) {
       // Max error in interpolated form: 1.796e-16
@@ -168,7 +168,7 @@ log_modified_bessel_first_kind(const T1 v, const T2 z) {
     lim *= lim;
     lim *= lim;
     lim /= 24;
-    if (lim < (std::numeric_limits<double>::epsilon() * 10)) {
+    if (lim < (EPSILON * 10)) {
       T s = 1;
       T mu = 4 * square(v);
       T ex = 8 * z;

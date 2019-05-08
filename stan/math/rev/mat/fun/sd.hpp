@@ -35,11 +35,11 @@ inline var calc_sd(size_t size, const var* dtrs) {
   double* partials = reinterpret_cast<double*>(
       ChainableStack::instance().memalloc_.alloc(size * sizeof(double)));
   if (sum_of_squares < 1e-20) {
-    double grad_limit = 1 / std::sqrt(static_cast<double>(size));
+    double grad_limit = inv(std::sqrt(static_cast<double>(size)));
     for (size_t i = 0; i < size; ++i)
       partials[i] = grad_limit;
   } else {
-    double multiplier = 1 / (sd * (size - 1));
+    double multiplier = inv(sd * (size - 1));
     for (size_t i = 0; i < size; ++i)
       partials[i] = multiplier * (dtrs[i].vi_->val_ - mean);
   }

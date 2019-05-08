@@ -45,10 +45,11 @@ typename return_type<T_y, T_inv_scale>::type exponential_lcdf(
   for (size_t n = 0; n < N; n++) {
     const T_partials_return beta_dbl = value_of(beta_vec[n]);
     const T_partials_return y_dbl = value_of(y_vec[n]);
-    T_partials_return one_m_exp = 1.0 - exp(-beta_dbl * y_dbl);
+    const T_partials_return beta_times_y = beta_dbl * y_dbl;
+    T_partials_return one_m_exp = 1.0 - exp(-beta_times_y);
     cdf_log += log(one_m_exp);
 
-    T_partials_return rep_deriv = -exp(-beta_dbl * y_dbl) / one_m_exp;
+    T_partials_return rep_deriv = -exp(-beta_times_y) / one_m_exp;
     if (!is_constant_struct<T_y>::value)
       ops_partials.edge1_.partials_[n] -= rep_deriv * beta_dbl;
     if (!is_constant_struct<T_inv_scale>::value)

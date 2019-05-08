@@ -79,7 +79,7 @@ multi_student_t_rng(
   variate_generator<RNG&, gamma_distribution<> > gamma_rng(
       rng, gamma_distribution<>(nu / 2.0, 2.0 / nu));
 
-  double w = 1.0 / gamma_rng();
+  double w = inv(gamma_rng());
   for (size_t n = 0; n < N; ++n) {
     Eigen::VectorXd z(S.cols());
     for (int i = 0; i < S.cols(); i++)

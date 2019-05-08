@@ -70,13 +70,13 @@ typename return_type<T_y, T_loc, T_scale>::type cauchy_cdf(
   for (size_t n = 0; n < N; n++) {
     // Explicit results for extreme values
     // The gradients are technically ill-defined, but treated as zero
-    if (value_of(y_vec[n]) == std::numeric_limits<double>::infinity()) {
+    if (value_of(y_vec[n]) == INFTY) {
       continue;
     }
 
     const T_partials_return y_dbl = value_of(y_vec[n]);
     const T_partials_return mu_dbl = value_of(mu_vec[n]);
-    const T_partials_return sigma_inv_dbl = 1.0 / value_of(sigma_vec[n]);
+    const T_partials_return sigma_inv_dbl = inv(value_of(sigma_vec[n]));
 
     const T_partials_return z = (y_dbl - mu_dbl) * sigma_inv_dbl;
 
@@ -84,15 +84,15 @@ typename return_type<T_y, T_loc, T_scale>::type cauchy_cdf(
 
     P *= Pn;
 
+    const T_partials_return sigma_inv_dbl_partials = sigma_inv_dbl /
+                                        (pi() * (1.0 + square(z)) * Pn);
+
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n]
-          += sigma_inv_dbl / (pi() * (1.0 + z * z) * Pn);
+      ops_partials.edge1_.partials_[n] += sigma_inv_dbl_partials;
     if (!is_constant_struct<T_loc>::value)
-      ops_partials.edge2_.partials_[n]
-          += -sigma_inv_dbl / (pi() * (1.0 + z * z) * Pn);
+      ops_partials.edge2_.partials_[n] -= sigma_inv_dbl_partials;
     if (!is_constant_struct<T_scale>::value)
-      ops_partials.edge3_.partials_[n]
-          += -z * sigma_inv_dbl / (pi() * (1.0 + z * z) * Pn);
+      ops_partials.edge3_.partials_[n] -= z * sigma_inv_dbl_partials;
   }
 
   if (!is_constant_struct<T_y>::value) {

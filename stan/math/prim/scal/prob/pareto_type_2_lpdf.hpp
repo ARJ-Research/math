@@ -86,7 +86,7 @@ typename return_type<T_y, T_loc, T_scale, T_shape>::type pareto_type_2_lpdf(
       inv_alpha(length(alpha));
   if (!is_constant_struct<T_shape>::value) {
     for (size_t n = 0; n < length(alpha); n++)
-      inv_alpha[n] = 1 / value_of(alpha_vec[n]);
+      inv_alpha[n] = inv(value_of(alpha_vec[n]));
   }
 
   for (size_t n = 0; n < N; n++) {
@@ -95,7 +95,7 @@ typename return_type<T_y, T_loc, T_scale, T_shape>::type pareto_type_2_lpdf(
     const T_partials_return lambda_dbl = value_of(lambda_vec[n]);
     const T_partials_return alpha_dbl = value_of(alpha_vec[n]);
     const T_partials_return sum_dbl = lambda_dbl + y_dbl - mu_dbl;
-    const T_partials_return inv_sum = 1.0 / sum_dbl;
+    const T_partials_return inv_sum = inv(sum_dbl);
     const T_partials_return alpha_div_sum = alpha_dbl / sum_dbl;
     const T_partials_return deriv_1_2 = inv_sum + alpha_div_sum;
 

@@ -13,6 +13,7 @@
 #include <stan/math/prim/scal/fun/log1m.hpp>
 #include <stan/math/prim/scal/fun/multiply_log.hpp>
 #include <stan/math/prim/scal/fun/value_of.hpp>
+#include <stan/math/prim/scal/fun/inv_logit.hpp>
 #include <stan/math/prim/scal/meta/length.hpp>
 #include <stan/math/prim/scal/meta/is_constant_struct.hpp>
 #include <stan/math/prim/scal/meta/scalar_seq_view.hpp>
@@ -58,17 +59,17 @@ typename return_type<T_y, T_shape, T_scale>::type frechet_lccdf(
     const T_partials_return sigma_dbl = value_of(sigma_vec[n]);
     const T_partials_return alpha_dbl = value_of(alpha_vec[n]);
     const T_partials_return pow_ = pow(sigma_dbl / y_dbl, alpha_dbl);
-    const T_partials_return exp_ = exp(-pow_);
 
-    ccdf_log += log1m(exp_);
+    ccdf_log += log1m_exp(-pow_);
 
-    const T_partials_return rep_deriv_ = pow_ / (1.0 / exp_ - 1);
+    const T_partials_return rep_deriv_ = pow_ / inv_logit(pow_);
+    const T_partials_return alpha_times_rep_deriv_ = alpha_dbl * rep_deriv_ ;
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n] -= alpha_dbl / y_dbl * rep_deriv_;
+      ops_partials.edge1_.partials_[n] -= alpha_times_rep_deriv_ / y_dbl;
     if (!is_constant_struct<T_shape>::value)
-      ops_partials.edge2_.partials_[n] -= log(y_dbl / sigma_dbl) * rep_deriv_;
+      ops_partials.edge2_.partials_[n] -= multiply_log(rep_deriv_, y_dbl / sigma_dbl);
     if (!is_constant_struct<T_scale>::value)
-      ops_partials.edge3_.partials_[n] += alpha_dbl / sigma_dbl * rep_deriv_;
+      ops_partials.edge3_.partials_[n] += alpha_times_rep_deriv_ / sigma_dbl;
   }
   return ops_partials.build(ccdf_log);
 }

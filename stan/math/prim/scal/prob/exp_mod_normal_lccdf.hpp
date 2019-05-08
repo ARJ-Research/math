@@ -52,7 +52,6 @@ exp_mod_normal_lccdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
   scalar_seq_view<T_scale> sigma_vec(sigma);
   scalar_seq_view<T_inv_scale> lambda_vec(lambda);
   size_t N = max_size(y, mu, sigma, lambda);
-  const double sqrt_pi = std::sqrt(pi());
   for (size_t n = 0; n < N; n++) {
     if (is_inf(y_vec[n])) {
       if (y_vec[n] > 0.0)
@@ -67,7 +66,7 @@ exp_mod_normal_lccdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
     const T_partials_return lambda_dbl = value_of(lambda_vec[n]);
     const T_partials_return u = lambda_dbl * (y_dbl - mu_dbl);
     const T_partials_return v = lambda_dbl * sigma_dbl;
-    const T_partials_return v_sq = v * v;
+    const T_partials_return v_sq = square(v);
     const T_partials_return scaled_diff
         = (y_dbl - mu_dbl) / (SQRT_2 * sigma_dbl);
     const T_partials_return scaled_diff_sq = scaled_diff * scaled_diff;
@@ -78,13 +77,13 @@ exp_mod_normal_lccdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
     const T_partials_return deriv_1
         = lambda_dbl * exp(0.5 * v_sq - u) * erf_calc2;
     const T_partials_return deriv_2
-        = SQRT_2 / sqrt_pi * 0.5
+        = SQRT_2 / SQRT_PI * 0.5
           * exp(0.5 * v_sq
-                - (-scaled_diff + (v / SQRT_2)) * (-scaled_diff + (v / SQRT_2))
+                - square(-scaled_diff + (v / SQRT_2))
                 - u)
           / sigma_dbl;
     const T_partials_return deriv_3
-        = SQRT_2 / sqrt_pi * 0.5 * exp(-scaled_diff_sq) / sigma_dbl;
+        = SQRT_2 / SQRT_PI * 0.5 * exp(-scaled_diff_sq) / sigma_dbl;
 
     const T_partials_return ccdf_
         = 1.0 - erf_calc1 + exp(-u + v_sq * 0.5) * (erf_calc2);
@@ -107,9 +106,8 @@ exp_mod_normal_lccdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
     if (!is_constant_struct<T_inv_scale>::value)
       ops_partials.edge4_.partials_[n]
           -= exp(0.5 * v_sq - u)
-             * (SQRT_2 / sqrt_pi * 0.5 * sigma_dbl
-                    * exp(-(v / SQRT_2 - scaled_diff)
-                          * (v / SQRT_2 - scaled_diff))
+             * (SQRT_2 / SQRT_PI * 0.5 * sigma_dbl
+                    * exp(-square(v / SQRT_2 - scaled_diff))
                 - (v * sigma_dbl + mu_dbl - y_dbl) * erf_calc2)
              / ccdf_;
   }

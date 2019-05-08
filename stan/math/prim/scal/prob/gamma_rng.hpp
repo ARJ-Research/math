@@ -53,7 +53,7 @@ inline typename VectorBuilder<true, double, T_shape, T_inv>::type gamma_rng(
     // Convert rate (inverse scale) argument to scale for boost
     variate_generator<RNG&, gamma_distribution<> > gamma_rng(
         rng, gamma_distribution<>(alpha_vec[n],
-                                  1 / static_cast<double>(beta_vec[n])));
+                                  inv(static_cast<double>(beta_vec[n]))));
     output[n] = gamma_rng();
   }
 

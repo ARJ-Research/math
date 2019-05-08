@@ -8,7 +8,7 @@ namespace math {
 
 inline double inv_sqrt(double x) {
   using std::sqrt;
-  return 1.0 / sqrt(x);
+  return inv(sqrt(x));
 }
 
 }  // namespace math

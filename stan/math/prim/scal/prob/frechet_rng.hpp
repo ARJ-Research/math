@@ -49,8 +49,8 @@ inline typename VectorBuilder<true, double, T_shape, T_scale>::type frechet_rng(
 
   for (size_t n = 0; n < N; ++n) {
     variate_generator<RNG&, weibull_distribution<> > weibull_rng(
-        rng, weibull_distribution<>(alpha_vec[n], 1.0 / sigma_vec[n]));
-    output[n] = 1 / weibull_rng();
+        rng, weibull_distribution<>(alpha_vec[n], inv(sigma_vec[n])));
+    output[n] = inv(weibull_rng());
   }
 
   return output.data();

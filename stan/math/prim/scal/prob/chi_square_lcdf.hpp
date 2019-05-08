@@ -93,19 +93,20 @@ typename return_type<T_y, T_dof>::type chi_square_lcdf(const T_y& y,
     const T_partials_return y_dbl = value_of(y_vec[n]);
     const T_partials_return alpha_dbl = value_of(nu_vec[n]) * 0.5;
     const T_partials_return beta_dbl = 0.5;
+    const T_partials_return beta_dbl_times_y_dbl = beta_dbl * y_dbl;
 
-    const T_partials_return Pn = gamma_p(alpha_dbl, beta_dbl * y_dbl);
+    const T_partials_return Pn = gamma_p(alpha_dbl, beta_dbl_times_y_dbl);
 
     cdf_log += log(Pn);
 
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n] += beta_dbl * exp(-beta_dbl * y_dbl)
-                                          * pow(beta_dbl * y_dbl, alpha_dbl - 1)
+      ops_partials.edge1_.partials_[n] += beta_dbl * exp(-beta_dbl_times_y_dbl)
+                                          * pow(beta_dbl_times_y_dbl, alpha_dbl - 1)
                                           / tgamma(alpha_dbl) / Pn;
     if (!is_constant_struct<T_dof>::value)
       ops_partials.edge2_.partials_[n]
           -= 0.5
-             * grad_reg_inc_gamma(alpha_dbl, beta_dbl * y_dbl, gamma_vec[n],
+             * grad_reg_inc_gamma(alpha_dbl, beta_dbl_times_y_dbl, gamma_vec[n],
                                   digamma_vec[n])
              / Pn;
   }

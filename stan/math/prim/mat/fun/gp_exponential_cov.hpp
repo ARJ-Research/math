@@ -60,7 +60,7 @@ gp_exponential_cov(const std::vector<T_x> &x, const T_s &sigma,
   check_positive_finite(function, "length scale", length_scale);
 
   T_s sigma_sq = square(sigma);
-  T_l neg_inv_l = -1.0 / length_scale;
+  T_l neg_inv_l = -inv(length_scale);
 
   for (size_t i = 0; i < x_size; ++i) {
     cov(i, i) = sigma_sq;
@@ -184,7 +184,7 @@ gp_exponential_cov(const std::vector<T_x1> &x1, const std::vector<T_x2> &x2,
   check_positive_finite(function, "length scale", length_scale);
 
   T_s sigma_sq = square(sigma);
-  T_l neg_inv_l = -1.0 / length_scale;
+  T_l neg_inv_l = -inv(length_scale);
   for (size_t i = 0; i < x1_size; ++i) {
     for (size_t j = 0; j < x2_size; ++j) {
       cov(i, j) = sigma_sq * exp(neg_inv_l * distance(x1[i], x2[j]));

@@ -45,7 +45,7 @@ inline void log_mix_partial_helper(
   partial_return_type t_plus_one_m_t_prod_exp_lam2_m_lam1
       = theta + one_m_t_prod_exp_lam2_m_lam1;
   partial_return_type one_d_t_plus_one_m_t_prod_exp_lam2_m_lam1
-      = 1.0 / t_plus_one_m_t_prod_exp_lam2_m_lam1;
+      = inv(t_plus_one_m_t_prod_exp_lam2_m_lam1);
 
   unsigned int offset = 0;
   if (std::is_same<T_theta, partial_return_type>::value) {

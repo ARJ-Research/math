@@ -63,45 +63,46 @@ exp_mod_normal_lpdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
     const T_partials_return mu_dbl = value_of(mu_vec[n]);
     const T_partials_return sigma_dbl = value_of(sigma_vec[n]);
     const T_partials_return lambda_dbl = value_of(lambda_vec[n]);
+    const T_partials_return lam_times_sigmasq_minus_y 
+            = lambda_dbl * square(sigma_dbl) - y_dbl;
+    const T_partials_return sigma_times_sqrt2 = sigma_dbl * SQRT_2;
 
-    const T_partials_return pi_dbl = boost::math::constants::pi<double>();
+    const T_partials_return partials_1 = (mu_dbl + lam_times_sigmasq_minus_y)
+                                          / (sigma_times_sqrt2);
+    const T_partials_return erfc_partials_1 = erfc(partials_1);
 
     if (include_summand<propto>::value)
-      logp -= log(2.0);
+      logp -= LOG_2;
     if (include_summand<propto, T_inv_scale>::value)
       logp += log(lambda_dbl);
     if (include_summand<propto, T_y, T_loc, T_scale, T_inv_scale>::value)
       logp += lambda_dbl
-                  * (mu_dbl + 0.5 * lambda_dbl * sigma_dbl * sigma_dbl - y_dbl)
-              + log(erfc((mu_dbl + lambda_dbl * sigma_dbl * sigma_dbl - y_dbl)
-                         / (sqrt(2.0) * sigma_dbl)));
+                  * (mu_dbl + 0.5 * lam_times_sigmasq_minus_y)
+              + log(erfc_partials_1);
 
     const T_partials_return deriv_logerfc
-        = -2.0 / sqrt(pi_dbl)
-          * exp(-(mu_dbl + lambda_dbl * sigma_dbl * sigma_dbl - y_dbl)
-                / (std::sqrt(2.0) * sigma_dbl)
-                * (mu_dbl + lambda_dbl * sigma_dbl * sigma_dbl - y_dbl)
-                / (sigma_dbl * std::sqrt(2.0)))
-          / erfc((mu_dbl + lambda_dbl * sigma_dbl * sigma_dbl - y_dbl)
-                 / (sigma_dbl * std::sqrt(2.0)));
+        = NEG_TWO_OVER_SQRT_PI
+          * exp(-square(partials_1))
+          / erfc_partials_1;
+
 
     if (!is_constant_struct<T_y>::value)
       ops_partials.edge1_.partials_[n]
-          += -lambda_dbl + deriv_logerfc * -1.0 / (sigma_dbl * std::sqrt(2.0));
+          += -lambda_dbl + deriv_logerfc * -inv(sigma_times_sqrt2);
     if (!is_constant_struct<T_loc>::value)
       ops_partials.edge2_.partials_[n]
-          += lambda_dbl + deriv_logerfc / (sigma_dbl * std::sqrt(2.0));
+          += lambda_dbl + deriv_logerfc / (sigma_times_sqrt2);
     if (!is_constant_struct<T_scale>::value)
       ops_partials.edge3_.partials_[n]
-          += sigma_dbl * lambda_dbl * lambda_dbl
+          += sigma_dbl * square(lambda_dbl)
              + deriv_logerfc
-                   * (-mu_dbl / (sigma_dbl * sigma_dbl * std::sqrt(2.0))
-                      + lambda_dbl / std::sqrt(2.0)
-                      + y_dbl / (sigma_dbl * sigma_dbl * std::sqrt(2.0)));
+                   * (-mu_dbl / (sigma_dbl * sigma_times_sqrt2)
+                      + lambda_dbl / SQRT_2
+                      + y_dbl / (sigma_dbl * sigma_times_sqrt2));
     if (!is_constant_struct<T_inv_scale>::value)
       ops_partials.edge4_.partials_[n]
-          += 1 / lambda_dbl + lambda_dbl * sigma_dbl * sigma_dbl + mu_dbl
-             - y_dbl + deriv_logerfc * sigma_dbl / std::sqrt(2.0);
+          += inv(lambda_dbl) + lam_times_sigmasq_minus_y + mu_dbl
+             + deriv_logerfc * sigma_dbl / SQRT_2;
   }
   return ops_partials.build(logp);
 }

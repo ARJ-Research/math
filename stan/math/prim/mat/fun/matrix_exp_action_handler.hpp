@@ -114,7 +114,7 @@ class matrix_exp_action_handler {
       for (auto i = 0; i < std::ceil(std::log2(p_max)); ++i) {
         a *= a;
       }
-      double ap = std::pow(l1norm(a), 1.0 / p_max);
+      double ap = std::pow(l1norm(a), inv(p_max));
       int c = std::ceil(ap / theta_m);
       s = (c < 1 ? 1 : c);
     }

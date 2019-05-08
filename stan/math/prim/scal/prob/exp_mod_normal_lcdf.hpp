@@ -67,27 +67,27 @@ exp_mod_normal_lcdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
     const T_partials_return lambda_dbl = value_of(lambda_vec[n]);
     const T_partials_return u = lambda_dbl * (y_dbl - mu_dbl);
     const T_partials_return v = lambda_dbl * sigma_dbl;
-    const T_partials_return v_sq = v * v;
+    const T_partials_return v_sq = square(v);
     const T_partials_return scaled_diff
         = (y_dbl - mu_dbl) / (SQRT_2 * sigma_dbl);
-    const T_partials_return scaled_diff_sq = scaled_diff * scaled_diff;
+    const T_partials_return scaled_diff_sq = square(scaled_diff);
     const T_partials_return erf_calc1 = 0.5 * (1 + erf(u / (v * SQRT_2)));
     const T_partials_return erf_calc2
         = 0.5 * (1 + erf(u / (v * SQRT_2) - v / SQRT_2));
+    const T_partials_return exp_half_vsq_minus_u = exp(0.5 * v_sq - u);
     const T_partials_return deriv_1
-        = lambda_dbl * exp(0.5 * v_sq - u) * erf_calc2;
+        = lambda_dbl * exp_half_vsq_minus_u * erf_calc2;
     const T_partials_return deriv_2
-        = SQRT_2 / sqrt_pi * 0.5
-          * exp(0.5 * v_sq
-                - (-scaled_diff + (v / SQRT_2)) * (-scaled_diff + (v / SQRT_2))
-                - u)
+        = SQRT_2_OVER_SQRT_PI * 0.5
+          * exp(exp_half_vsq_minus_u
+                - square(-scaled_diff + (v / SQRT_2)))
           / sigma_dbl;
     const T_partials_return deriv_3
-        = SQRT_2 / sqrt_pi * 0.5 * exp(-scaled_diff_sq) / sigma_dbl;
+        = SQRT_2_OVER_SQRT_PI * 0.5 * exp(-scaled_diff_sq) / sigma_dbl;
 
-    const T_partials_return denom = erf_calc1 - erf_calc2 * exp(0.5 * v_sq - u);
+    const T_partials_return denom = erf_calc1 - erf_calc2 * exp_half_vsq_minus_u;
     const T_partials_return cdf_
-        = erf_calc1 - exp(-u + v_sq * 0.5) * (erf_calc2);
+        = erf_calc1 - exp_half_vsq_minus_u * (erf_calc2);
 
     cdf_log += log(cdf_);
 
@@ -106,10 +106,9 @@ exp_mod_normal_lcdf(const T_y& y, const T_loc& mu, const T_scale& sigma,
              / denom;
     if (!is_constant_struct<T_inv_scale>::value)
       ops_partials.edge4_.partials_[n]
-          += exp(0.5 * v_sq - u)
-             * (SQRT_2 / sqrt_pi * 0.5 * sigma_dbl
-                    * exp(-(v / SQRT_2 - scaled_diff)
-                          * (v / SQRT_2 - scaled_diff))
+          += exp_half_vsq_minus_u
+             * (SQRT_2_OVER_SQRT_PI * 0.5 * sigma_dbl
+                    * exp(-square(v / SQRT_2 - scaled_diff))
                 - (v * sigma_dbl + mu_dbl - y_dbl) * erf_calc2)
              / denom;
   }

@@ -87,7 +87,7 @@ typename return_type<T_y, T_loc, T_scale>::type logistic_lpdf(
       exp_m_y_minus_mu_div_sigma = exp(-y_minus_mu_div_sigma);
     T_partials_return inv_1p_exp_y_minus_mu_div_sigma(0);
     if (contains_nonconstant_struct<T_y, T_scale>::value)
-      inv_1p_exp_y_minus_mu_div_sigma = 1 / (1 + exp(y_minus_mu_div_sigma));
+      inv_1p_exp_y_minus_mu_div_sigma = inv(1 + exp(y_minus_mu_div_sigma));
 
     if (include_summand<propto, T_y, T_loc, T_scale>::value)
       logp -= y_minus_mu_div_sigma;

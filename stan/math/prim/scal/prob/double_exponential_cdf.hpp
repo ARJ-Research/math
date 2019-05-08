@@ -73,18 +73,19 @@ typename return_type<T_y, T_loc, T_scale>::type double_exponential_cdf(
     const T_partials_return sigma_dbl = value_of(sigma_vec[n]);
     const T_partials_return scaled_diff = (y_dbl - mu_dbl) / sigma_dbl;
     const T_partials_return exp_scaled_diff = exp(scaled_diff);
-    const T_partials_return inv_sigma = 1.0 / sigma_dbl;
+    const T_partials_return inv_sigma = inv(sigma_dbl);
+    const T_partials_return inv_sigma_times_cdf = inv_sigma * cdf;
 
     if (y_dbl < mu_dbl) {
       if (!is_constant_struct<T_y>::value)
-        ops_partials.edge1_.partials_[n] += inv_sigma * cdf;
+        ops_partials.edge1_.partials_[n] += inv_sigma_times_cdf;
       if (!is_constant_struct<T_loc>::value)
-        ops_partials.edge2_.partials_[n] -= inv_sigma * cdf;
+        ops_partials.edge2_.partials_[n] -= inv_sigma_times_cdf;
       if (!is_constant_struct<T_scale>::value)
-        ops_partials.edge3_.partials_[n] -= scaled_diff * inv_sigma * cdf;
+        ops_partials.edge3_.partials_[n] -= scaled_diff * inv_sigma_times_cdf;
     } else {
       const T_partials_return rep_deriv
-          = cdf * inv_sigma / (2.0 * exp_scaled_diff - 1.0);
+          = inv_sigma_times_cdf / (2.0 * exp_scaled_diff - 1.0);
       if (!is_constant_struct<T_y>::value)
         ops_partials.edge1_.partials_[n] += rep_deriv;
       if (!is_constant_struct<T_loc>::value)

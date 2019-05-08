@@ -67,17 +67,20 @@ typename return_type<T_y, T_loc, T_scale>::type gumbel_cdf(
     const T_partials_return mu_dbl = value_of(mu_vec[n]);
     const T_partials_return beta_dbl = value_of(beta_vec[n]);
     const T_partials_return scaled_diff = (y_dbl - mu_dbl) / beta_dbl;
+    const T_partials_return exp_neg_scaled_diff = exp(-scaled_diff);
     const T_partials_return rep_deriv
-        = exp(-scaled_diff - exp(-scaled_diff)) / beta_dbl;
-    const T_partials_return cdf_ = exp(-exp(-scaled_diff));
+        = exp(-scaled_diff - exp_neg_scaled_diff) / beta_dbl;
+    const T_partials_return cdf_ = exp(-exp_neg_scaled_diff);
+    const T_partials_return deriv_div_cdf = rep_deriv / cdf_;
+
     cdf *= cdf_;
 
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n] += rep_deriv / cdf_;
+      ops_partials.edge1_.partials_[n] += deriv_div_cdf;
     if (!is_constant_struct<T_loc>::value)
-      ops_partials.edge2_.partials_[n] -= rep_deriv / cdf_;
+      ops_partials.edge2_.partials_[n] -= deriv_div_cdf;
     if (!is_constant_struct<T_scale>::value)
-      ops_partials.edge3_.partials_[n] -= rep_deriv * scaled_diff / cdf_;
+      ops_partials.edge3_.partials_[n] -= deriv_div_cdf * scaled_diff;
   }
 
   if (!is_constant_struct<T_y>::value) {

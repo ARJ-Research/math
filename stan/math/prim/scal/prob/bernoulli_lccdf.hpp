@@ -70,7 +70,7 @@ typename return_type<T_prob>::type bernoulli_lccdf(const T_n& n,
       P += log(Pi);
 
       if (!is_constant_struct<T_prob>::value)
-        ops_partials.edge1_.partials_[i] += 1 / Pi;
+        ops_partials.edge1_.partials_[i] += inv(Pi);
     }
   }
 

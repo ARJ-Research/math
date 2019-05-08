@@ -59,12 +59,13 @@ typename return_type<T_y, T_shape, T_scale>::type frechet_lcdf(
 
     cdf_log -= pow_;
 
+    const T_partials_return pow_times_alpha = pow_ * alpha_dbl;
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n] += pow_ * alpha_dbl / y_dbl;
+      ops_partials.edge1_.partials_[n] += pow_times_alpha / y_dbl;
     if (!is_constant_struct<T_shape>::value)
-      ops_partials.edge2_.partials_[n] += pow_ * log(y_dbl / sigma_dbl);
+      ops_partials.edge2_.partials_[n] += multiply_log(pow_, y_dbl / sigma_dbl);
     if (!is_constant_struct<T_scale>::value)
-      ops_partials.edge3_.partials_[n] -= pow_ * alpha_dbl / sigma_dbl;
+      ops_partials.edge3_.partials_[n] -= pow_times_alpha / sigma_dbl;
   }
   return ops_partials.build(cdf_log);
 }

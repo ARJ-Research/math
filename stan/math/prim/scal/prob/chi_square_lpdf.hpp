@@ -81,7 +81,7 @@ typename return_type<T_y, T_dof>::type chi_square_lpdf(const T_y& y,
       inv_y(length(y));
   for (size_t i = 0; i < length(y); i++)
     if (include_summand<propto, T_y>::value)
-      inv_y[i] = 1.0 / value_of(y_vec[i]);
+      inv_y[i] = inv(value_of(y_vec[i]));
 
   VectorBuilder<include_summand<propto, T_dof>::value, T_partials_return, T_dof>
       lgamma_half_nu(length(nu));

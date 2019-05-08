@@ -85,24 +85,23 @@ typename return_type<T_y, T_shape, T_inv_scale>::type gamma_lccdf(
     const T_partials_return y_dbl = value_of(y_vec[n]);
     const T_partials_return alpha_dbl = value_of(alpha_vec[n]);
     const T_partials_return beta_dbl = value_of(beta_vec[n]);
-
-    const T_partials_return Pn = gamma_q(alpha_dbl, beta_dbl * y_dbl);
+    const T_partials_return beta_times_y = beta_dbl * y_dbl;
+    const T_partials_return Pn = gamma_q(alpha_dbl, beta_times_y);
+    const T_partials_return partials_1 = exp(-beta_times_y)
+                                          * pow(beta_times_y, alpha_dbl - 1)
+                                          / tgamma(alpha_dbl) / Pn;
 
     P += log(Pn);
 
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n] -= beta_dbl * exp(-beta_dbl * y_dbl)
-                                          * pow(beta_dbl * y_dbl, alpha_dbl - 1)
-                                          / tgamma(alpha_dbl) / Pn;
+      ops_partials.edge1_.partials_[n] -= beta_dbl * partials_1;
     if (!is_constant_struct<T_shape>::value)
       ops_partials.edge2_.partials_[n]
-          += grad_reg_inc_gamma(alpha_dbl, beta_dbl * y_dbl, gamma_vec[n],
+          += grad_reg_inc_gamma(alpha_dbl, beta_times_y, gamma_vec[n],
                                 digamma_vec[n])
              / Pn;
     if (!is_constant_struct<T_inv_scale>::value)
-      ops_partials.edge3_.partials_[n] -= y_dbl * exp(-beta_dbl * y_dbl)
-                                          * pow(beta_dbl * y_dbl, alpha_dbl - 1)
-                                          / tgamma(alpha_dbl) / Pn;
+      ops_partials.edge3_.partials_[n] -= y_dbl * partials_1;
   }
   return ops_partials.build(P);
 }

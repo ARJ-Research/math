@@ -83,7 +83,7 @@ typename return_type<T_y, T_shape, T_scale>::type inv_gamma_lpdf(
       if (value_of(y_vec[n]) > 0)
         log_y[n] = log(value_of(y_vec[n]));
     if (include_summand<propto, T_y, T_scale>::value)
-      inv_y[n] = 1.0 / value_of(y_vec[n]);
+      inv_y[n] = inv(value_of(y_vec[n]));
   }
 
   VectorBuilder<include_summand<propto, T_shape>::value, T_partials_return,

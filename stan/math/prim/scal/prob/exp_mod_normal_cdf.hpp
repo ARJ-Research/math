@@ -64,10 +64,12 @@ typename return_type<T_y, T_loc, T_scale, T_inv_scale>::type exp_mod_normal_cdf(
     const T_partials_return lambda_dbl = value_of(lambda_vec[n]);
     const T_partials_return u = lambda_dbl * (y_dbl - mu_dbl);
     const T_partials_return v = lambda_dbl * sigma_dbl;
-    const T_partials_return v_sq = v * v;
+    const T_partials_return v_div_sqrt2 = v / SQRT_2;
+    const T_partials_return v_sq = square(v);
     const T_partials_return scaled_diff
         = (y_dbl - mu_dbl) / (SQRT_2 * sigma_dbl);
-    const T_partials_return scaled_diff_sq = scaled_diff * scaled_diff;
+    const T_partials_return scaled_diff_times_sqrt2 = scaled_diff * SQRT_2;
+    const T_partials_return scaled_diff_sq = square(scaled_diff);
     const T_partials_return erf_calc
         = 0.5 * (1 + erf(-v / SQRT_2 + scaled_diff));
     const T_partials_return deriv_1
@@ -75,7 +77,7 @@ typename return_type<T_y, T_loc, T_scale, T_inv_scale>::type exp_mod_normal_cdf(
     const T_partials_return deriv_2
         = SQRT_2 / sqrt_pi * 0.5
           * exp(0.5 * v_sq
-                - (scaled_diff - (v / SQRT_2)) * (scaled_diff - (v / SQRT_2))
+                - square(scaled_diff - v_div_sqrt2)
                 - u)
           / sigma_dbl;
     const T_partials_return deriv_3
@@ -92,18 +94,17 @@ typename return_type<T_y, T_loc, T_scale, T_inv_scale>::type exp_mod_normal_cdf(
       ops_partials.edge2_.partials_[n] += (-deriv_1 + deriv_2 - deriv_3) / cdf_;
     if (!is_constant_struct<T_scale>::value)
       ops_partials.edge3_.partials_[n]
-          += (-deriv_1 * v - deriv_3 * scaled_diff * SQRT_2
+          += (-deriv_1 * v - deriv_3 * scaled_diff_times_sqrt2
               - deriv_2 * sigma_dbl * SQRT_2
                     * (-SQRT_2 * 0.5
-                           * (-lambda_dbl + scaled_diff * SQRT_2 / sigma_dbl)
+                           * (-lambda_dbl + scaled_diff_times_sqrt2 / sigma_dbl)
                        - SQRT_2 * lambda_dbl))
              / cdf_;
     if (!is_constant_struct<T_inv_scale>::value)
       ops_partials.edge4_.partials_[n]
           += exp(0.5 * v_sq - u)
              * (SQRT_2 / sqrt_pi * 0.5 * sigma_dbl
-                    * exp(-(v / SQRT_2 - scaled_diff)
-                          * (v / SQRT_2 - scaled_diff))
+                    * exp(-square(v_div_sqrt2 - scaled_diff))
                 - (v * sigma_dbl + mu_dbl - y_dbl) * erf_calc)
              / cdf_;
   }

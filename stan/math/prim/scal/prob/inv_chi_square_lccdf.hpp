@@ -94,22 +94,24 @@ typename return_type<T_y, T_dof>::type inv_chi_square_lccdf(const T_y& y,
     }
 
     const T_partials_return y_dbl = value_of(y_vec[n]);
-    const T_partials_return y_inv_dbl = 1.0 / y_dbl;
+    const T_partials_return y_inv_dbl = inv(y_dbl);
     const T_partials_return nu_dbl = value_of(nu_vec[n]);
+    const T_partials_return half_nu_dbl = 0.5 * nu_dbl;
+    const T_partials_return half_y_inv_dbl = 0.5 * y_inv_dbl;
 
-    const T_partials_return Pn = gamma_p(0.5 * nu_dbl, 0.5 * y_inv_dbl);
+    const T_partials_return Pn = gamma_p(half_nu_dbl, half_y_inv_dbl);
 
     P += log(Pn);
 
     if (!is_constant_struct<T_y>::value)
       ops_partials.edge1_.partials_[n]
-          -= 0.5 * y_inv_dbl * y_inv_dbl * exp(-0.5 * y_inv_dbl)
-             * pow(0.5 * y_inv_dbl, 0.5 * nu_dbl - 1) / tgamma(0.5 * nu_dbl)
+          -= 0.5 * square(y_inv_dbl) * exp(-0.5 * y_inv_dbl)
+             * pow(half_y_inv_dbl, half_nu_dbl - 1) / tgamma(half_nu_dbl)
              / Pn;
     if (!is_constant_struct<T_dof>::value)
       ops_partials.edge2_.partials_[n]
           -= 0.5
-             * grad_reg_inc_gamma(0.5 * nu_dbl, 0.5 * y_inv_dbl, gamma_vec[n],
+             * grad_reg_inc_gamma(half_nu_dbl, half_y_inv_dbl, gamma_vec[n],
                                   digamma_vec[n])
              / Pn;
   }

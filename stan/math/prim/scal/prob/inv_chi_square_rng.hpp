@@ -42,7 +42,7 @@ inline typename VectorBuilder<true, double, T_deg>::type inv_chi_square_rng(
   for (size_t n = 0; n < N; ++n) {
     variate_generator<RNG&, chi_squared_distribution<> > chi_square_rng(
         rng, chi_squared_distribution<>(nu_vec[n]));
-    output[n] = 1 / chi_square_rng();
+    output[n] = inv(chi_square_rng());
   }
 
   return output.data();

@@ -71,7 +71,7 @@ typename return_type<T_y, T_loc, T_scale>::type gumbel_lpdf(
                 T_scale>
       log_beta(length(beta));
   for (size_t i = 0; i < length(beta); i++) {
-    inv_beta[i] = 1.0 / value_of(beta_vec[i]);
+    inv_beta[i] = inv(value_of(beta_vec[i]));
     if (include_summand<propto, T_scale>::value)
       log_beta[i] = log(value_of(beta_vec[i]));
   }
@@ -83,16 +83,20 @@ typename return_type<T_y, T_loc, T_scale>::type gumbel_lpdf(
     const T_partials_return y_minus_mu_over_beta
         = (y_dbl - mu_dbl) * inv_beta[n];
 
+    const T_partials_return exp_neg_y_minus_mu_over_beta
+        = exp(-y_minus_mu_over_beta);
+
     if (include_summand<propto, T_scale>::value)
       logp -= log_beta[n];
     if (include_summand<propto, T_y, T_loc, T_scale>::value)
-      logp += -y_minus_mu_over_beta - exp(-y_minus_mu_over_beta);
+      logp += -y_minus_mu_over_beta - exp_neg_y_minus_mu_over_beta;
 
-    T_partials_return scaled_diff = inv_beta[n] * exp(-y_minus_mu_over_beta);
+    T_partials_return scaled_diff = inv_beta[n] * exp_neg_y_minus_mu_over_beta;
+    T_partials_return inv_beta_minus_scaled_diff = inv_beta[n] - scaled_diff;
     if (!is_constant_struct<T_y>::value)
-      ops_partials.edge1_.partials_[n] -= inv_beta[n] - scaled_diff;
+      ops_partials.edge1_.partials_[n] -= inv_beta_minus_scaled_diff;
     if (!is_constant_struct<T_loc>::value)
-      ops_partials.edge2_.partials_[n] += inv_beta[n] - scaled_diff;
+      ops_partials.edge2_.partials_[n] += inv_beta_minus_scaled_diff;
     if (!is_constant_struct<T_scale>::value)
       ops_partials.edge3_.partials_[n] += -inv_beta[n]
                                           + y_minus_mu_over_beta * inv_beta[n]

@@ -306,7 +306,7 @@ gaussian_dlm_obs_lpdf(
         // f_{t, i} = F_{t, i}' m_{t, i-1}
         f = dot_product(Fj, m);
         Q = trace_quad_form(C, Fj) + V(j);
-        Q_inv = 1.0 / Q;
+        Q_inv = inv(Q);
         // filtered observation
         // e_{t, i} = y_{t, i} - f_{t, i}
         e = yij - f;

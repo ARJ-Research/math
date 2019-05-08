@@ -72,8 +72,8 @@ typename return_type<T_y, T_loc, T_scale>::type cauchy_lpdf(
       log_sigma(length(sigma));
   for (size_t i = 0; i < length(sigma); i++) {
     const T_partials_return sigma_dbl = value_of(sigma_vec[i]);
-    inv_sigma[i] = 1.0 / sigma_dbl;
-    sigma_squared[i] = sigma_dbl * sigma_dbl;
+    inv_sigma[i] = inv(sigma_dbl);
+    sigma_squared[i] = square(sigma_dbl);
     if (include_summand<propto, T_scale>::value) {
       log_sigma[i] = log(sigma_dbl);
     }
@@ -86,10 +86,10 @@ typename return_type<T_y, T_loc, T_scale>::type cauchy_lpdf(
     const T_partials_return mu_dbl = value_of(mu_vec[n]);
 
     const T_partials_return y_minus_mu = y_dbl - mu_dbl;
-    const T_partials_return y_minus_mu_squared = y_minus_mu * y_minus_mu;
+    const T_partials_return y_minus_mu_squared = square(y_minus_mu);
     const T_partials_return y_minus_mu_over_sigma = y_minus_mu * inv_sigma[n];
     const T_partials_return y_minus_mu_over_sigma_squared
-        = y_minus_mu_over_sigma * y_minus_mu_over_sigma;
+        = square(y_minus_mu_over_sigma);
 
     if (include_summand<propto>::value)
       logp += NEG_LOG_PI;
