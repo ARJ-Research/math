@@ -54,6 +54,25 @@ class ops_partials_edge<ViewElt, std::vector<Eigen::Matrix<Op, R, C>>> {
 };
 
 template <typename Op, typename ViewElt>
+class ops_partials_edge<ViewElt, std::vector<Op>> {
+ public:
+  typedef empty_broadcast_array<ViewElt, std::vector<Op>> partials_t;
+  partials_t partials_;
+  empty_broadcast_array<partials_t, std::vector<Op>> partials_vec_;
+  ops_partials_edge() {}
+  explicit ops_partials_edge(const std::vector<Op>& /* ops */) {}
+
+ private:
+  template <typename, typename, typename, typename, typename, typename>
+  friend class stan::math::operands_and_partials;
+
+  void dump_partials(double* /* partials */) const {}  // reverse mode
+  void dump_operands(void* /* operands */) const {}    // reverse mode
+  double dx() const { return 0; }                      // used for fvars
+  int size() const { return 0; }
+};
+
+template <typename Op, typename ViewElt>
 class ops_partials_edge<ViewElt, std::vector<std::vector<Op>>> {
  public:
   typedef empty_broadcast_array<ViewElt, std::vector<std::vector<Op>>>

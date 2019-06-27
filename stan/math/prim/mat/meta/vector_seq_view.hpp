@@ -117,6 +117,34 @@ class vector_seq_view<std::vector<Eigen::Matrix<S, 1, Eigen::Dynamic> > > {
  private:
   const std::vector<Eigen::Matrix<S, 1, Eigen::Dynamic> >& v_;
 };
+
+template <typename S>
+class vector_seq_view<std::vector<S> > {
+ public:
+  explicit vector_seq_view(const std::vector<S>& v)
+      : v_(v) {}
+  int size() const { return 1; }
+  std::vector<S> operator[](int /* i */) const {
+    return v_;
+  }
+
+ private:
+  const std::vector<S>& v_;
+};
+
+template <typename S>
+class vector_seq_view<std::vector<std::vector<S> > > {
+ public:
+  explicit vector_seq_view(
+      const std::vector<std::vector<S> >& v)
+      : v_(v) {}
+  int size() const { return v_.size(); }
+  std::vector<S> operator[](int i) const { return v_[i]; }
+
+ private:
+  const std::vector<std::vector<S> >& v_;
+};
+
 }  // namespace stan
 
 #endif

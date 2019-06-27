@@ -5,6 +5,7 @@
 #include <stan/math/prim/arr/meta/index_type.hpp>
 #include <stan/math/prim/arr/meta/is_vector.hpp>
 #include <stan/math/prim/arr/meta/length.hpp>
+#include <stan/math/prim/arr/meta/length_mvt.hpp>
 
 #include <stan/math/prim/mat/meta/append_return_type.hpp>
 #include <stan/math/prim/mat/meta/as_array_or_scalar.hpp>

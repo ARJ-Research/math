@@ -71,7 +71,7 @@ TEST(AgradPartialsVari, OperandsAndPartialsStdVec) {
 
   std::vector<double> d_vec(4);
   operands_and_partials<std::vector<double> > o3(d_vec);
-  EXPECT_EQ(5, sizeof(o3));
+  EXPECT_EQ(6, sizeof(o3));
 
   std::vector<var> v_vec;
   var v1 = var(0.0);
