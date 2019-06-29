@@ -82,7 +82,7 @@ log_mix(const T_theta& theta, const T_lam& lambda) {
                               - logp.transpose().array()).exp();
     if (!is_constant_all<T_theta>::value) {
         Eigen::Map<T_partials_vec>(ops_partials.edge1_.partials_.data(), M)
-          += derivs.rowwise().sum();
+          = derivs.rowwise().sum();
     }
 
     if (!is_constant_all<T_lam>::value) {

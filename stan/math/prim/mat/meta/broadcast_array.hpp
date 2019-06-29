@@ -25,7 +25,9 @@ class empty_broadcast_array<ViewElt, Eigen::Matrix<OpElt, R, C> > {
    * Not implemented so cannot be called.
    */
   void operator=(const Eigen::Matrix<ViewElt, R, C>& /*A*/);
-
+  /**
+   * Not implemented so cannot be called.
+   */
   void operator=(const std::vector<ViewElt>& /*A*/);
   /**
    * Not implemented so cannot be called.
@@ -43,8 +45,10 @@ class empty_broadcast_array<ViewElt, Eigen::Matrix<OpElt, R, C> > {
    * Not implemented so cannot be called.
    */
   Eigen::Matrix<ViewElt, R, 1>& col(int /*i*/);
-
-  ViewElt* data(){ return &this[0][0]; }
+  /**
+   * Not implemented so cannot be called.
+   */
+  ViewElt* data();
 };
 
 template <typename ViewElt, typename OpElt>
@@ -63,7 +67,9 @@ class empty_broadcast_array<ViewElt, std::vector<OpElt> > {
    * Not implemented so cannot be called.
    */
   void operator=(const std::vector<ViewElt>& /*A*/);
-
+  /**
+   * Not implemented so cannot be called.
+   */
   void operator=(const Eigen::Matrix<ViewElt, -1, -1>& /*A*/);
   /**
    * Not implemented so cannot be called.
@@ -81,8 +87,10 @@ class empty_broadcast_array<ViewElt, std::vector<OpElt> > {
    * Not implemented so cannot be called.
    */
   std::vector<ViewElt>& col(int /*i*/);
-
-  ViewElt* data(){ return &this[0][0]; }
+  /**
+   * Not implemented so cannot be called.
+   */
+  ViewElt* data();
 };
 }  // namespace internal
 }  // namespace math
