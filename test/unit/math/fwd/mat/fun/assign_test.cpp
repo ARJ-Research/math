@@ -1,4 +1,5 @@
 #include <stan/math/fwd/mat.hpp>
+#include <test/unit/math/prim/mat/fun/expect_matrix_eq.hpp>
 #include <gtest/gtest.h>
 #include <stdexcept>
 #include <vector>
@@ -36,21 +37,15 @@ TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_double_to_fvar_double) {
   using stan::math::assign;
 
   Matrix<fvar<double>, 1, Dynamic> y(3);
-  y[0] = 1.2;
-  y[1] = 100;
-  y[2] = -5.1;
-  y[0].d_ = 1.0;
-  y[1].d_ = 2.0;
-  y[2].d_ = 3.0;
+  y.val() << 1.2, 100, -5.1;
+  y.d() << 1.0, 2.0, 3.0;
 
   Matrix<fvar<double>, 1, Dynamic> x(3);
   assign(x, y);
   EXPECT_EQ(3, x.size());
   EXPECT_EQ(3, y.size());
-  for (int i = 0; i < 3; ++i) {
-    EXPECT_FLOAT_EQ(y[i].val_, x[i].val_);
-    EXPECT_FLOAT_EQ(y[i].d_, x[i].d_);
-  }
+  expect_matrix_eq(y.val(), x.val());
+  expect_matrix_eq(y.d(), x.d());
 }
 
 TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_double_shape_mismatch) {
@@ -59,9 +54,7 @@ TEST(AgradFwdMatrixAssign, eigen_row_vector_fvar_double_shape_mismatch) {
   using stan::math::assign;
 
   Matrix<fvar<double>, 1, Dynamic> x(3);
-  x[0] = 1.2;
-  x[1] = 100;
-  x[2] = -5.1;
+  x << 1.2, 100, -5.1;
 
   Matrix<fvar<double>, 1, Dynamic> z(2);
   EXPECT_THROW(assign(x, z), std::invalid_argument);

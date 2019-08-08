@@ -1,4 +1,5 @@
 #include <stan/math/fwd/mat.hpp>
+#include <test/unit/math/prim/mat/fun/expect_matrix_eq.hpp>
 #include <gtest/gtest.h>
 
 TEST(AgradFwdMatrixAppendRow, fd) {
@@ -11,26 +12,15 @@ TEST(AgradFwdMatrixAppendRow, fd) {
   MatrixXd b(2, 2);
 
   a << 2.0, 3.0, 9.0, -1.0;
-
+  a.d() << 2.0, 3.0, 4.0, 5.0;
   ad << 2.0, 3.0, 9.0, -1.0;
-
   b << 4.0, 3.0, 0.0, 1.0;
-
-  a(0, 0).d_ = 2.0;
-  a(0, 1).d_ = 3.0;
-  a(1, 0).d_ = 4.0;
-  a(1, 1).d_ = 5.0;
 
   matrix_fd ab_append_row = append_row(a, b);
   MatrixXd adb_append_row = append_row(ad, b);
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j < 2; j++)
-      EXPECT_EQ(a(i, j).d_, ab_append_row(i, j).d_);
-
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 2; j++)
-      EXPECT_EQ(ab_append_row(i, j).val_, adb_append_row(i, j));
+  expect_matrix_eq(a.d(), ab_append_row.d().block(0,0,2,2));
+  expect_matrix_eq(ab_append_row.val(), adb_append_row);
 }
 
 TEST(AgradFwdVectorAppendRow, fd) {
@@ -43,24 +33,15 @@ TEST(AgradFwdVectorAppendRow, fd) {
   VectorXd b(3);
 
   a << 2.0, 3.0, 9.0, -1.0;
-
+  a.d() << 2.0, 3.0, 4.0, 5.0;
   ad << 2.0, 3.0, 9.0, -1.0;
-
   b << 4.0, 3.0, 0.4;
-
-  a(0).d_ = 2.0;
-  a(1).d_ = 3.0;
-  a(2).d_ = 4.0;
-  a(3).d_ = 5.0;
 
   vector_fd ab_append_row = append_row(a, b);
   VectorXd adb_append_row = append_row(ad, b);
 
-  for (int i = 0; i < 4; i++)
-    EXPECT_EQ(a(i).d_, ab_append_row(i).d_);
-
-  for (int i = 0; i < 7; i++)
-    EXPECT_EQ(ab_append_row(i).val_, adb_append_row(i));
+  expect_matrix_eq(a.d(), ab_append_row.d().block(0,0,4,1));
+  expect_matrix_eq(ab_append_row.val(), adb_append_row);
 }
 
 TEST(AgradFwdMatrixAppendRow, ffd) {
@@ -73,26 +54,15 @@ TEST(AgradFwdMatrixAppendRow, ffd) {
   MatrixXd b(2, 2);
 
   a << 2.0, 3.0, 9.0, -1.0;
-
+  a.d() << 2.0, 3.0, 4.0, 5.0;
   ad << 2.0, 3.0, 9.0, -1.0;
-
   b << 4.0, 3.0, 0.0, 1.0;
-
-  a(0, 0).d_ = 2.0;
-  a(0, 1).d_ = 3.0;
-  a(1, 0).d_ = 4.0;
-  a(1, 1).d_ = 5.0;
 
   matrix_ffd ab_append_row = append_row(a, b);
   MatrixXd adb_append_row = append_row(ad, b);
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j < 2; j++)
-      EXPECT_EQ(a(i, j).d_.val(), ab_append_row(i, j).d_.val());
-
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 2; j++)
-      EXPECT_EQ(ab_append_row(i, j).val_.val(), adb_append_row(i, j));
+  expect_matrix_eq(a.d().val(), ab_append_row.d().val().block(0,0,2,2));
+  expect_matrix_eq(ab_append_row.val().val(), adb_append_row);
 }
 
 TEST(AgradFwdVectorAppendRow, ffd) {
@@ -105,22 +75,13 @@ TEST(AgradFwdVectorAppendRow, ffd) {
   VectorXd b(3);
 
   a << 2.0, 3.0, 9.0, -1.0;
-
+  a.d() << 2.0, 3.0, 4.0, 5.0;
   ad << 2.0, 3.0, 9.0, -1.0;
-
   b << 4.0, 3.0, 0.4;
-
-  a(0).d_ = 2.0;
-  a(1).d_ = 3.0;
-  a(2).d_ = 4.0;
-  a(3).d_ = 5.0;
 
   vector_ffd ab_append_row = append_row(a, b);
   VectorXd adb_append_row = append_row(ad, b);
 
-  for (int i = 0; i < 4; i++)
-    EXPECT_EQ(a(i).d_.val(), ab_append_row(i).d_.val());
-
-  for (int i = 0; i < 7; i++)
-    EXPECT_EQ(ab_append_row(i).val_.val(), adb_append_row(i));
+  expect_matrix_eq(a.d().val(), ab_append_row.d().val().block(0,0,4,1));
+  expect_matrix_eq(ab_append_row.val().val(), adb_append_row);
 }
