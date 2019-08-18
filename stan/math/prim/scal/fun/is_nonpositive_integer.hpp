@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_PRIM_SCAL_FUN_IS_NONPOSITIVE_INTEGER_HPP
 #define STAN_MATH_PRIM_SCAL_FUN_IS_NONPOSITIVE_INTEGER_HPP
 
+#include <stan/math/prim/scal/fun/is_integer.hpp>
 #include <stan/math/prim/meta.hpp>
 #include <cmath>
 
@@ -15,7 +16,7 @@ namespace math {
  */
 template <typename T>
 inline bool is_nonpositive_integer(T x) {
-  return x <= 0.0 && floor(x) == x;
+  return x <= 0.0 && floor(x) == x && !is_inf(x);
 }
 
 }  // namespace math

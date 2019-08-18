@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_PRIM_SCAL_FUN_IS_INTEGER_HPP
 #define STAN_MATH_PRIM_SCAL_FUN_IS_INTEGER_HPP
 
+#include <stan/math/prim/scal/fun/is_inf.hpp>
 #include <stan/math/prim/meta.hpp>
 #include <cmath>
 
@@ -9,13 +10,14 @@ namespace math {
 
 /**
  * Returns true if the input is an integer and false otherwise.
+ * Checks for infinity input to avoid false positive
  *
  * @param x Value to test.
  * @return <code>true</code> if the value is an integer
  */
-template <typename T>
+template <typename T, typename = enable_if_arithmetic<T>>
 inline bool is_integer(T x) {
-  return floor(x) == x;
+  return floor(x) == x && !is_inf(x);
 }
 
 }  // namespace math
