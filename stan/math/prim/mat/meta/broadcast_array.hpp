@@ -1,5 +1,5 @@
 #include <stan/math/prim/scal/meta/broadcast_array.hpp>
-#include <Eigen/Dense>
+#include <stan/math/prim/mat/fun/Eigen.hpp>
 #include <stdexcept>
 #include <vector>
 
