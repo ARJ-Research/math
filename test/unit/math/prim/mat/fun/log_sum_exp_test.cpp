@@ -42,3 +42,12 @@ TEST(MathFunctions, log_sum_exp) {
   ii << -std::numeric_limits<double>::infinity();
   test_log_sum_exp(ii);
 }
+
+TEST(MathFunctions, log_sum_exp_std) {
+  using stan::math::log_sum_exp;
+
+  std::vector<double> m{1,3.5,4,6,7};
+  Eigen::Matrix<double, Eigen::Dynamic, 1> v(5);
+  v << 1,3.5,4,6,7;
+  EXPECT_FLOAT_EQ(log_sum_exp(m), log_sum_exp(v));
+}
