@@ -17,7 +17,7 @@
 #include <stan/math/prim/scal/err/check_size_match.hpp>
 #include <stan/math/prim/arr/fun/vec_concat.hpp>
 
-#include <CL/cl.hpp>
+#include <cl.hpp>
 #include <algorithm>
 #include <iostream>
 #include <type_traits>
@@ -36,7 +36,7 @@ namespace math {
  * @param src source Eigen matrix
  * @return matrix_cl with a copy of the data in the source matrix
  */
-template <typename T, int R, int C, typename = enable_if_arithmetic<T>>
+template <typename T, int R, int C, typename = require_arithmetic_t<T>>
 inline matrix_cl<T> to_matrix_cl(const Eigen::Matrix<T, R, C>& src) {
   matrix_cl<T> dst(src.rows(), src.cols());
   if (src.size() == 0) {
@@ -69,10 +69,11 @@ inline matrix_cl<T> to_matrix_cl(const Eigen::Matrix<T, R, C>& src) {
  * @param src source matrix on the OpenCL device
  * @return Eigen matrix with a copy of the data in the source matrix
  */
-template <typename T, typename = enable_if_arithmetic<T>>
-inline Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> from_matrix_cl(
-    const matrix_cl<T>& src) {
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> dst(src.rows(), src.cols());
+
+template <int R = Eigen::Dynamic, int C = Eigen::Dynamic, typename T,
+          typename = require_arithmetic_t<T>>
+inline Eigen::Matrix<T, R, C> from_matrix_cl(const matrix_cl<T>& src) {
+  Eigen::Matrix<T, R, C> dst(src.rows(), src.cols());
   if (src.size() == 0) {
     return dst;
   }
@@ -87,9 +88,8 @@ inline Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> from_matrix_cl(
      */
     cl::Event copy_event;
     const cl::CommandQueue queue = opencl_context.queue();
-    queue.enqueueReadBuffer(src.buffer(), CL_FALSE, 0,
-                            sizeof(double) * dst.size(), dst.data(),
-                            &src.write_events(), &copy_event);
+    queue.enqueueReadBuffer(src.buffer(), CL_FALSE, 0, sizeof(T) * dst.size(),
+                            dst.data(), &src.write_events(), &copy_event);
     copy_event.wait();
     src.clear_write_events();
   } catch (const cl::Error& e) {
@@ -106,7 +106,7 @@ inline Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> from_matrix_cl(
  * @return the packed std::vector
  * @throw <code>std::invalid_argument</code> if the matrix is not triangular
  */
-template <typename T, typename = enable_if_arithmetic<T>>
+template <typename T, typename = require_arithmetic_t<T>>
 inline std::vector<T> packed_copy(const matrix_cl<T>& src) {
   check_triangular("packed_copy", "src", src);
   const int packed_size = src.rows() * (src.rows() + 1) / 2;
@@ -148,7 +148,7 @@ inline std::vector<T> packed_copy(const matrix_cl<T>& src) {
  * for the packed triangular matrix
  */
 template <matrix_cl_view matrix_view, typename T,
-          typename = enable_if_arithmetic<T>>
+          typename = require_arithmetic_t<T>>
 inline matrix_cl<T> packed_copy(const std::vector<T>& src, int rows) {
   const int packed_size = rows * (rows + 1) / 2;
   check_size_match("copy (packed std::vector -> OpenCL)", "src.size()",
@@ -162,7 +162,7 @@ inline matrix_cl<T> packed_copy(const std::vector<T>& src, int rows) {
     cl::Event packed_event;
     const cl::CommandQueue queue = opencl_context.queue();
     queue.enqueueWriteBuffer(packed.buffer(), CL_FALSE, 0,
-                             sizeof(T) * packed_size, src.data(), NULL,
+                             sizeof(T) * packed_size, src.data(), nullptr,
                              &packed_event);
     packed.add_write_event(packed_event);
     stan::math::opencl_kernels::unpack(cl::NDRange(dst.rows(), dst.rows()), dst,
@@ -184,7 +184,7 @@ inline matrix_cl<T> packed_copy(const std::vector<T>& src, int rows) {
  * @throw <code>std::invalid_argument</code> if the
  * matrices do not have matching dimensions
  */
-template <typename T, typename = enable_if_arithmetic<T>>
+template <typename T, typename = require_arithmetic_t<T>>
 inline matrix_cl<T> copy_cl(const matrix_cl<T>& src) {
   matrix_cl<T> dst(src.rows(), src.cols(), src.view());
   if (src.size() == 0) {
@@ -216,7 +216,7 @@ inline matrix_cl<T> copy_cl(const matrix_cl<T>& src) {
  * @param src A 1x1 matrix on the device.
  * @return dst Arithmetic to receive the matrix_cl value.
  */
-template <typename T, typename = enable_if_arithmetic<T>>
+template <typename T, typename = require_arithmetic_t<T>>
 inline T from_matrix_cl_error_code(const matrix_cl<T>& src) {
   T dst;
   check_size_match("copy_error_code ((OpenCL) -> (OpenCL))", "src.rows()",
@@ -242,7 +242,7 @@ inline T from_matrix_cl_error_code(const matrix_cl<T>& src) {
  * @param src Arithmetic to receive the matrix_cl value.
  * @return A 1x1 matrix on the device.
  */
-template <typename T, typename = enable_if_arithmetic<T>>
+template <typename T, typename = require_arithmetic_t<T>>
 inline matrix_cl<T> to_matrix_cl(const T& src) {
   matrix_cl<T> dst(1, 1);
   check_size_match("to_matrix_cl ((OpenCL) -> (OpenCL))", "src.rows()",

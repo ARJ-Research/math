@@ -40,10 +40,10 @@ namespace math {
  * @return log mixture of densities in specified proportion
  */
 template <typename T_theta, typename T_lam>
-typename return_type<T_theta, T_lam>::type
+return_type_t<T_theta, T_lam>
 log_mix(const T_theta& theta, const T_lam& lambda) {
   static const char* function = "log_mix";
-  typedef typename stan::partials_return_type<T_theta, T_lam>::type
+  typedef typename stan::partials_return_type<T_theta, T_lam>
       T_partials_return;
   typedef typename Eigen::Matrix<T_partials_return, -1, 1> T_partials_vec;
   typedef typename Eigen::Matrix<T_partials_return, -1, -1> T_partials_mat;
