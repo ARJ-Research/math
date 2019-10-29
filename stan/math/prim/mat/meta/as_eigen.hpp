@@ -17,7 +17,7 @@ namespace math {
  * @param v Specified matrix.
  * @return Matrix converted to an array.
  */
-template <typename T>
+template <typename T, typename = require_eigen_t<T>>
 const auto& as_eigen(const T& v) {
   return v;
 }
