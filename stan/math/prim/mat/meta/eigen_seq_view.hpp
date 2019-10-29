@@ -34,6 +34,18 @@ class eigen_seq_view<std::vector<Eigen::Matrix<double, R, C>>> {
   const std::vector<Eigen::Matrix<double, R, C>>& m_;
 };
 
+template <>
+class eigen_seq_view<std::vector<std::vector<double>>> {
+ public:
+  explicit eigen_seq_view(const std::vector<std::vector<double>>& m)
+      : m_(m) {}
+  int size() const { return m_.size(); }
+  auto operator[](int i) const { return math::as_eigen(m_[i]);}
+
+ private:
+  const std::vector<std::vector<double>>& m_;
+};
+
 }  // namespace stan
 
 #endif

@@ -48,4 +48,7 @@ TEST(MathFunctions, log_sum_exp) {
   std::vector<Matrix<double, Dynamic, 1>> st_i{i,ii,v,v};
   double result = log_sum_exp(i) + log_sum_exp(ii) + log_sum_exp(v) + log_sum_exp(v);
   EXPECT_FLOAT_EQ(result, log_sum_exp(st_i));
+
+  std::vector<std::vector<double>> st_stv{stv,stv,stv};
+  EXPECT_FLOAT_EQ(log_sum_exp(stv) * 3, log_sum_exp(st_stv));
 }
