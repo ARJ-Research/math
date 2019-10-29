@@ -8,27 +8,12 @@
 namespace stan {
 namespace math {
 
-/**
- * Converts a matrix type to an array.
- *
- * @tparam T Type of scalar element.
- * @tparam R Row type of input matrix.
- * @tparam C Column type of input matrix.
- * @param v Specified matrix.
- * @return Matrix converted to an array.
- */
+
 template <typename T, typename = require_eigen_t<T>>
 const auto& as_eigen(const T& v) {
   return v;
 }
 
-/**
- * Converts a std::vector type to an array.
- *
- * @tparam T Type of scalar element.
- * @param v Specified vector.
- * @return Matrix converted to an array.
- */
 template <typename T>
 const auto as_eigen(const std::vector<T>& v) {
   return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>>(v.data(),
