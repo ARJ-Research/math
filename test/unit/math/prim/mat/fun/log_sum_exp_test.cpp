@@ -41,4 +41,11 @@ TEST(MathFunctions, log_sum_exp) {
   Matrix<double, Dynamic, 1> ii(1);
   ii << -std::numeric_limits<double>::infinity();
   test_log_sum_exp(ii);
+
+  std::vector<double> stv{1,2,3};
+  EXPECT_FLOAT_EQ(log_sum_exp(v), log_sum_exp(stv));
+
+  std::vector<Matrix<double, Dynamic, 1>> st_i{i,ii,v,v};
+  double result = log_sum_exp(i) + log_sum_exp(ii) + log_sum_exp(v) + log_sum_exp(v);
+  EXPECT_FLOAT_EQ(result, log_sum_exp(st_i));
 }

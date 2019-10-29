@@ -2,6 +2,7 @@
 #define STAN_MATH_PRIM_MAT_FUN_LOG_SUM_EXP_HPP
 
 #include <stan/math/prim/mat/fun/Eigen.hpp>
+#include <stan/math/prim/meta.hpp>
 #include <vector>
 #include <cmath>
 
@@ -22,13 +23,20 @@ namespace math {
  * @param[in] x Matrix of specified values
  * @return The log of the sum of the exponentiated vector values.
  */
-template <int R, int C>
-double log_sum_exp(const Eigen::Matrix<double, R, C>& x) {
-  const double max = x.maxCoeff();
-  if (!std::isfinite(max)) {
-    return max;
+template <typename T>
+double log_sum_exp(const T& v) {
+  eigen_seq_view<T> x(v);
+  double result = 0;
+  double max = 0;
+  for(int i = 0; i < x.size(); i++){
+    max = x[i].maxCoeff();
+    if (!std::isfinite(max)){
+      result += max;
+      continue;
+    }
+    result += max + std::log((x[i].array() - max).exp().sum());
   }
-  return max + std::log((x.array() - max).exp().sum());
+  return result;
 }
 
 }  // namespace math
