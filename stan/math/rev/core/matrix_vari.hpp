@@ -15,8 +15,8 @@ class op_matrix_vari : public vari {
   vari** vis_;
 
  public:
-  template <int R, int C>
-  op_matrix_vari(double f, const Eigen::Matrix<var, R, C>& vs)
+  template <typename Derived>
+  op_matrix_vari(double f, const Eigen::MatrixBase<Derived>& vs)
       : vari(f), size_(vs.size()) {
     vis_ = reinterpret_cast<vari**>(operator new(sizeof(vari*) * vs.size()));
     for (int i = 0; i < vs.size(); ++i) {

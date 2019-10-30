@@ -16,6 +16,7 @@ void test_log_sum_exp(const Eigen::Matrix<double, R, C>& as) {
 TEST(MathFunctions, log_sum_exp) {
   using Eigen::Dynamic;
   using Eigen::Matrix;
+  using Eigen::Array;
   using stan::math::log_sum_exp;
 
   Matrix<double, Dynamic, Dynamic> m(3, 2);
@@ -46,9 +47,27 @@ TEST(MathFunctions, log_sum_exp) {
   EXPECT_FLOAT_EQ(log_sum_exp(v), log_sum_exp(stv));
 
   std::vector<Matrix<double, Dynamic, 1>> st_i{i,ii,v,v};
-  double result = log_sum_exp(i) + log_sum_exp(ii) + log_sum_exp(v) + log_sum_exp(v);
-  EXPECT_FLOAT_EQ(result, log_sum_exp(st_i));
+  std::vector<double> result{log_sum_exp(i), log_sum_exp(ii), log_sum_exp(v), log_sum_exp(v)};
+  std::vector<double> res_t = log_sum_exp(st_i);
+  EXPECT_FLOAT_EQ(result[0], res_t[0]);
+  EXPECT_FLOAT_EQ(result[1], res_t[1]);
+  EXPECT_FLOAT_EQ(result[2], res_t[2]);
+  EXPECT_FLOAT_EQ(result[3], res_t[3]);
 
   std::vector<std::vector<double>> st_stv{stv,stv,stv};
-  EXPECT_FLOAT_EQ(log_sum_exp(stv) * 3, log_sum_exp(st_stv));
+  res_t = log_sum_exp(st_stv);
+  EXPECT_FLOAT_EQ(log_sum_exp(stv), res_t[0]);
+  EXPECT_FLOAT_EQ(log_sum_exp(stv), res_t[1]);
+  EXPECT_FLOAT_EQ(log_sum_exp(stv), res_t[2]);
+
+  auto map = Eigen::Map<Eigen::Matrix<double,Eigen::Dynamic,1>>(stv.data(), stv.size());
+  log_sum_exp(map);
+
+  Array<double, 1, Dynamic> arr(3);
+  arr << 1, 2, 3;
+  std::vector<Array<double, 1, Dynamic>> arr_arr{arr, arr};
+  log_sum_exp(arr);
+  log_sum_exp(arr_arr);
+  log_sum_exp(m.diagonal());
 }
+
