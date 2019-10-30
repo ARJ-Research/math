@@ -36,16 +36,14 @@ namespace math {
  * @param[in] v Vector to transform.
  * @return Unit simplex result of the softmax transform of the vector.
  */
-template <typename T,
-          typename nest_vec =
-            std::conditional_t<is_vector_like<typename T::value_type>::value,
-                               typename T::value_type, T>,
+template <typename T, typename T_v = typename T::value_type,
+          typename nest_vec_t = std::conditional_t<is_vector_like<T_v>::value,
+                                                   T_v, T>,
           typename = require_vector_like_st<std::is_arithmetic, T>>
-inline auto log_softmax(
-    const T& v) {
+inline auto log_softmax(const T& v) {
   eigen_seq_view<T> u(v);
   check_nonzero_size("log_softmax", "v", u[0]);
-  std::vector<nest_vec> result(u.size());
+  std::vector<nest_vec_t> result(u.size());
   for(int i = 0; i < u.size(); i++){
     result[i].resize(u[i].size());
     as_eigen(result[i]) = u[i].array() - log_sum_exp(u[i]);
