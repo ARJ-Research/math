@@ -58,6 +58,14 @@ class eigen_seq_view<std::vector<std::vector<S>>> {
   const std::vector<std::vector<S>>& m_;
 };
 
+template<typename T1, typename T2,
+         typename = require_vector_like_t<typename T1::value_type>>
+std::vector<T2> match_input_dim(std::vector<T2>& v){return v;}
+
+template<typename T1, typename T2,
+         typename = require_not_vector_like_t<typename T1::value_type>>
+T2 match_input_dim(std::vector<T2>& v){return v[0];}
+
 }  // namespace stan
 
 #endif

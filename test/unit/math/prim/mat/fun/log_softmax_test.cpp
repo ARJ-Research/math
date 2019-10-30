@@ -47,3 +47,34 @@ TEST(MathMatrix, softmax_exception) {
 
   EXPECT_THROW(log_softmax(v0), std::invalid_argument);
 }
+
+TEST(MathMatrix, softmax_vectors) {
+  using stan::math::vector_d;
+  using stan::math::log_softmax;
+
+  vector_d x2_1(2);
+  x2_1 << -1.0, 1.0;
+
+  vector_d x2_2(2);
+  x2_2 << 1.5, 2.2;
+
+  std::vector<double> stx2_1{-1,1};
+  std::vector<double> stx2_2{1.5, 2.2};
+
+  vector_d eigen_res = log_softmax(x2_1);
+  std::vector<double> st_res = log_softmax(stx2_1);
+
+  EXPECT_FLOAT_EQ(eigen_res[0], st_res[0]);
+  EXPECT_FLOAT_EQ(eigen_res[1], st_res[1]);
+
+  std::vector<vector_d> x2_nest{x2_1,x2_2};
+  std::vector<std::vector<double>> stx2_nest{stx2_1,stx2_2};
+
+  std::vector<vector_d> eigen_res_vec = log_softmax(x2_nest);
+  std::vector<std::vector<double>> st_res_vec = log_softmax(stx2_nest);
+
+  EXPECT_FLOAT_EQ(eigen_res_vec[0][0], st_res_vec[0][0]);
+  EXPECT_FLOAT_EQ(eigen_res_vec[0][1], st_res_vec[0][1]);
+  EXPECT_FLOAT_EQ(eigen_res_vec[1][0], st_res_vec[1][0]);
+  EXPECT_FLOAT_EQ(eigen_res_vec[1][1], st_res_vec[1][1]);
+}

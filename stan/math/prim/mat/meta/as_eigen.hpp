@@ -14,9 +14,20 @@ const auto& as_eigen(const T& v) {
   return v;
 }
 
+template <typename T, typename = require_eigen_t<T>>
+auto& as_eigen(T& v) {
+  return v;
+}
+
 template <typename T>
 const auto as_eigen(const std::vector<T>& v) {
   return Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>>(v.data(),
+                                                               v.size());
+}
+
+template <typename T>
+auto as_eigen(std::vector<T>& v) {
+  return Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>>(v.data(),
                                                                v.size());
 }
 
