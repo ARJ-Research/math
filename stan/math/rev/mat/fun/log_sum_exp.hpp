@@ -32,8 +32,16 @@ class log_sum_exp_matrix_vari : public op_matrix_vari {
  * @param x matrix
  */
 template <typename T, typename = require_vector_like_st<is_var, T>>
-inline var log_sum_exp(const T& x) {
-  return var(new internal::log_sum_exp_matrix_vari(x));
+inline var log_sum_exp(const T& v) {
+  return var(new internal::log_sum_exp_matrix_vari(v));
+}
+
+template <typename T, typename = require_vector_like_st<is_var, T>>
+inline std::vector<var> log_sum_exp(const std::vector<T>& v) {
+  std::vector<var> result(v.size());
+  for(int i = 0; i < v.size(); i++)
+    result[i] = log_sum_exp(v[i]);
+  return result;
 }
 
 }  // namespace math

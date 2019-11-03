@@ -36,19 +36,23 @@ namespace math {
  * @param[in] v Vector to transform.
  * @return Unit simplex result of the softmax transform of the vector.
  */
-template <typename T, typename T_v = typename T::value_type,
-          typename nest_vec_t = std::conditional_t<is_vector_like<T_v>::value,
-                                                   T_v, T>,
-          typename = require_vector_like_st<std::is_arithmetic, T>>
-inline auto log_softmax(const T& v) {
-  eigen_seq_view<T> u(v);
-  check_nonzero_size("log_softmax", "v", u[0]);
-  std::vector<nest_vec_t> result(u.size());
-  for(int i = 0; i < u.size(); i++){
-    result[i].resize(u[i].size());
-    as_eigen(result[i]) = u[i].array() - log_sum_exp(u[i]);
+template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>>
+inline T log_softmax(const T& v) {
+  check_nonzero_size("log_softmax", "v", v);
+  auto u = as_eigen(v);
+  T result(u.size());
+  as_eigen(result) = u.array() - log_sum_exp(u);
+  return result;
+}
+
+template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>>
+inline std::vector<T> log_softmax(const std::vector<T>& v) {
+  check_nonzero_size("log_softmax", "v", v);
+  std::vector<T> result(v.size());
+  for(int i = 0; i < v.size(); i++){
+    result[i] = log_softmax(v[i]);
   }
-  return match_input_dim<T>(result);
+  return result;
 }
 
 }  // namespace math

@@ -66,8 +66,10 @@ TEST(MathFunctions, log_sum_exp) {
   Array<double, 1, Dynamic> arr(3);
   arr << 1, 2, 3;
   std::vector<Array<double, 1, Dynamic>> arr_arr{arr, arr};
+  std::vector<Eigen::Map<Eigen::Matrix<double,Eigen::Dynamic,1>>> map_map{map, map};
   log_sum_exp(arr);
   log_sum_exp(arr_arr);
+  log_sum_exp(map_map);
   log_sum_exp(m.diagonal());
 }
 

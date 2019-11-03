@@ -50,6 +50,7 @@ TEST(MathMatrix, softmax_exception) {
 
 TEST(MathMatrix, softmax_vectors) {
   using stan::math::vector_d;
+  using stan::math::matrix_d;
   using stan::math::log_softmax;
 
   vector_d x2_1(2);
@@ -77,4 +78,14 @@ TEST(MathMatrix, softmax_vectors) {
   EXPECT_FLOAT_EQ(eigen_res_vec[0][1], st_res_vec[0][1]);
   EXPECT_FLOAT_EQ(eigen_res_vec[1][0], st_res_vec[1][0]);
   EXPECT_FLOAT_EQ(eigen_res_vec[1][1], st_res_vec[1][1]);
+
+  std::vector<double> stv{1,2,3};
+  auto map = Eigen::Map<Eigen::Matrix<double,Eigen::Dynamic,1>>(stv.data(), stv.size());
+
+  Eigen::Array<double, 1, Eigen::Dynamic> arr(3);
+  arr << 1, 2, 3;
+  std::vector<Eigen::Array<double, 1, Eigen::Dynamic>> arr_arr{arr, arr};
+  std::vector<Eigen::Map<Eigen::Matrix<double,Eigen::Dynamic,1>>> map_map{map, map};
+  log_softmax(arr);
+  log_softmax(arr_arr);
 }
