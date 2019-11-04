@@ -12,7 +12,6 @@
 #include <stan/math/prim/mat/meta/as_eigen.hpp>
 #include <stan/math/prim/mat/meta/as_scalar.hpp>
 #include <stan/math/prim/mat/meta/broadcast_array.hpp>
-#include <stan/math/prim/mat/meta/eigen_seq_view.hpp>
 #include <stan/math/prim/mat/meta/get.hpp>
 #include <stan/math/prim/mat/meta/index_type.hpp>
 #include <stan/math/prim/mat/meta/is_eigen.hpp>

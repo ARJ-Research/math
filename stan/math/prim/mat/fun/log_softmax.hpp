@@ -4,7 +4,7 @@
 #include <stan/math/prim/arr/err/check_nonzero_size.hpp>
 #include <stan/math/prim/mat/fun/Eigen.hpp>
 #include <stan/math/prim/mat/fun/log_sum_exp.hpp>
-#include <stan/math/prim/mat/meta/return_container_type.hpp>
+#include <stan/math/prim/meta.hpp>
 
 namespace stan {
 namespace math {

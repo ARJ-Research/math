@@ -27,6 +27,7 @@ namespace math {
 template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>,
           typename promoted_scalar_t = return_type_t<typename T::value_type>>
 inline double log_sum_exp(const T& v) {
+  check_nonzero_size("log_sum_exp", "v", v);
   auto x = as_eigen(v).template cast<promoted_scalar_t>();
   auto max = x.maxCoeff();
   if (!std::isfinite(max))
