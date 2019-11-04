@@ -38,10 +38,10 @@ namespace math {
  * @return Unit simplex result of the softmax transform of the vector.
  */
 template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>,
-          typename promoted_scalar_t = return_type_t<typename T::value_type>>
+          typename PromotedScalarT = return_type_t<typename T::value_type>>
 inline auto log_softmax(const T& v) {
   check_nonzero_size("log_softmax", "v", v);
-  auto u = as_eigen(v).template cast<promoted_scalar_t>();
+  auto u = as_eigen(v).template cast<PromotedScalarT>();
   return_container_t<T> result(u.size());
   as_eigen(result) = u.array() - log_sum_exp(u);
   return result;
