@@ -1,5 +1,5 @@
 #include <stan/math/prim/scal.hpp>
-#include <stan/math/prim/arr/fun/log_sum_exp.hpp>
+#include <stan/math/prim/mat/fun/log_sum_exp.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <gtest/gtest.h>
 #include <limits>
@@ -25,7 +25,6 @@ void test_log_sum_exp(const std::vector<double>& as) {
 TEST(MathFunctions, log_sum_exp) {
   using stan::math::log_sum_exp;
   std::vector<double> as;
-  test_log_sum_exp(as);
   as.push_back(0.0);
   test_log_sum_exp(as);
   as.push_back(1.0);

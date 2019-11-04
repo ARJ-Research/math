@@ -1,6 +1,7 @@
 #ifndef STAN_MATH_PRIM_MAT_FUN_LOG_SUM_EXP_HPP
 #define STAN_MATH_PRIM_MAT_FUN_LOG_SUM_EXP_HPP
 
+#include <stan/math/prim/arr/err/check_nonzero_size.hpp>
 #include <stan/math/prim/mat/fun/Eigen.hpp>
 #include <stan/math/prim/meta.hpp>
 #include <vector>
@@ -23,21 +24,22 @@ namespace math {
  * @param[in] x Matrix of specified values
  * @return The log of the sum of the exponentiated vector values.
  */
-template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>>
-double log_sum_exp(const T& v) {
-  const auto& x = as_eigen(v);
+template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>,
+          typename promoted_scalar_t = return_type_t<typename T::value_type>>
+inline double log_sum_exp(const T& v) {
+  auto x = as_eigen(v).template cast<promoted_scalar_t>();
   auto max = x.maxCoeff();
   if (!std::isfinite(max))
     return max;
   return max + std::log((x.array() - max).exp().sum());
 }
 
-
-template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>>
-std::vector<double> log_sum_exp(const std::vector<T>& v) {
+template <typename Vec, require_vector_st<std::is_arithmetic, Vec>...,
+          require_vector_vt<is_vector, Vec>...>
+inline auto log_sum_exp(Vec&& v) {
   std::vector<double> result(v.size());
   for(int i = 0; i < v.size(); i++){
-    result[i] = log_sum_exp(v[i]);
+    result[i] = log_sum_exp(std::forward<decltype(v[i])>(v[i]));
   }
   return result;
 }

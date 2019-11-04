@@ -4,6 +4,7 @@
 #include <stan/math/prim/arr/err/check_nonzero_size.hpp>
 #include <stan/math/prim/mat/fun/Eigen.hpp>
 #include <stan/math/prim/mat/fun/log_sum_exp.hpp>
+#include <stan/math/prim/mat/meta/return_container_type.hpp>
 
 namespace stan {
 namespace math {
@@ -36,24 +37,27 @@ namespace math {
  * @param[in] v Vector to transform.
  * @return Unit simplex result of the softmax transform of the vector.
  */
-template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>>
-inline T log_softmax(const T& v) {
+template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>,
+          typename promoted_scalar_t = return_type_t<typename T::value_type>>
+inline auto log_softmax(const T& v) {
   check_nonzero_size("log_softmax", "v", v);
-  auto u = as_eigen(v);
-  T result(u.size());
+  auto u = as_eigen(v).template cast<promoted_scalar_t>();
+  return_container_t<T> result(u.size());
   as_eigen(result) = u.array() - log_sum_exp(u);
   return result;
 }
 
-template <typename T, typename = require_vector_like_st<std::is_arithmetic, T>>
-inline std::vector<T> log_softmax(const std::vector<T>& v) {
+template <typename Vec, require_vector_st<std::is_arithmetic, Vec>...,
+          require_vector_vt<is_vector, Vec>...>
+inline auto log_softmax(Vec&& v) {
   check_nonzero_size("log_softmax", "v", v);
-  std::vector<T> result(v.size());
+  std::vector<return_container_t<value_type_t<Vec>>> result(v.size());
   for(int i = 0; i < v.size(); i++){
-    result[i] = log_softmax(v[i]);
+    result[i] = log_softmax(std::forward<decltype(v[i])>(v[i]));
   }
   return result;
 }
+
 
 }  // namespace math
 }  // namespace stan

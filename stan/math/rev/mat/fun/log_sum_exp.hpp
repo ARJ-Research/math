@@ -36,11 +36,12 @@ inline var log_sum_exp(const T& v) {
   return var(new internal::log_sum_exp_matrix_vari(v));
 }
 
-template <typename T, typename = require_vector_like_st<is_var, T>>
-inline std::vector<var> log_sum_exp(const std::vector<T>& v) {
+template <typename Vec, require_vector_st<is_var, Vec>...,
+          require_vector_vt<is_vector, Vec>...>
+inline std::vector<var> log_sum_exp(Vec&& v) {
   std::vector<var> result(v.size());
   for(int i = 0; i < v.size(); i++)
-    result[i] = log_sum_exp(v[i]);
+    result[i] = log_sum_exp(std::forward<decltype(v[i])>(v[i]));
   return result;
 }
 

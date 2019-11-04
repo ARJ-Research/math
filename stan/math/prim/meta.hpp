@@ -20,6 +20,7 @@
 #include <stan/math/prim/mat/meta/length.hpp>
 #include <stan/math/prim/mat/meta/length_mvt.hpp>
 #include <stan/math/prim/mat/meta/operands_and_partials.hpp>
+#include <stan/math/prim/mat/meta/return_container_type.hpp>
 #include <stan/math/prim/mat/meta/scalar_type.hpp>
 #include <stan/math/prim/mat/meta/seq_view.hpp>
 #include <stan/math/prim/mat/meta/value_type.hpp>

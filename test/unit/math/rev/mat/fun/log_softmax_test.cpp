@@ -112,3 +112,27 @@ TEST(AgradRevMatrix, check_varis_on_stack) {
   x << -1.0, 1.0;
   test::check_varis_on_stack(stan::math::log_softmax(x));
 }
+
+TEST(AgradRevLogSoftmax, VecTest) {
+  using stan::math::log_softmax;
+  using stan::math::var;
+  using stan::math::vector_v;
+  using stan::math::row_vector_v;
+
+  std::vector<var> st_test{1, 2, 3};
+
+  vector_v cvec(3);
+  cvec << 1, 2, 3;
+  
+  row_vector_v rvec(3);
+  rvec << 1, 2, 3;
+
+  std::vector<vector_v> st_cvec{cvec, cvec, cvec, cvec};
+  std::vector<row_vector_v> st_rvec{rvec, rvec, rvec, rvec};
+
+  log_softmax(st_test);
+  log_softmax(cvec);
+  log_softmax(rvec);
+  log_softmax(st_cvec);
+  log_softmax(st_rvec);
+}

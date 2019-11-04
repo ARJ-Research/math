@@ -2,7 +2,7 @@
 #define STAN_MATH_FWD_ARR_FUN_LOG_SUM_EXP_HPP
 
 #include <stan/math/fwd/core.hpp>
-#include <stan/math/prim/arr/fun/log_sum_exp.hpp>
+#include <stan/math/prim/mat/fun/log_sum_exp.hpp>
 #include <vector>
 
 namespace stan {

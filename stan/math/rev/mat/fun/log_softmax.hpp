@@ -7,6 +7,7 @@
 #include <stan/math/prim/mat/fun/softmax.hpp>
 #include <stan/math/rev/mat/fun/typedefs.hpp>
 #include <stan/math/prim/mat/fun/typedefs.hpp>
+#include <stan/math/prim/meta.hpp>
 #include <stan/math/rev/core.hpp>
 #include <cmath>
 #include <vector>
@@ -54,18 +55,19 @@ class log_softmax_elt_vari : public vari {
  * @return Softmax of the input.
  * @throw std::domain_error If the input vector is size 0.
  */
-inline Eigen::Matrix<var, Eigen::Dynamic, 1> log_softmax(
-    const Eigen::Matrix<var, Eigen::Dynamic, 1>& alpha) {
-  const int a_size = alpha.size();
-
+template <typename T, typename = require_vector_like_st<is_var, T>>
+inline auto log_softmax(const T& alpha) {
   check_nonzero_size("log_softmax", "alpha", alpha);
+
+  auto alpha_vec = as_eigen(alpha);
+  const int a_size = alpha.size();
 
   // TODO(carpenter): replace with array alloc
   vari** alpha_vi_array
       = reinterpret_cast<vari**>(vari::operator new(sizeof(vari*) * a_size));
-  Eigen::Map<vector_vi>(alpha_vi_array, a_size) = alpha.vi();
+  Eigen::Map<vector_vi>(alpha_vi_array, a_size) = alpha_vec.vi();
 
-  vector_d alpha_d = alpha.val();
+  vector_d alpha_d = alpha_vec.val();
 
   // fold logic of math::softmax() and math::log_softmax()
   // to save computations
@@ -82,13 +84,24 @@ inline Eigen::Matrix<var, Eigen::Dynamic, 1> log_softmax(
       = reinterpret_cast<double*>(vari::operator new(sizeof(double) * a_size));
   Eigen::Map<vector_d>(softmax_alpha_d_array, a_size) = softmax_alpha_d;
 
-  vector_v log_softmax_alpha(a_size);
+  return_container_t<T> log_softmax_alpha(a_size);
   for (int k = 0; k < a_size; ++k) {
-    log_softmax_alpha(k) = var(new internal::log_softmax_elt_vari(
+    log_softmax_alpha[k] = var(new internal::log_softmax_elt_vari(
         log_softmax_alpha_d[k], alpha_vi_array, softmax_alpha_d_array, a_size,
         k));
   }
   return log_softmax_alpha;
+}
+
+template <typename Vec, require_vector_st<is_var, Vec>...,
+          require_vector_vt<is_vector, Vec>...>
+inline auto log_softmax(Vec&& v) {
+  check_nonzero_size("log_softmax", "v", v);
+  std::vector<return_container_t<value_type_t<Vec>>> result(v.size());
+  for(int i = 0; i < v.size(); i++){
+    result[i] = log_softmax(std::forward<decltype(v[i])>(v[i]));
+  }
+  return result;
 }
 
 }  // namespace math
