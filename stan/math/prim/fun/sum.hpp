@@ -29,18 +29,6 @@ inline double sum(double v) { return v; }
 inline int sum(int v) { return v; }
 
 /**
- * Return the sum of the values in the specified standard vector.
- *
- * @tparam T Type of elements summed.
- * @param xs Standard vector to sum.
- * @return Sum of elements.
- */
-template <typename T>
-inline T sum(const std::vector<T>& xs) {
-  return std::accumulate(xs.begin(), xs.end(), T{0});
-}
-
-/**
  * Returns the sum of the coefficients of the specified
  * Eigen Matrix, Array or expression.
  *
@@ -48,10 +36,11 @@ inline T sum(const std::vector<T>& xs) {
  * @param v argument
  * @return Sum of coefficients of argument.
  */
-template <typename Derived>
-inline typename Eigen::DenseBase<Derived>::Scalar sum(
-    const Eigen::DenseBase<Derived>& v) {
-  return v.sum();
+template <typename T, require_t<std::is_arithmetic<scalar_type_t<T>>>...>
+inline auto sum(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    return m.sum();
+  });
 }
 
 }  // namespace math

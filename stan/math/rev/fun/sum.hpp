@@ -10,6 +10,7 @@
 namespace stan {
 namespace math {
 
+namespace internal {
 /**
  * Class for sums of variables constructed with standard vectors.
  * There's an extension for Eigen matrices.
@@ -19,71 +20,23 @@ class sum_v_vari : public vari {
   vari** v_;
   size_t length_;
 
-  inline static double sum_of_val(const std::vector<var>& v) {
-    double result = 0;
-    for (auto x : v) {
-      result += x.val();
-    }
-    return result;
-  }
-
  public:
   explicit sum_v_vari(double value, vari** v, size_t length)
       : vari(value), v_(v), length_(length) {}
 
-  explicit sum_v_vari(const std::vector<var>& v1)
-      : vari(sum_of_val(v1)),
-        v_(reinterpret_cast<vari**>(ChainableStack::instance_->memalloc_.alloc(
-            v1.size() * sizeof(vari*)))),
-        length_(v1.size()) {
-    for (size_t i = 0; i < length_; i++) {
-      v_[i] = v1[i].vi_;
-    }
+  template<typename T>
+  explicit sum_v_vari(const T& v1)
+      : vari(v1.val().sum()), length_(v1.size()) {
+    v_ = ChainableStack::instance_->memalloc_.alloc_array<vari*>(length_);
+    Eigen::Map<matrix_vi>(v_, v1.rows(), v1.cols()) = v1.vi();
   }
 
   virtual void chain() {
-    for (size_t i = 0; i < length_; i++) {
-      v_[i]->adj_ += adj_;
+    Eigen::Map<vector_vi> v_map(v_, length_);
+    v_map.adj().array() += adj_;
     }
-  }
 };
-
-/**
- * Returns the sum of the entries of the specified vector.
- *
- * @param m Vector.
- * @return Sum of vector entries.
- */
-inline var sum(const std::vector<var>& m) {
-  if (m.empty()) {
-    return 0.0;
-  }
-  return var(new sum_v_vari(m));
 }
-
-/**
- * Class for representing sums with constructors for Eigen.
- * The <code>chain()</code> method and member variables are
- * managed by the superclass <code>sum_v_vari</code>.
- */
-class sum_eigen_v_vari : public sum_v_vari {
- protected:
-  template <typename Derived>
-  inline static double sum_of_val(const Eigen::DenseBase<Derived>& v) {
-    return Eigen::Ref<const matrix_v>(v).val().sum();
-  }
-
- public:
-  template <int R1, int C1>
-  explicit sum_eigen_v_vari(const Eigen::Matrix<var, R1, C1>& v1)
-      : sum_v_vari(
-            sum_of_val(v1),
-            reinterpret_cast<vari**>(ChainableStack::instance_->memalloc_.alloc(
-                v1.size() * sizeof(vari*))),
-            v1.size()) {
-    Eigen::Map<matrix_vi>(v_, v1.rows(), v1.cols()) = v1.vi();
-  }
-};
 
 /**
  * Returns the sum of the coefficients of the specified
@@ -94,12 +47,14 @@ class sum_eigen_v_vari : public sum_v_vari {
  * @param m Specified matrix or vector.
  * @return Sum of coefficients of matrix.
  */
-template <int R, int C>
-inline var sum(const Eigen::Matrix<var, R, C>& m) {
-  if (m.size() == 0) {
-    return 0.0;
-  }
-  return var(new sum_eigen_v_vari(m));
+template <typename T, require_t<is_var<scalar_type_t<T>>>...>
+inline auto sum(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    if (m.size() == 0) {
+      return scalar_type_t<T>(0.0);
+    }
+    return var(new internal::sum_v_vari(m));
+  });
 }
 
 }  // namespace math

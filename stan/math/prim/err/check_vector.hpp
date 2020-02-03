@@ -24,13 +24,13 @@ namespace math {
  * @throw <code>std::invalid_argument</code> if x is not a row or column
  *   vector.
  */
-template <typename T, int R, int C>
+template <typename T, require_eigen_t<T>...>
 inline void check_vector(const char* function, const char* name,
-                         const Eigen::Matrix<T, R, C>& x) {
-  if (R == 1) {
+                         const T& x) {
+  if (T::RowsAtCompileTime == 1) {
     return;
   }
-  if (C == 1) {
+  if (T::ColsAtCompileTime == 1) {
     return;
   }
   if (x.rows() == 1 || x.cols() == 1) {

@@ -2,6 +2,7 @@
 #define STAN_MATH_PRIM_FUN_SOFTMAX_HPP
 
 #include <stan/math/prim/err.hpp>
+#include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <cmath>
 
@@ -41,14 +42,14 @@ namespace math {
  * @param[in] v Vector to transform.
  * @return Unit simplex result of the softmax transform of the vector.
  */
-template <typename T>
-inline Eigen::Matrix<T, Eigen::Dynamic, 1> softmax(
-    const Eigen::Matrix<T, Eigen::Dynamic, 1>& v) {
-  using std::exp;
-  check_nonzero_size("softmax", "v", v);
-  Eigen::Matrix<T, Eigen::Dynamic, 1> theta(v.size());
-  theta = (v.array() - v.maxCoeff()).exp();
-  return theta.array() / theta.sum();
+template <typename T, require_t<std::is_arithmetic<scalar_type_t<T>>>...>
+inline auto softmax(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    check_nonzero_size("softmax", "v", v);
+    Eigen::Matrix<scalar_type_t<T>, Eigen::Dynamic, 1> theta(v.size());
+    theta = (v.array() - v.maxCoeff()).exp();
+    return (theta.array() / theta.sum()).matrix().eval();
+  });
 }
 
 }  // namespace math

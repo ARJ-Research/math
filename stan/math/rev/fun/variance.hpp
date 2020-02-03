@@ -31,21 +31,6 @@ inline var calc_variance(size_t size, const var* dtrs) {
 
 }  // namespace internal
 
-/**
- * Return the sample variance of the specified standard
- * vector.  Raise domain error if size is not greater than zero.
- *
- * @param[in] v a vector
- * @return sample variance of specified vector
- */
-inline var variance(const std::vector<var>& v) {
-  check_nonzero_size("variance", "v", v);
-  if (v.size() == 1) {
-    return 0;
-  }
-  return internal::calc_variance(v.size(), &v[0]);
-}
-
 /*
  * Return the sample variance of the specified vector, row vector,
  * or matrix.  Raise domain error if size is not greater than
@@ -56,13 +41,15 @@ inline var variance(const std::vector<var>& v) {
  * @param[in] m input matrix
  * @return sample variance of specified matrix
  */
-template <int R, int C>
-var variance(const Eigen::Matrix<var, R, C>& m) {
-  check_nonzero_size("variance", "m", m);
-  if (m.size() == 1) {
-    return 0;
-  }
-  return internal::calc_variance(m.size(), &m(0));
+template <typename T, require_t<is_var<scalar_type_t<T>>>...>
+inline auto variance(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    check_nonzero_size("variance", "m", m);
+    if (m.size() == 1) {
+      return var(0);
+    }
+    return internal::calc_variance(m.size(), m.data());
+  });
 }
 
 }  // namespace math

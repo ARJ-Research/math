@@ -9,10 +9,23 @@
 namespace stan {
 namespace math {
 
-template <typename T, int R, int C>
-inline fvar<T> dot_self(const Eigen::Matrix<fvar<T>, R, C>& v) {
-  check_vector("dot_self", "v", v);
-  return dot_product(v, v);
+/**
+ * Returns the dot product of a vector with itself.
+ *
+ * @tparam R number of rows, can be Eigen::Dynamic; one of R or C must be 1
+ * @tparam C number of columns, can be Eigen::Dynamic; one of R or C must be 1
+ * @param[in] v Vector.
+ * @return Dot product of the vector with itself.
+ */
+template <typename T, require_t<is_fvar<scalar_type_t<T>>>...>
+inline auto dot_self(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& v) {
+    check_vector("dot_self", "v", v);
+    using T_inner = typename scalar_type_t<T>::Scalar;
+    Eigen::Matrix<T_inner, -1, 1> v_val = v.val();
+    return fvar<T_inner>(v_val.squaredNorm(), 
+                         2 * v_val.cwiseProduct(v.d()).sum());
+  });
 }
 
 }  // namespace math

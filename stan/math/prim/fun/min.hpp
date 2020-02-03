@@ -2,10 +2,9 @@
 #define STAN_MATH_PRIM_FUN_MIN_HPP
 
 #include <stan/math/prim/err.hpp>
+#include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/fun/constants.hpp>
-#include <algorithm>
-#include <vector>
 
 namespace stan {
 namespace math {
@@ -18,10 +17,12 @@ namespace math {
  * @return minimum coefficient value in the vector
  * @throws <code>std::invalid_argument</code> if the vector is size zero
  */
-inline int min(const std::vector<int>& x) {
-  check_nonzero_size("min", "int vector", x);
-  Eigen::Map<const Eigen::Matrix<int, Eigen::Dynamic, 1>> m(&x[0], x.size());
-  return m.minCoeff();
+template <typename T, require_t<std::is_integral<scalar_type_t<T>>>...>
+inline auto min(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    check_nonzero_size("min", "int vector", m);
+    return m.minCoeff();
+  });
 }
 
 /**
@@ -33,32 +34,14 @@ inline int min(const std::vector<int>& x) {
  * @return minimum coefficient value in the vector, or infinity if the vector is
  * size zero
  */
-template <typename T>
-inline T min(const std::vector<T>& x) {
-  if (x.size() == 0) {
-    return INFTY;
-  }
-  Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> m(&x[0], x.size());
-  return m.minCoeff();
-}
-
-/**
- * Returns the minimum coefficient in the specified
- * matrix, vector, or row vector.
- *
- * @tparam T type of elements in the matrix, vector or row vector
- * @tparam R number of rows, can be Eigen::Dynamic
- * @tparam C number of columns, can be Eigen::Dynamic
- * @param m specified matrix, vector, or row vector
- * @return minimum coefficient value in the vector, or infinity if the vector is
- * size zero
- */
-template <typename T, int R, int C>
-inline T min(const Eigen::Matrix<T, R, C>& m) {
-  if (m.size() == 0) {
-    return INFTY;
-  }
-  return m.minCoeff();
+template <typename T, require_not_t<std::is_integral<scalar_type_t<T>>>...>
+inline auto min(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    if (m.size() == 0) {
+      return scalar_type_t<T>(NEGATIVE_INFTY);
+    }
+    return m.minCoeff();
+  });
 }
 
 }  // namespace math

@@ -8,41 +8,32 @@
 namespace stan {
 namespace math {
 
-template <typename T>
-inline Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1> softmax(
-    const Eigen::Matrix<fvar<T>, Eigen::Dynamic, 1>& alpha) {
-  using Eigen::Dynamic;
-  using Eigen::Matrix;
+template <typename T, require_t<is_fvar<scalar_type_t<T>>>...>
+inline auto softmax(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& alpha) {
+    using T_fvar = scalar_type_t<T>;
+    using T_fvar_inner = typename T_fvar::Scalar;
+    Eigen::Matrix<T_fvar, -1, 1> softmax_alpha(alpha.size());
+    softmax_alpha.val() = softmax(alpha.val().eval());
+    softmax_alpha.d().fill(0);
 
-  Matrix<T, Dynamic, 1> alpha_t(alpha.size());
-  for (int k = 0; k < alpha.size(); ++k) {
-    alpha_t(k) = alpha(k).val_;
-  }
-
-  Matrix<T, Dynamic, 1> softmax_alpha_t = softmax(alpha_t);
-
-  Matrix<fvar<T>, Dynamic, 1> softmax_alpha(alpha.size());
-  for (int k = 0; k < alpha.size(); ++k) {
-    softmax_alpha(k).val_ = softmax_alpha_t(k);
-    softmax_alpha(k).d_ = 0;
-  }
-
-  for (int m = 0; m < alpha.size(); ++m) {
-    T negative_alpha_m_d_times_softmax_alpha_t_m
-        = -alpha(m).d_ * softmax_alpha_t(m);
-    for (int k = 0; k < alpha.size(); ++k) {
-      if (m == k) {
-        softmax_alpha(k).d_
-            += softmax_alpha_t(k)
-               * (alpha(m).d_ + negative_alpha_m_d_times_softmax_alpha_t_m);
-      } else {
-        softmax_alpha(k).d_
-            += negative_alpha_m_d_times_softmax_alpha_t_m * softmax_alpha_t(k);
+    for (int m = 0; m < alpha.size(); ++m) {
+      T_fvar_inner negative_alpha_m_d_times_softmax_alpha_t_m
+          = -alpha(m).d_ * softmax_alpha(m).val();
+      for (int k = 0; k < alpha.size(); ++k) {
+        if (m == k) {
+          softmax_alpha(k).d_
+              += softmax_alpha(k).val()
+                 * (alpha(m).d_ + negative_alpha_m_d_times_softmax_alpha_t_m);
+        } else {
+          softmax_alpha(k).d_
+              += negative_alpha_m_d_times_softmax_alpha_t_m * softmax_alpha(k).val();
+        }
       }
     }
-  }
 
-  return softmax_alpha;
+    return softmax_alpha;
+  });
 }
 
 }  // namespace math

@@ -11,30 +11,6 @@ namespace math {
 
 /**
  * Returns the sample variance (divide by length - 1) of the
- * coefficients in the specified standard vector.
- *
- * @tparam T type of elements in the vector
- * @param v specified vector
- * @return sample variance of vector
- * @throw <code>std::invalid_argument</code> if the vector has size zero
- */
-template <typename T>
-inline return_type_t<T> variance(const std::vector<T>& v) {
-  check_nonzero_size("variance", "v", v);
-  if (v.size() == 1) {
-    return 0.0;
-  }
-  T v_mean(mean(v));
-  T sum_sq_diff(0);
-  for (size_t i = 0; i < v.size(); ++i) {
-    T diff = v[i] - v_mean;
-    sum_sq_diff += diff * diff;
-  }
-  return sum_sq_diff / (v.size() - 1);
-}
-
-/**
- * Returns the sample variance (divide by length - 1) of the
  * coefficients in the specified matrix
  *
  * @tparam T type of elements in the vector
@@ -45,20 +21,15 @@ inline return_type_t<T> variance(const std::vector<T>& v) {
  * @return sample variance of coefficients
  * @throw <code>std::invalid_argument</code> if the matrix has size zero
  */
-template <typename T, int R, int C>
-inline return_type_t<T> variance(const Eigen::Matrix<T, R, C>& m) {
-  check_nonzero_size("variance", "m", m);
-
-  if (m.size() == 1) {
-    return 0.0;
-  }
-  return_type_t<T> mn(mean(m));
-  return_type_t<T> sum_sq_diff(0);
-  for (int i = 0; i < m.size(); ++i) {
-    return_type_t<T> diff = m(i) - mn;
-    sum_sq_diff += diff * diff;
-  }
-  return sum_sq_diff / (m.size() - 1);
+template <typename T, require_not_t<is_var<scalar_type_t<T>>>...>
+inline auto variance(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    check_nonzero_size("variance", "m", m);
+    if (m.size() == 1) {
+      return scalar_type_t<T>(0.0);
+    }
+    return (m.array() - m.mean()).matrix().squaredNorm() / (m.size() - 1);
+  });
 }
 
 }  // namespace math

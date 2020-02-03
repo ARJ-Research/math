@@ -19,10 +19,8 @@ namespace internal {
 
 inline var calc_sd(size_t size, const var* dtrs) {
   using std::sqrt;
-  vari** varis = reinterpret_cast<vari**>(
-      ChainableStack::instance_->memalloc_.alloc(size * sizeof(vari*)));
-  double* partials = reinterpret_cast<double*>(
-      ChainableStack::instance_->memalloc_.alloc(size * sizeof(double)));
+  vari** varis = ChainableStack::instance_->memalloc_.alloc_array<vari*>(size);
+  double* partials = ChainableStack::instance_->memalloc_.alloc_array<double>(size);
   Eigen::Map<vector_vi> varis_map(varis, size);
   Eigen::Map<const vector_v> dtrs_map(dtrs, size);
   Eigen::Map<vector_d> partials_map(partials, size);
@@ -30,8 +28,7 @@ inline var calc_sd(size_t size, const var* dtrs) {
   double size_m1 = size - 1;
   varis_map = dtrs_map.vi();
   vector_d dtrs_val = dtrs_map.val();
-  double mean = dtrs_val.mean();
-  vector_d diff = dtrs_val.array() - mean;
+  vector_d diff = dtrs_val.array() - dtrs_val.mean();
   double sum_of_squares = diff.squaredNorm();
   double sd = sqrt(sum_of_squares / size_m1);
 
@@ -45,21 +42,6 @@ inline var calc_sd(size_t size, const var* dtrs) {
 
 }  // namespace internal
 
-/**
- * Return the sample standard deviation of the specified standard
- * vector.  Raise domain error if size is not greater than zero.
- *
- * @param[in] v a vector
- * @return sample standard deviation of specified vector
- */
-inline var sd(const std::vector<var>& v) {
-  check_nonzero_size("sd", "v", v);
-  if (v.size() == 1) {
-    return 0;
-  }
-  return internal::calc_sd(v.size(), &v[0]);
-}
-
 /*
  * Return the sample standard deviation of the specified vector,
  * row vector, or matrix.  Raise domain error if size is not
@@ -70,13 +52,16 @@ inline var sd(const std::vector<var>& v) {
  * @param[in] m input matrix
  * @return sample standard deviation of specified matrix
  */
-template <int R, int C>
-var sd(const Eigen::Matrix<var, R, C>& m) {
-  check_nonzero_size("sd", "m", m);
-  if (m.size() == 1) {
-    return 0;
-  }
-  return internal::calc_sd(m.size(), &m(0));
+template <typename T, require_t<is_var<scalar_type_t<T>>>...>
+inline auto sd(const T& x) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
+    using std::sqrt;
+    check_nonzero_size("sd", "m", m);
+    if (m.size() == 1) {
+      return scalar_type_t<T>(0.0);
+    }
+    return internal::calc_sd(m.size(), m.data());
+  });
 }
 
 }  // namespace math

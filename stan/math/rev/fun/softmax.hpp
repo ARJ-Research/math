@@ -32,10 +32,8 @@ class softmax_op {
     N_ = alpha.size();
     y_ = ChainableStack::instance_->memalloc_.alloc_array<double>(N_);
 
-    auto y = softmax(alpha);
-    for (int n = 0; n < N_; ++n) {
-      y_[n] = y(n);
-    }
+    Eigen::Map<vector_d> y(y_, N_);
+    y = softmax(alpha);
     return y;
   }
 
@@ -70,11 +68,13 @@ class softmax_op {
  * @return Softmax of the input.
  * @throw std::domain_error If the input vector is size 0.
  */
-inline Eigen::Matrix<var, Eigen::Dynamic, 1> softmax(
-    const Eigen::Matrix<var, Eigen::Dynamic, 1>& alpha) {
-  check_nonzero_size("softmax", "alpha", alpha);
+template <typename T, require_t<is_var<scalar_type_t<T>>>...>
+inline auto softmax(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& alpha) {
+    check_nonzero_size("softmax", "alpha", alpha);
 
-  return adj_jac_apply<internal::softmax_op>(alpha);
+    return adj_jac_apply<internal::softmax_op>(alpha);
+  });
 }
 
 }  // namespace math
