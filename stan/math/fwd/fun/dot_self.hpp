@@ -2,6 +2,7 @@
 #define STAN_MATH_FWD_FUN_DOT_SELF_HPP
 
 #include <stan/math/prim/err.hpp>
+#include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/fwd/core.hpp>
 #include <stan/math/fwd/fun/dot_product.hpp>
@@ -22,8 +23,8 @@ inline auto dot_self(const T& x) {
   return apply_vector_unary<T>::reduce(x, [&](const auto& v) {
     check_vector("dot_self", "v", v);
     using T_inner = typename scalar_type_t<T>::Scalar;
-    Eigen::Matrix<T_inner, -1, 1> v_val = v.val();
-    return fvar<T_inner>(v_val.squaredNorm(), 
+    auto v_val = v.val().eval();
+    return fvar<T_inner>(v_val.squaredNorm(),
                          2 * v_val.cwiseProduct(v.d()).sum());
   });
 }

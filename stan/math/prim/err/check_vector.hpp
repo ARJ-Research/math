@@ -15,9 +15,7 @@ namespace math {
  * Check if the matrix is either a row vector or column vector.
  * This function checks the runtime size of the matrix to check
  * whether it is a row or column vector.
- * @tparam T Scalar type of the matrix
- * @tparam R number of rows or Eigen::Dynamic
- * @tparam C number of columns or Eigen::Dynamic
+ * @tparam T Type of the matrix
  * @param function Function name (for error messages)
  * @param name Variable name (for error messages)
  * @param x Matrix

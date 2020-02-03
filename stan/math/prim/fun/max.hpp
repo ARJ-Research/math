@@ -5,13 +5,14 @@
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/fun/constants.hpp>
+#include <algorithm>
 
 namespace stan {
 namespace math {
 
 /**
  * Returns the maximum coefficient in the specified
- * column vector.
+ * vector of integers.
  *
  * @param x specified vector
  * @return maximum coefficient value in the vector
@@ -27,7 +28,7 @@ inline auto max(const T& x) {
 
 /**
  * Returns the maximum coefficient in the specified
- * column vector.
+ * vector.
  *
  * @tparam type of elements in the vector
  * @param x specified vector

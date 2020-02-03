@@ -30,10 +30,10 @@ inline int sum(int v) { return v; }
 
 /**
  * Returns the sum of the coefficients of the specified
- * Eigen Matrix, Array or expression.
+ * Eigen object, std::vector, or container of these.
  *
- * @tparam Derived type of argument
- * @param v argument
+ * @tparam T type of argument
+ * @param x argument
  * @return Sum of coefficients of argument.
  */
 template <typename T, require_t<std::is_arithmetic<scalar_type_t<T>>>...>

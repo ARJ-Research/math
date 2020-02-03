@@ -8,6 +8,13 @@
 namespace stan {
 namespace math {
 
+/**
+ * Return the softmax of the specified vector.
+ *
+ * @tparam T type of elements in the vector
+ * @param[in] v Vector to transform.
+ * @return Unit simplex result of the softmax transform of the vector.
+ */
 template <typename T, require_t<is_fvar<scalar_type_t<T>>>...>
 inline auto softmax(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& alpha) {
@@ -27,7 +34,8 @@ inline auto softmax(const T& x) {
                  * (alpha(m).d_ + negative_alpha_m_d_times_softmax_alpha_t_m);
         } else {
           softmax_alpha(k).d_
-              += negative_alpha_m_d_times_softmax_alpha_t_m * softmax_alpha(k).val();
+              += negative_alpha_m_d_times_softmax_alpha_t_m
+                 * softmax_alpha(k).val();
         }
       }
     }

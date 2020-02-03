@@ -13,11 +13,9 @@ namespace math {
  * Returns the sample variance (divide by length - 1) of the
  * coefficients in the specified matrix
  *
- * @tparam T type of elements in the vector
- * @tparam R number of rows in the matrix, can be Eigen::Dynamic
- * @tparam C number of columns in the matrix, can be Eigen::Dynamic
+ * @tparam T type of vector
  *
- * @param m matrix
+ * @param x matrix
  * @return sample variance of coefficients
  * @throw <code>std::invalid_argument</code> if the matrix has size zero
  */

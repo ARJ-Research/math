@@ -11,12 +11,12 @@ namespace stan {
 namespace math {
 
 /**
- * Returns the dot product of the specified vector with itself.
+ * Returns the dot product of the specified vector, or container of vectors,
+ * with itself.
  *
- * @tparam R number of rows, can be Eigen::Dynamic
- * @tparam C number of columns, can be Eigen::Dynamic
- * @param v Vector.
- * @throw std::domain_error If v is not vector dimensioned.
+ * @tparam T Type of vector or container of vectors
+ * @param x Vector.
+ * @throw std::domain_error If x is not vector dimensioned.
  */
 template <typename T, require_t<std::is_arithmetic<scalar_type_t<T>>>...>
 inline auto dot_self(const T& x) {

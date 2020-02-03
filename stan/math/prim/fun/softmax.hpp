@@ -38,8 +38,8 @@ namespace math {
  * \end{array}
  * \f$
  *
- * @tparam T type of elements in the vector
- * @param[in] v Vector to transform.
+ * @tparam T type of vector
+ * @param[in] x Vector to transform.
  * @return Unit simplex result of the softmax transform of the vector.
  */
 template <typename T, require_t<std::is_arithmetic<scalar_type_t<T>>>...>

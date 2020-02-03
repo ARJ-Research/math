@@ -5,13 +5,14 @@
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/fun/constants.hpp>
+#include <algorithm>
 
 namespace stan {
 namespace math {
 
 /**
  * Returns the minimum coefficient in the specified
- * column vector.
+ * vector of integers.
  *
  * @param x specified vector
  * @return minimum coefficient value in the vector
@@ -27,7 +28,7 @@ inline auto min(const T& x) {
 
 /**
  * Returns the minimum coefficient in the specified
- * column vector.
+ * vector.
  *
  * @tparam T type of elements in the vector
  * @param x specified vector
@@ -38,7 +39,7 @@ template <typename T, require_not_t<std::is_integral<scalar_type_t<T>>>...>
 inline auto min(const T& x) {
   return apply_vector_unary<T>::reduce(x, [&](const auto& m) {
     if (m.size() == 0) {
-      return scalar_type_t<T>(NEGATIVE_INFTY);
+      return scalar_type_t<T>(INFTY);
     }
     return m.minCoeff();
   });
