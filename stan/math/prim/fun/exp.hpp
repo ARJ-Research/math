@@ -45,7 +45,9 @@ struct exp_fun {
  * @param[in] x container
  * @return Elementwise application of exponentiation to the argument.
  */
-template <typename T, typename = require_not_eigen_vt<std::is_arithmetic, T>>
+template <typename T, typename = require_not_container_st<is_container,
+														  std::is_arithmetic,
+														  T>>
 inline auto exp(const T& x) {
   return apply_scalar_unary<exp_fun, T>::apply(x);
 }
@@ -56,10 +58,11 @@ inline auto exp(const T& x) {
  * @param x Matrix or matrix expression
  * @return Elementwise application of exponentiation to the argument.
  */
-template <typename Derived,
-          typename = require_eigen_vt<std::is_arithmetic, Derived>>
-inline auto exp(const Eigen::MatrixBase<Derived>& x) {
-  return x.derived().array().exp().matrix().eval();
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto exp(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    return v.derived().array().exp().matrix().eval();
+  });
 }
 
 }  // namespace math
