@@ -71,10 +71,25 @@ struct log1p_exp_fun {
  * @param x container
  * @return Natural log of (1 + exp()) applied to each value in x.
  */
-template <typename T>
+template <typename T, typename = require_not_container_st<is_container,
+                              std::is_arithmetic,
+                              T>>
 inline auto log1p_exp(const T& x) {
   return apply_scalar_unary<log1p_exp_fun, T>::apply(x);
 }
+
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto log1p_exp(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    const auto& v_der = v.derived().array();
+    return match_wrapper<decltype(v)>(
+      (v_der > 0.0).select(
+        v_der + (-v_der).exp().log1p(),
+        v_der.exp().log1p())
+      ).eval();
+  });
+}
+
 
 }  // namespace math
 }  // namespace stan
