@@ -9,6 +9,9 @@ TEST(MathFunctions, expInt) {
 }
 
 TEST(MathFunctions, exp_works_with_other_functions) {
+  Eigen::ArrayXd arr(5);
+  arr << 1.1, 1.2, 1.3, 1.4, 1.5;
+  Eigen::ArrayXd out = stan::math::exp(arr);
   Eigen::VectorXd a(5);
   a << 1.1, 1.2, 1.3, 1.4, 1.5;
   Eigen::RowVectorXd b(5);
