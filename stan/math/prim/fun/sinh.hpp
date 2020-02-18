@@ -31,9 +31,8 @@ struct sinh_fun {
  * @param x container
  * @return Hyperbolic sine of each variable in x.
  */
-template <typename T, typename = require_not_container_st<is_container,
-                              std::is_arithmetic,
-                              T>>
+template <typename T,
+          require_not_container_st<is_container, std::is_arithmetic, T>...>
 inline auto sinh(const T& x) {
   return apply_scalar_unary<sinh_fun, T>::apply(x);
 }
@@ -45,10 +44,11 @@ inline auto sinh(const T& x) {
  * @param x Matrix or matrix expression
  * @return Hyperbolic sine of each variable in x.
  */
-template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+template <typename T,
+          require_container_st<is_container, std::is_arithmetic, T>...>
 inline auto sinh(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    return match_wrapper<decltype(v)>(v.derived().array().sinh()).eval();
+    return v.derived().array().sinh();
   });
 }
 

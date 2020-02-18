@@ -39,9 +39,8 @@ struct exp_fun {
  * @param[in] x container
  * @return Elementwise application of exponentiation to the argument.
  */
-template <typename T, typename = require_not_container_st<is_container,
-                              std::is_arithmetic,
-                              T>>
+template <typename T,
+          require_not_container_st<is_container, std::is_arithmetic, T>...>
 inline auto exp(const T& x) {
   return apply_scalar_unary<exp_fun, T>::apply(x);
 }
@@ -52,10 +51,11 @@ inline auto exp(const T& x) {
  * @param x Matrix or matrix expression
  * @return Elementwise application of exponentiation to the argument.
  */
-template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+template <typename T,
+          require_container_st<is_container, std::is_arithmetic, T>...>
 inline auto exp(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    return match_wrapper<decltype(v)>(v.derived().array().exp()).eval();
+    return v.derived().array().exp();
   });
 }
 

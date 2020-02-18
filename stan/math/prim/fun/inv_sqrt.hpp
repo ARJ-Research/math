@@ -37,9 +37,8 @@ struct inv_sqrt_fun {
  * @param x container
  * @return 1 / sqrt of each value in x.
  */
-template <typename T, typename = require_not_container_st<is_container,
-                              std::is_arithmetic,
-                              T>>
+template <typename T,
+          require_not_container_st<is_container, std::is_arithmetic, T>...>
 inline auto inv_sqrt(const T& x) {
   return apply_scalar_unary<inv_sqrt_fun, T>::apply(x);
 }
@@ -51,10 +50,11 @@ inline auto inv_sqrt(const T& x) {
  * @param x Matrix or matrix expression
  * @return Arc cosine of each variable in the container, in radians.
  */
-template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+template <typename T,
+          require_container_st<is_container, std::is_arithmetic, T>...>
 inline auto inv_sqrt(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    return match_wrapper<decltype(v)>(v.derived().array().rsqrt()).eval();
+    return v.derived().array().rsqrt();
   });
 }
 

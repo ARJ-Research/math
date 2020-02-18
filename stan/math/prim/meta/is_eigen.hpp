@@ -62,7 +62,7 @@ struct is_eigen_array_impl<Eigen::Array<T, R, C>> : std::true_type {};
 }  // namespace internal
 
 template <typename T>
-struct is_eigen_array : internal::is_eigen_array_impl<typename std::decay_t<T>::PlainObject> {};
+struct is_eigen_array : internal::is_eigen_array_impl<std::decay_t<T>> {};
 
 template <typename T>
 using is_eigen_matrix_or_array

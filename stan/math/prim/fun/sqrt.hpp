@@ -40,9 +40,8 @@ struct sqrt_fun {
  * @param x container
  * @return Square root of each value in x.
  */
-template <typename T, typename = require_not_container_st<is_container,
-                              std::is_arithmetic,
-                              T>>
+template <typename T,
+          require_not_container_st<is_container, std::is_arithmetic, T>...>
 inline auto sqrt(const T& x) {
   return apply_scalar_unary<sqrt_fun, T>::apply(x);
 }
@@ -54,10 +53,11 @@ inline auto sqrt(const T& x) {
  * @param x Matrix or matrix expression
  * @return Square root of each value in x.
  */
-template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+template <typename T,
+          require_container_st<is_container, std::is_arithmetic, T>...>
 inline auto sqrt(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    return match_wrapper<decltype(v)>(v.derived().array().sqrt()).eval();
+    return v.derived().array().sqrt();
   });
 }
 
