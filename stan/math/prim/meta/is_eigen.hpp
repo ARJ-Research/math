@@ -59,18 +59,10 @@ template <typename T>
 struct is_eigen_array_impl : std::false_type {};
 template <typename T, int R, int C>
 struct is_eigen_array_impl<Eigen::Array<T, R, C>> : std::true_type {};
-template <typename T>
-struct is_eigen_array_impl<Eigen::ArrayBase<T>> : std::true_type {};
-template <typename T>
-struct is_eigen_array_impl<Eigen::ArrayWrapper<T>> : std::true_type {};
-template <typename Op, typename T, int R, int C>
-struct is_eigen_array_impl<Eigen::CwiseUnaryOp<Op, const Eigen::Array<T, R, C>>> : std::true_type {};
-template <typename Op, typename Lhs, typename Rhs>
-struct is_eigen_array_impl<Eigen::CwiseBinaryOp<Op, Lhs, Rhs>> : std::true_type {};
 }  // namespace internal
 
 template <typename T>
-struct is_eigen_array : internal::is_eigen_array_impl<std::decay_t<T>> {};
+struct is_eigen_array : internal::is_eigen_array_impl<typename std::decay_t<T>::PlainObject> {};
 
 template <typename T>
 using is_eigen_matrix_or_array

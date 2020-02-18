@@ -48,7 +48,7 @@ inline auto fabs(const T& x) {
 template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
 inline auto fabs(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    return match_wrapper<decltype(v)>(v.derived().array().fabs()).eval();
+    return match_wrapper<decltype(v)>(v.derived().array().abs()).eval();
   });
 }
 
