@@ -3,6 +3,7 @@
 
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
+#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {
@@ -30,7 +31,9 @@ struct tan_fun {
  * @param x angles in radians
  * @return Tangent of each value in x.
  */
-template <typename T, typename = require_not_eigen_vt<std::is_arithmetic, T>>
+template <typename T, typename = require_not_container_st<is_container,
+                              std::is_arithmetic,
+                              T>>
 inline auto tan(const T& x) {
   return apply_scalar_unary<tan_fun, T>::apply(x);
 }
@@ -42,10 +45,11 @@ inline auto tan(const T& x) {
  * @param x Matrix or matrix expression
  * @return Tangent of each value in x.
  */
-template <typename Derived,
-          typename = require_eigen_vt<std::is_arithmetic, Derived>>
-inline auto tan(const Eigen::MatrixBase<Derived>& x) {
-  return x.derived().array().tan().matrix().eval();
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto tan(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    return match_wrapper<decltype(v)>(v.derived().array().tan()).eval();
+  });
 }
 
 }  // namespace math

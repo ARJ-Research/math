@@ -5,6 +5,7 @@
 #include <stan/math/prim/fun/inv.hpp>
 #include <stan/math/prim/fun/square.hpp>
 #include <stan/math/prim/fun/inv_square.hpp>
+#include <stan/math/prim/fun/match_wrapper.hpp>
 
 namespace stan {
 namespace math {
@@ -18,9 +19,18 @@ inline double inv_square(double x) { return inv(square(x)); }
  * @param x container
  * @return 1 / the square of each value in x.
  */
-template <typename T>
+template <typename T, typename = require_not_container_st<is_container,
+                              std::is_arithmetic,
+                              T>>
 inline auto inv_square(const T& x) {
   return inv(square(x));
+}
+
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto inv_square(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    return match_wrapper<decltype(v)>(v.derived().array().square().inverse()).eval();
+  });
 }
 
 }  // namespace math

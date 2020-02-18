@@ -4,6 +4,7 @@
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/fun/square.hpp>
+#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {
@@ -45,7 +46,9 @@ struct square_fun {
  * @param x container
  * @return Each value in x squared.
  */
-template <typename T>
+template <typename T, typename = require_not_container_st<is_container,
+                              std::is_arithmetic,
+                              T>>
 inline auto square(const T& x) {
   return apply_scalar_unary<square_fun, T>::apply(x);
 }
@@ -57,10 +60,11 @@ inline auto square(const T& x) {
  * @param x Matrix or matrix expression
  * @return Each value in x squared.
  */
-template <typename Derived,
-          typename = require_eigen_vt<std::is_arithmetic, Derived>>
-inline auto square(const Eigen::MatrixBase<Derived>& x) {
-  return x.derived().array().square().matrix();
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto square(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    return match_wrapper<decltype(v)>(v.derived().array().square()).eval();
+  });
 }
 
 }  // namespace math

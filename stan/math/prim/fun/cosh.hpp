@@ -3,6 +3,7 @@
 
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
+#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {
@@ -30,8 +31,10 @@ struct cosh_fun {
  * @param x angles in radians
  * @return Hyberbolic cosine of x.
  */
-template <typename T, typename = require_not_eigen_vt<std::is_arithmetic, T>>
-inline typename apply_scalar_unary<cosh_fun, T>::return_t cosh(const T& x) {
+template <typename T, typename = require_not_container_st<is_container,
+                              std::is_arithmetic,
+                              T>>
+inline auto cosh(const T& x) {
   return apply_scalar_unary<cosh_fun, T>::apply(x);
 }
 
@@ -42,12 +45,12 @@ inline typename apply_scalar_unary<cosh_fun, T>::return_t cosh(const T& x) {
  * @param x Matrix or matrix expression
  * @return Hyberbolic cosine of x.
  */
-template <typename Derived,
-          typename = require_eigen_vt<std::is_arithmetic, Derived>>
-inline auto cosh(const Eigen::MatrixBase<Derived>& x) {
-  return x.derived().array().cosh().matrix().eval();
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto cosh(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    return match_wrapper<decltype(v)>(v.derived().array().cosh()).eval();
+  });
 }
-
 }  // namespace math
 }  // namespace stan
 

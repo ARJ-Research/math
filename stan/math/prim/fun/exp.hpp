@@ -40,8 +40,8 @@ struct exp_fun {
  * @return Elementwise application of exponentiation to the argument.
  */
 template <typename T, typename = require_not_container_st<is_container,
-														  std::is_arithmetic,
-														  T>>
+                              std::is_arithmetic,
+                              T>>
 inline auto exp(const T& x) {
   return apply_scalar_unary<exp_fun, T>::apply(x);
 }

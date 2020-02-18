@@ -3,6 +3,7 @@
 
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
+#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {
@@ -30,7 +31,9 @@ struct sinh_fun {
  * @param x container
  * @return Hyperbolic sine of each variable in x.
  */
-template <typename T, typename = require_not_eigen_vt<std::is_arithmetic, T>>
+template <typename T, typename = require_not_container_st<is_container,
+                              std::is_arithmetic,
+                              T>>
 inline auto sinh(const T& x) {
   return apply_scalar_unary<sinh_fun, T>::apply(x);
 }
@@ -42,23 +45,11 @@ inline auto sinh(const T& x) {
  * @param x Matrix or matrix expression
  * @return Hyperbolic sine of each variable in x.
  */
-template <typename Derived,
-          typename = require_eigen_vt<std::is_arithmetic, Derived>>
-inline auto sinh(const Eigen::MatrixBase<Derived>& x) {
-  return x.derived().array().sinh().matrix().eval();
-}
-
-/**
- * Version of sinh() that accepts Eigen Array or array expressions.
- *
- * @tparam Derived derived type of x
- * @param x Matrix or matrix expression
- * @return Hyperbolic sine of each variable in x.
- */
-template <typename Derived,
-          typename = require_eigen_vt<std::is_arithmetic, Derived>>
-inline auto sinh(const Eigen::ArrayBase<Derived>& x) {
-  return x.derived().sinh().eval();
+template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
+inline auto sinh(const T& x) {
+  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
+    return match_wrapper<decltype(v)>(v.derived().array().sinh()).eval();
+  });
 }
 
 }  // namespace math
