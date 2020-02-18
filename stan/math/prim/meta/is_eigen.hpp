@@ -59,6 +59,12 @@ template <typename T>
 struct is_eigen_array_impl : std::false_type {};
 template <typename T, int R, int C>
 struct is_eigen_array_impl<Eigen::Array<T, R, C>> : std::true_type {};
+template <typename T>
+struct is_eigen_array_impl<Eigen::ArrayBase<T>> : std::true_type {};
+template <typename T>
+struct is_eigen_array_impl<Eigen::ArrayWrapper<T>> : std::true_type {};
+template <typename Op, typename T, int R, int C>
+struct is_eigen_array_impl<Eigen::CwiseUnaryOp<Op, const Eigen::Array<T, R, C>>> : std::true_type {};
 }  // namespace internal
 
 template <typename T>

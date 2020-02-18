@@ -3,18 +3,12 @@
 
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/Eigen.hpp>
+#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {
 namespace math {
 
-/**
- * Return the natural exponential of the specified argument.  This
- * version is required to disambiguate <code>exp(int)</code>.
- *
- * @param[in] x Argument.
- * @return Natural exponential of argument.
- */
 inline double exp(int x) { return std::exp(x); }
 
 /**
@@ -61,7 +55,7 @@ inline auto exp(const T& x) {
 template <typename T, require_container_st<is_container, std::is_arithmetic, T>* = nullptr>
 inline auto exp(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    return v.derived().array().exp().matrix().eval();
+    return match_wrapper<decltype(v)>(v.derived().array().exp()).eval();
   });
 }
 
