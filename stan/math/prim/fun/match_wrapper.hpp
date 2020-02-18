@@ -1,7 +1,7 @@
 #ifndef STAN_MATH_PRIM_FUN_MATCH_WRAPPER_HPP
 #define STAN_MATH_PRIM_FUN_MATCH_WRAPPER_HPP
 
-#include <stan/math/prim/meta.hpp>
+#include <stan/math/prim/meta/require_generics.hpp>
 #include <stan/math/prim/meta/plain_type.hpp>
 #include <cmath>
 
