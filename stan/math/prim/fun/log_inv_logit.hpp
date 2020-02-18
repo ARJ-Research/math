@@ -88,7 +88,7 @@ template <typename T,
 inline auto log_inv_logit(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
     const auto& v_array = v.derived().array();
-    return  (v_array < 0.0).select(v_array + v_array.exp().log1p(),
+    return  (v_array < 0.0).select(v_array - v_array.exp().log1p(),
                                    -(-v_array).exp().log1p());
   });
 }
