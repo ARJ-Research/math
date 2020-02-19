@@ -5,6 +5,7 @@
 #include <stan/math/prim/meta/as_column_vector_or_scalar.hpp>
 #include <stan/math/prim/meta/require_generics.hpp>
 #include <stan/math/prim/meta/plain_type.hpp>
+#include <stan/math/prim/meta/promote_scalar_type.hpp>
 #include <vector>
 
 namespace stan {
@@ -124,6 +125,8 @@ template <typename T>
 struct apply_vector_unary<T, require_std_vector_vt<is_container, T>> {
   using T_vt = value_type_t<T>;
   using T_st = value_type_t<T_vt>;
+  using T_return = promote_scalar_t<return_type_t<T>, T>;
+
 
   /**
    * Member function for applying a functor to each container in an std::vector
@@ -137,13 +140,14 @@ struct apply_vector_unary<T, require_std_vector_vt<is_container, T>> {
    *         input.
    */
   template <typename F>
-  static inline std::vector<T_vt> apply(const T& x, const F& f) {
+  static inline T_return apply(const T& x, const F& f) {
     size_t x_size = x.size();
-    std::vector<T_vt> result(x_size);
+    T_return result(x_size);
     for (size_t i = 0; i < x_size; ++i)
       result[i] = apply_vector_unary<T_vt>::apply(x[i], f);
     return result;
   }
+
 
   /**
    * Member function for applying a functor to each container in an
