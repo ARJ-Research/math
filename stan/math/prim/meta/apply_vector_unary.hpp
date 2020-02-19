@@ -4,7 +4,6 @@
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/meta/as_column_vector_or_scalar.hpp>
 #include <stan/math/prim/meta/require_generics.hpp>
-#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <vector>
 
 namespace stan {
@@ -40,9 +39,16 @@ struct apply_vector_unary<T, require_eigen_t<T>> {
    * @return Eigen expression template with result of applying functor
    *         to input
    */
-  template <typename F>
+  template <typename F, typename T2 = T,
+            require_t<is_eigen_matrix<plain_type_t<T2>>>...>
   static inline auto apply(const T& x, const F& f) {
-    return match_wrapper<T>(f(x)).eval();
+    return f(x).matrix().eval();
+  }
+
+  template <typename F, typename T2 = T,
+            require_t<is_eigen_array<plain_type_t<T2>>>...>
+  static inline auto apply(const T& x, const F& f) {
+    return f(x).array().eval();
   }
 
   /**
@@ -86,7 +92,7 @@ struct apply_vector_unary<T, require_std_vector_vt<is_stan_scalar, T>> {
   static inline std::vector<T_vt> apply(const T& x, const F& f) {
     std::vector<T_vt> result(x.size());
     Eigen::Map<Eigen::Matrix<T_vt, -1, 1>>(result.data(), result.size())
-        = match_wrapper<T_map>(f(as_column_vector_or_scalar(x)));
+        = f(as_column_vector_or_scalar(x)).matrix();
     return result;
   }
 
