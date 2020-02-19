@@ -78,7 +78,7 @@ inline auto log1p_exp(const T& x) {
 }
 
 template <typename T,
-          require_container_st<is_container, std::is_integral, T>...>
+          require_container_st<is_container, std::is_arithmetic, T>...>
 inline auto log1p_exp(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
     const auto& v_array = v.derived().template cast<double>().array().eval();
@@ -87,15 +87,6 @@ inline auto log1p_exp(const T& x) {
   });
 }
 
-template <typename T,
-          require_container_st<is_container, std::is_floating_point, T>...>
-inline auto log1p_exp(const T& x) {
-  return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    const auto& v_array = v.derived().array();
-    return (v_array > 0.0).select(v_array + (-v_array).exp().log1p(),
-                                  v_array.exp().log1p());
-  });
-}
 }  // namespace math
 }  // namespace stan
 
