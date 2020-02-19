@@ -4,10 +4,15 @@
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/meta/as_column_vector_or_scalar.hpp>
 #include <stan/math/prim/meta/require_generics.hpp>
+#include <stan/math/prim/meta/plain_type.hpp>
 #include <vector>
 
 namespace stan {
 namespace math {
+
+template <typename T1, typename T2>
+const auto match_wrapper(const T2& x) { return x.matrix(); }
+
 
 // Forward declaration to allow specialisations
 template <typename T, typename Enable = void>
@@ -39,9 +44,17 @@ struct apply_vector_unary<T, require_eigen_t<T>> {
    * @return Eigen expression template with result of applying functor
    *         to input
    */
+
+  //segfaults
+  //template <typename F>
+  //static inline auto apply(const T& x, const F& f) {
+  //  return match_wrapper<T>(f(x)).eval();
+  //}
+
+  //Doesn't segfault
   template <typename F>
   static inline auto apply(const T& x, const F& f) {
-    return f(x);
+    return f(x).matrix().eval();
   }
 
   /**
