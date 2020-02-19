@@ -5,7 +5,6 @@
 #include <stan/math/prim/fun/inv.hpp>
 #include <stan/math/prim/fun/square.hpp>
 #include <stan/math/prim/fun/inv_square.hpp>
-#include <stan/math/prim/fun/match_wrapper.hpp>
 
 namespace stan {
 namespace math {

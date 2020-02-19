@@ -5,7 +5,6 @@
 #include <stan/math/prim/fun/Eigen.hpp>
 #include <stan/math/prim/fun/inv.hpp>
 #include <stan/math/prim/fun/sqrt.hpp>
-#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {

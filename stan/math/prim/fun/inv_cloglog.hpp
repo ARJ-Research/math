@@ -3,7 +3,6 @@
 
 #include <stan/math/prim/meta.hpp>
 #include <stan/math/prim/fun/exp.hpp>
-#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <cmath>
 
 namespace stan {

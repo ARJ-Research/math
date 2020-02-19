@@ -179,7 +179,6 @@
 #include <stan/math/prim/fun/lub_constrain.hpp>
 #include <stan/math/prim/fun/lub_free.hpp>
 #include <stan/math/prim/fun/make_nu.hpp>
-#include <stan/math/prim/fun/match_wrapper.hpp>
 #include <stan/math/prim/fun/matrix_exp.hpp>
 #include <stan/math/prim/fun/matrix_exp_multiply.hpp>
 #include <stan/math/prim/fun/matrix_power.hpp>
