@@ -78,7 +78,6 @@ struct apply_vector_unary<T, require_eigen_t<T>> {
 template <typename T>
 struct apply_vector_unary<T, require_std_vector_vt<is_stan_scalar, T>> {
   using T_vt = value_type_t<T>;
-  using T_return = return_type_t<T_vt>;
   using T_map = typename Eigen::Map<const Eigen::Matrix<T_vt, -1, 1>>;
 
   /**
@@ -92,10 +91,12 @@ struct apply_vector_unary<T, require_std_vector_vt<is_stan_scalar, T>> {
    * @return std::vector with result of applying functor to input.
    */
   template <typename F>
-  static inline std::vector<T_return> apply(const T& x, const F& f) {
+  static inline auto apply(const T& x, const F& f) {
+    const auto& rtn = f(as_column_vector_or_scalar(x));
+    using T_return = return_type_t<plain_type_t<decltype(rtn)>>;
     std::vector<T_return> result(x.size());
     Eigen::Map<Eigen::Matrix<T_return, -1, 1>>(result.data(), result.size())
-        = f(as_column_vector_or_scalar(x)).matrix();
+        = rtn.matrix();
     return result;
   }
 
@@ -125,7 +126,6 @@ template <typename T>
 struct apply_vector_unary<T, require_std_vector_vt<is_container, T>> {
   using T_vt = value_type_t<T>;
   using T_st = value_type_t<T_vt>;
-  using T_return = promote_scalar_t<return_type_t<T>, T>;
 
 
   /**
@@ -140,10 +140,13 @@ struct apply_vector_unary<T, require_std_vector_vt<is_container, T>> {
    *         input.
    */
   template <typename F>
-  static inline T_return apply(const T& x, const F& f) {
+  static inline auto apply(const T& x, const F& f) {
     size_t x_size = x.size();
-    T_return result(x_size);
-    for (size_t i = 0; i < x_size; ++i)
+    const auto& rtn = apply_vector_unary<T_vt>::apply(x[0], f);
+    using T_return = plain_type_t<decltype(rtn)>;
+    std::vector<T_return> result(x_size);
+    result[0] = rtn;
+    for (size_t i = 1; i < x_size; ++i)
       result[i] = apply_vector_unary<T_vt>::apply(x[i], f);
     return result;
   }
