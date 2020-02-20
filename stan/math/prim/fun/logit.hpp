@@ -90,8 +90,7 @@ template <typename T,
           require_container_st<is_container, std::is_arithmetic, T>...>
 inline auto logit(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& v) {
-    const auto& v_array = v.derived().array();
-    return (v_array / (1 - v_array)).log();
+    return (v.derived().array() / (1 - v.derived().array())).log();
   });
 }
 

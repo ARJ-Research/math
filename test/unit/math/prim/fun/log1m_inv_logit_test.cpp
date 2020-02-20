@@ -11,6 +11,13 @@ TEST(MathFunctions, log1m_inv_logit) {
   EXPECT_FLOAT_EQ(log(1 - inv_logit(-7.2)), log1m_inv_logit(-7.2));
   EXPECT_FLOAT_EQ(log(1 - inv_logit(0.0)), log1m_inv_logit(0.0));
   EXPECT_FLOAT_EQ(log(1 - inv_logit(1.9)), log1m_inv_logit(1.9));
+
+  Eigen::VectorXi intv(0);
+  std::vector<std::vector<int>> intd(0);
+  //intv << 1, 2, 3;
+
+  Eigen::VectorXd outv = log1m_inv_logit(intv);
+  std::vector<std::vector<double>> out = log1m_inv_logit(intd);
 }
 
 TEST(MathFunctions, log1m_inv_logit_nan) {
