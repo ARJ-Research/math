@@ -140,11 +140,10 @@ struct apply_vector_unary<T, require_std_vector_vt<is_container, T>> {
   template <typename F>
   static inline auto apply(const T& x, const F& f) {
     size_t x_size = x.size();
-    auto out = apply_vector_unary<T_vt>::apply(x[0], f);
-    using T_return = decltype(out);
+    //auto out = apply_vector_unary<T_vt>::apply(x[0], f);
+    using T_return = decltype(apply_vector_unary<T_vt>::apply(x[0], f));
     std::vector<T_return> result(x_size);
-    result[0] = out;
-    for (size_t i = 1; i < x_size; ++i)
+    for (size_t i = 0; i < x_size; ++i)
       result[i] = apply_vector_unary<T_vt>::apply(x[i], f);
     return result;
   }
