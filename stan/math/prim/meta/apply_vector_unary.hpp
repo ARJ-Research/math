@@ -76,6 +76,7 @@ struct apply_vector_unary<T, require_eigen_t<T>> {
  */
 template <typename T>
 struct apply_vector_unary<T, require_std_vector_vt<is_stan_scalar, T>> {
+  using T_vt = value_type_t<T>;
   using T_map = typename Eigen::Map<const Eigen::Matrix<T_vt, -1, 1>>;
 
   /**
