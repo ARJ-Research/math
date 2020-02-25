@@ -198,6 +198,21 @@ inline CwiseUnaryView<vi_Op, Derived>
 vi() { return CwiseUnaryView<vi_Op, Derived>(derived());
 }
 
+struct make_fvar_Op {
+  EIGEN_EMPTY_STRUCT_CTOR(make_fvar_Op);
+  stan::math::fvar<Scalar> operator()(const Scalar& a, const Scalar& b) const {
+    return stan::math::fvar<Scalar>(a,b);
+  }
+};
+
+template <typename OtherDerived>
+inline CwiseBinaryOp<make_fvar_Op, const Derived, const OtherDerived>
+make_fvar(const OtherDerived& other) {
+  return CwiseBinaryOp<make_fvar_Op,
+                       const Derived,
+                       const OtherDerived>(derived(),other.derived());
+}
+
 #define EIGEN_STAN_MATRIXBASE_PLUGIN
 
 #endif

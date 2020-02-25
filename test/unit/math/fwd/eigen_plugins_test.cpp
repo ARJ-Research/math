@@ -10,6 +10,9 @@ TEST(AgradFwdMatrixAddons, fvar_double_matrix) {
   MatrixXd derivs = MatrixXd::Random(100, 100);
 
   matrix_fd mat_in(100, 100);
+  matrix_fd mat2 = vals.make_fvar(derivs);
+  expect_matrix_eq(mat2.val(), vals);
+  expect_matrix_eq(mat2.d(), derivs);
 
   for (int i = 0; i < 100; i++) {
     for (int j = 0; j < 100; j++) {
