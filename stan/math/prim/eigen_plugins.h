@@ -36,6 +36,9 @@ using forward_return_t = std::conditional_t<std::is_const<std::remove_reference_
                                          const decltype(T::val_)&,
                                          decltype(T::val_)&>;
 
+template <typename T>
+using require_const_t = std::enable_if_t<std::is_const<std::decay_t<T>>::value>;
+
 /**
  * Structure to return a view to the values in a var, vari*, and fvar<T>.
  * To identify the correct member to call for a given input, templates
@@ -200,8 +203,9 @@ vi() { return CwiseUnaryView<vi_Op, Derived>(derived());
 
 struct make_fvar_Op {
   EIGEN_EMPTY_STRUCT_CTOR(make_fvar_Op);
-  stan::math::fvar<Scalar> operator()(const Scalar& a, const Scalar& b) const {
-    return stan::math::fvar<Scalar>(a,b);
+  template <typename T = Scalar>
+  const stan::math::fvar<T> operator()(const T& a, const T& b) const {
+    return stan::math::fvar<T>(a,b);
   }
 };
 
@@ -211,6 +215,14 @@ make_fvar(const OtherDerived& other) {
   return CwiseBinaryOp<make_fvar_Op,
                        const Derived,
                        const OtherDerived>(derived(),other.derived());
+}
+
+template<typename OtherDerived>
+void read_fvar(OtherDerived& other1, OtherDerived& other2) {
+  for(size_t i = 0; i < derived().size(); ++i) {
+    other1.derived().coeffRef(i) = derived().coeff(i).val_;
+    other2.derived().coeffRef(i) = derived().coeff(i).d_;
+  }
 }
 
 #define EIGEN_STAN_MATRIXBASE_PLUGIN

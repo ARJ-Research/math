@@ -11,6 +11,7 @@ TEST(AgradFwdMatrixAddons, fvar_double_matrix) {
 
   matrix_fd mat_in(100, 100);
   matrix_fd mat2 = vals.make_fvar(derivs);
+  mat2.read_fvar(vals, derivs);
   expect_matrix_eq(mat2.val(), vals);
   expect_matrix_eq(mat2.d(), derivs);
 
