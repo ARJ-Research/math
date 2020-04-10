@@ -41,26 +41,11 @@ inline double value_of(const T x) {
  * @param x value
  * @return input value
  */
-template <typename T, require_double_or_int_t<T>...>
+template <typename T, require_double_or_int_t<scalar_type_t<T>>...>
 inline auto value_of(T&& x) {
   return std::forward<T>(x);
 }
 
-/**
- * Return the specified argument.
- *
- * <p>See <code>value_of(T)</code> for a polymorphic
- * implementation using static casts.
- *
- * <p>This inline pass-through no-op should be compiled away.
- *
- * @param x Specified std::vector.
- * @return Specified std::vector.
- */
-template <typename T, require_container_vt<std::is_arithmetic, T>...>
-inline decltype(auto) value_of(T&& x) {
-  return std::forward<T>(x);
-}
 /**
  * Convert a matrix of type T to a matrix of doubles.
  *
