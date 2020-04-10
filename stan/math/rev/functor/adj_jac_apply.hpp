@@ -22,9 +22,9 @@ namespace internal {
  * @param[in] M shape of y_adj
  * @param[out] y_adj reference to variable where adjoint is to be stored
  */
-template <size_t size>
+template <typename T, size_t size, require_arithmetic_t<T>...>
 inline void build_y_adj(vari** y_vi, const std::array<int, size>& M,
-                        double& y_adj) {
+                        T&& y_adj) {
   y_adj = y_vi[0]->adj_;
 }
 
@@ -36,9 +36,10 @@ inline void build_y_adj(vari** y_vi, const std::array<int, size>& M,
  * @param[in] M shape of y_adj
  * @param[out] y_adj reference to std::vector where adjoints are to be stored
  */
-template <size_t size>
+template <typename T, size_t size,
+          require_std_vector_vt<std::is_arithmetic, T>...>
 inline void build_y_adj(vari** y_vi, const std::array<int, size>& M,
-                        std::vector<double>& y_adj) {
+                        T&& y_adj) {
   y_adj.resize(M[0]);
   for (size_t m = 0; m < y_adj.size(); ++m) {
     y_adj[m] = y_vi[m]->adj_;
@@ -56,12 +57,12 @@ inline void build_y_adj(vari** y_vi, const std::array<int, size>& M,
  * @param[in] M shape of y_adj
  * @param[out] y_adj reference to Eigen::Matrix where adjoints are to be stored
  */
-template <typename EigT, size_t size, require_eigen_st<std::is_arithmetic, EigT>...>
+template <typename T, size_t size,
+          require_eigen_vt<std::is_arithmetic, T>...>
 inline void build_y_adj(vari** y_vi, const std::array<int, size>& M,
-                        EigT& y_adj) {
+                        T&& y_adj) {
   y_adj = Eigen::Map<matrix_vi>(y_vi, M[0], M[1]).adj();
 }
-
 /**
  * Compute the dimensionality of the given template argument. The
  * definition of dimensionality is deferred to specializations. By
@@ -183,7 +184,7 @@ struct adj_jac_vari : public vari {
   inline void prepare_x_vis(T&& x, Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
     Eigen::Map<matrix_vi>(&x_vis_[offsets_[t]], x.rows(), x.cols())
-      = std::move(x.matrix().vi());
+      = x.matrix().vi();
     prepare_x_vis(std::forward<Pargs>(args)...);
   }
 
@@ -192,14 +193,14 @@ struct adj_jac_vari : public vari {
   inline void prepare_x_vis(T&& x, Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
     Eigen::Map<vector_vi>(&x_vis_[offsets_[t]], x.size())
-      = std::move(as_column_vector_or_scalar(x).vi());
+      = as_column_vector_or_scalar(x).vi();
     prepare_x_vis(std::forward<Pargs>(args)...);
   }
 
   template <typename T, typename... Pargs, require_var_t<T>...>
   inline void prepare_x_vis(T&& x, Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
-    x_vis_[offsets_[t]] = std::move(x.vi_);
+    x_vis_[offsets_[t]] = x.vi_;
     prepare_x_vis(std::forward<Pargs>(args)...);
   }
 
