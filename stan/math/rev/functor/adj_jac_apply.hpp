@@ -326,14 +326,14 @@ struct adj_jac_vari : public vari {
    */
   template <typename T, typename... Pargs,
             require_eigen_st<std::is_arithmetic, T>...>
-  inline void accumulate_adjoints(const T& y_adj_jac,
-                                  const Pargs&... args) {
+  inline void accumulate_adjoints(T&& y_adj_jac,
+                                  Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
     if (is_var_[t]) {
       Eigen::Map<matrix_vi>(&x_vis_[offsets_[t]], y_adj_jac.rows(),
-                            y_adj_jac.cols()).adj() += y_adj_jac;
+                            y_adj_jac.cols()).adj() += std::move(y_adj_jac);
     }
-    accumulate_adjoints(args...);
+    accumulate_adjoints(std::forward<Pargs>(args)...);
   }
 
   /**
@@ -347,17 +347,19 @@ struct adj_jac_vari : public vari {
    * @param args the rest of the arguments (that will be iterated through
    * recursively)
    */
-  template <typename... Pargs>
-  inline void accumulate_adjoints(const std::vector<double>& y_adj_jac,
-                                  const Pargs&... args) {
+  template <typename T, typename... Pargs,
+            require_std_vector_vt<std::is_arithmetic, T>...,
+            require_not_integral_t<scalar_type_t<T>>...>
+  inline void accumulate_adjoints(T&& y_adj_jac,
+                                  Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
     if (is_var_[t]) {
       for (int n = 0; n < y_adj_jac.size(); ++n) {
-        x_vis_[offsets_[t] + n]->adj_ += y_adj_jac[n];
+        x_vis_[offsets_[t] + n]->adj_ += std::move(y_adj_jac[n]);
       }
     }
 
-    accumulate_adjoints(args...);
+    accumulate_adjoints(std::forward<Pargs>(args)...);
   }
 
   /**
@@ -369,10 +371,11 @@ struct adj_jac_vari : public vari {
    * @param args the rest of the arguments (that will be iterated through
    * recursively)
    */
-  template <typename T, typename... Pargs, require_integral_t<scalar_type_t<T>>...>
-  inline void accumulate_adjoints(const T& y_adj_jac,
-                                  const Pargs&... args) {
-    accumulate_adjoints(args...);
+  template <typename T, typename... Pargs,
+            require_integral_t<scalar_type_t<T>>...>
+  inline void accumulate_adjoints(T&& y_adj_jac,
+                                  Pargs&&... args) {
+    accumulate_adjoints(std::forward<Pargs>(args)...);
   }
 
   /**
@@ -386,14 +389,16 @@ struct adj_jac_vari : public vari {
    * @param args the rest of the arguments (that will be iterated through
    * recursively)
    */
-  template <typename... Pargs>
-  inline void accumulate_adjoints(const double& y_adj_jac,
-                                  const Pargs&... args) {
+  template <typename T, typename... Pargs,
+            require_arithmetic_t<T>...,
+            require_not_integral_t<T>...>
+  inline void accumulate_adjoints(T&& y_adj_jac,
+                                  Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
     if (is_var_[t]) {
-      x_vis_[offsets_[t]]->adj_ += y_adj_jac;
+      x_vis_[offsets_[t]]->adj_ += std::move(y_adj_jac);
     }
-    accumulate_adjoints(args...);
+    accumulate_adjoints(std::forward<Pargs>(args)...);
   }
 
   inline void accumulate_adjoints() {}
@@ -415,8 +420,8 @@ struct adj_jac_vari : public vari {
     internal::build_y_adj(y_vi_, M_, y_adj);
     auto y_adj_jacs = f_.multiply_adjoint_jacobian(is_var_, y_adj);
 
-    apply([this](auto&&... args) { this->accumulate_adjoints(args...); },
-          y_adj_jacs);
+    apply([this](auto&&... args) { this->accumulate_adjoints(std::forward<decltype(args)>(args)...); },
+          std::move(y_adj_jacs));
   }
 };
 
