@@ -188,8 +188,8 @@ struct adj_jac_vari : public vari {
   template <typename EigT, typename... Pargs, require_eigen_vt<is_var, EigT>* = nullptr>
   inline void prepare_x_vis(EigT&& x, Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
-    for (size_t m = 0; m < x.size(); ++m) {
-      x_vis_[offsets_[t] + m] = x(m).vi_;
+    for (size_t i = 0; i < x.size(); ++i) {
+      x_vis_[offsets_[t] + i] = x(i).vi_;
     }
     prepare_x_vis(std::forward<Pargs>(args)...);
   }
@@ -198,8 +198,8 @@ struct adj_jac_vari : public vari {
             require_std_vector_vt<is_var, StdVecT>* = nullptr>
   inline void prepare_x_vis(StdVecT&& x, Pargs&&... args) {
     static constexpr int t = sizeof...(Targs) - sizeof...(Pargs) - 1;
-    for (size_t m = 0; m < x.size(); ++m) {
-      x_vis_[offsets_[t] + m] = x[m].vi_;
+    for (size_t i = 0; i < x.size(); ++i) {
+      x_vis_[offsets_[t] + i] = x[i].vi_;
     }
     prepare_x_vis(std::forward<Pargs>(args)...);
   }
@@ -284,9 +284,9 @@ struct adj_jac_vari : public vari {
 
     y_vi_
         = ChainableStack::instance_->memalloc_.alloc_array<vari*>(var_y.size());
-    for (size_t m = 0; m < var_y.size(); ++m) {
-      y_vi_[m] = new vari(val_y(m), false);
-      var_y(m) = y_vi_[m];
+    for (size_t i = 0; i < var_y.size(); ++i) {
+      y_vi_[i] = new vari(val_y(i), false);
+      var_y(i) = y_vi_[i];
     }
 
     return var_y;
