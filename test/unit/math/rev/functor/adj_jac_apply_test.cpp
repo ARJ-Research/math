@@ -454,10 +454,10 @@ struct WeirdArgumentListFunctor1 {
 };
 
 template <typename F, typename... Targs>
-auto make_vari_for_test(const Targs&... args) {
+auto make_vari_for_test(Targs&&... args) {
   auto vi = new stan::math::adj_jac_vari<F, Targs...>();
 
-  (*vi)(args...);
+  (*vi)(std::forward<Targs>(args)...);
 
   return vi;
 }

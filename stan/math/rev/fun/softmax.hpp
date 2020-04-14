@@ -26,16 +26,16 @@ class softmax_op {
    * @param alpha Unconstrained input vector.
    * @return Softmax of the input.
    */
-  template <std::size_t size>
+  template <typename EigVecT, std::size_t size,
+            require_eigen_col_vector_t<EigVecT>* = nullptr>
   Eigen::VectorXd operator()(const std::array<bool, size>& /* needs_adj */,
-                             const Eigen::VectorXd& alpha) {
+                             EigVecT&& alpha) {
     N_ = alpha.size();
     y_ = ChainableStack::instance_->memalloc_.alloc_array<double>(N_);
 
-    auto y = softmax(alpha);
-    for (int n = 0; n < N_; ++n) {
-      y_[n] = y(n);
-    }
+    Eigen::Map<vector_d> y(y_, N_);
+    y = softmax(alpha);
+
     return y;
   }
 
@@ -48,10 +48,11 @@ class softmax_op {
    * @param adj Eigen::VectorXd of adjoints at the output of the softmax
    * @return Eigen::VectorXd of adjoints propagated through softmax operation
    */
-  template <std::size_t size>
+  template <typename EigVecT, std::size_t size,
+            require_eigen_col_vector_t<EigVecT>* = nullptr>
   std::tuple<Eigen::VectorXd> multiply_adjoint_jacobian(
       const std::array<bool, size>& /* needs_adj */,
-      const Eigen::VectorXd& adj) const {
+      EigVecT&& adj) const {
     vector_d adj_times_jac(N_);
     Eigen::Map<vector_d> y(y_, N_);
 
@@ -63,18 +64,19 @@ class softmax_op {
 }  // namespace internal
 
 /**
- * Return the softmax of the specified Eigen vector.  Softmax is
+ * Return the softmax of the specified Eigen vector. Softmax is
  * guaranteed to return a simplex.
  *
  * @param alpha Unconstrained input vector.
  * @return Softmax of the input.
  * @throw std::domain_error If the input vector is size 0.
  */
-inline Eigen::Matrix<var, Eigen::Dynamic, 1> softmax(
-    const Eigen::Matrix<var, Eigen::Dynamic, 1>& alpha) {
+template <typename EigVecT, std::size_t size,
+          require_eigen_col_vector_vt<is_var, EigVecT>* = nullptr>
+inline Eigen::Matrix<var, Eigen::Dynamic, 1> softmax(EigVecT&& alpha) {
   check_nonzero_size("softmax", "alpha", alpha);
 
-  return adj_jac_apply<internal::softmax_op>(alpha);
+  return adj_jac_apply<internal::softmax_op>(std::forward<EigVecT>(alpha));
 }
 
 }  // namespace math

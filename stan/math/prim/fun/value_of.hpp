@@ -24,7 +24,8 @@ namespace math {
  * @param x scalar to convert to double
  * @return value of scalar cast to double
  */
-template <typename T>
+template <typename T, require_not_container_t<T>* = nullptr,
+          require_not_double_or_int_t<T>* = nullptr>
 inline double value_of(const T x) {
   return static_cast<double>(x);
 }
@@ -40,70 +41,10 @@ inline double value_of(const T x) {
  * @param x value
  * @return input value
  */
-template <>
-inline double value_of<double>(double x) {
-  return x;
+template <typename T, require_double_or_int_t<scalar_type_t<T>>* = nullptr>
+inline decltype(auto) value_of(T&& x) {
+  return std::forward<T>(x);
 }
-
-/**
- * Return the specified argument.
- *
- * <p>See <code>value_of(T)</code> for a polymorphic
- * implementation using static casts.
- *
- * <p>This inline pass-through no-op should be compiled away.
- *
- * @param x value
- * @return input value
- */
-inline int value_of(int x) { return x; }
-
-/**
- * Convert a std::vector of type T to a std::vector of
- * child_type<T>::type.
- *
- * @tparam T Scalar type in std::vector
- * @param[in] x std::vector to be converted
- * @return std::vector of values
- **/
-template <typename T>
-inline std::vector<typename child_type<T>::type> value_of(
-    const std::vector<T>& x) {
-  size_t x_size = x.size();
-  std::vector<typename child_type<T>::type> result(x_size);
-  for (size_t i = 0; i < x_size; i++) {
-    result[i] = value_of(x[i]);
-  }
-  return result;
-}
-
-/**
- * Return the specified argument.
- *
- * <p>See <code>value_of(T)</code> for a polymorphic
- * implementation using static casts.
- *
- * <p>This inline pass-through no-op should be compiled away.
- *
- * @param x Specified std::vector.
- * @return Specified std::vector.
- */
-inline const std::vector<double>& value_of(const std::vector<double>& x) {
-  return x;
-}
-
-/**
- * Return the specified argument.
- *
- * <p>See <code>value_of(T)</code> for a polymorphic
- * implementation using static casts.
- *
- * <p>This inline pass-through no-op should be compiled away.
- *
- * @param x Specified std::vector.
- * @return Specified std::vector.
- */
-inline const std::vector<int>& value_of(const std::vector<int>& x) { return x; }
 
 /**
  * Convert a matrix of type T to a matrix of doubles.
@@ -118,56 +59,11 @@ inline const std::vector<int>& value_of(const std::vector<int>& x) { return x; }
  * @param[in] M Matrix to be converted
  * @return Matrix of values
  **/
-template <typename T, int R, int C>
-inline Eigen::Matrix<typename child_type<T>::type, R, C> value_of(
-    const Eigen::Matrix<T, R, C>& M) {
-  Eigen::Matrix<typename child_type<T>::type, R, C> Md(M.rows(), M.cols());
-  for (int j = 0; j < M.cols(); j++) {
-    for (int i = 0; i < M.rows(); i++) {
-      Md(i, j) = value_of(M(i, j));
-    }
-  }
-  return Md;
-}
-
-/**
- * Return the specified argument.
- *
- * <p>See <code>value_of(T)</code> for a polymorphic
- * implementation using static casts.
- *
- * <p>This inline pass-through no-op should be compiled away.
- *
- * @tparam R number of rows in the matrix, can be Eigen::Dynamic
- * @tparam C number of columns in the matrix, can be Eigen::Dynamic
- *
- * @param x Specified matrix.
- * @return Specified matrix.
- */
-template <int R, int C>
-inline const Eigen::Matrix<double, R, C>& value_of(
-    const Eigen::Matrix<double, R, C>& x) {
-  return x;
-}
-
-/**
- * Return the specified argument.
- *
- * <p>See <code>value_of(T)</code> for a polymorphic
- * implementation using static casts.
- *
- * <p>This inline pass-through no-op should be compiled away.
- *
- * @tparam R number of rows in the matrix, can be Eigen::Dynamic
- * @tparam C number of columns in the matrix, can be Eigen::Dynamic
- *
- * @param x Specified matrix.
- * @return Specified matrix.
- */
-template <int R, int C>
-inline const Eigen::Matrix<int, R, C>& value_of(
-    const Eigen::Matrix<int, R, C>& x) {
-  return x;
+template <typename T, require_container_st<is_autodiff, T>* = nullptr>
+inline auto value_of(const T& M) {
+  return apply_vector_unary<T>::apply(M, [&](const auto& v) {
+    return v.unaryExpr([](const auto& x){ return value_of(x); });
+  });
 }
 
 }  // namespace math
