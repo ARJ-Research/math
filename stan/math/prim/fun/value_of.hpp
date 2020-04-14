@@ -24,8 +24,8 @@ namespace math {
  * @param x scalar to convert to double
  * @return value of scalar cast to double
  */
-template <typename T, require_not_container_t<T>...,
-          require_not_double_or_int_t<T>...>
+template <typename T, require_not_container_t<T>* = nullptr,
+          require_not_double_or_int_t<T>* = nullptr>
 inline double value_of(const T x) {
   return static_cast<double>(x);
 }
@@ -41,8 +41,8 @@ inline double value_of(const T x) {
  * @param x value
  * @return input value
  */
-template <typename T, require_double_or_int_t<scalar_type_t<T>>...>
-inline auto value_of(T&& x) {
+template <typename T, require_double_or_int_t<scalar_type_t<T>>* = nullptr>
+inline decltype(auto) value_of(T&& x) {
   return std::forward<T>(x);
 }
 
@@ -59,8 +59,8 @@ inline auto value_of(T&& x) {
  * @param[in] M Matrix to be converted
  * @return Matrix of values
  **/
-template <typename T, require_container_st<is_autodiff, T>...>
-inline decltype(auto) value_of(const T& M) {
+template <typename T, require_container_st<is_autodiff, T>* = nullptr>
+inline auto value_of(const T& M) {
   return apply_vector_unary<T>::apply(M, [&](const auto& v) {
     return v.unaryExpr([](const auto& x){ return value_of(x); });
   });
