@@ -47,11 +47,11 @@ class mdivide_left_vv_vari : public vari {
     using Eigen::Map;
 
     Map<matrix_d> Ad(A_, M_, M_);
+    Map<matrix_vi> A_vi(variRefA_, M_, M_);
+    read_vi_val(A, A_vi, Ad);
     Map<matrix_d> Cd(C_, M_, N_);
-    Ad = A.val();
     Cd = Ad.colPivHouseholderQr().solve(B.val());
 
-    Map<matrix_vi>(variRefA_, M_, M_) = A.vi();
     Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
     Map<matrix_vi>(variRefC_, M_, N_)
         = Cd.unaryExpr([](double x) { return new vari(x, false); });

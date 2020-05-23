@@ -48,8 +48,8 @@ class mdivide_left_spd_vv_vari : public vari {
                                                        * B.cols()))),
         alloc_(new mdivide_left_spd_alloc<R1, C1, R2, C2>()) {
     Eigen::Map<matrix_vi>(variRefA_, M_, M_) = A.vi();
-    Eigen::Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
-    alloc_->C_ = B.val();
+    Eigen::Map<matrix_vi> B_vi(variRefB_, M_, N_);
+    read_vi_val(B, B_vi, alloc_->C_);
     alloc_->llt_ = A.val().llt();
     check_pos_definite("mdivide_left_spd", "A", alloc_->llt_);
     alloc_->llt_.solveInPlace(alloc_->C_);
@@ -88,8 +88,8 @@ class mdivide_left_spd_dv_vari : public vari {
             ChainableStack::instance_->memalloc_.alloc(sizeof(vari *) * B.rows()
                                                        * B.cols()))),
         alloc_(new mdivide_left_spd_alloc<R1, C1, R2, C2>()) {
-    alloc_->C_ = B.val();
-    Eigen::Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
+    Eigen::Map<matrix_vi> B_vi(variRefB_, M_, N_);
+    read_vi_val(B, B_vi, alloc_->C_);
     alloc_->llt_ = A.llt();
     check_pos_definite("mdivide_left_spd", "A", alloc_->llt_);
     alloc_->llt_.solveInPlace(alloc_->C_);

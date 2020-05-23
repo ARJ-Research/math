@@ -57,14 +57,14 @@ Eigen::Matrix<var, R, C> unit_vector_constrain(
     const Eigen::Matrix<var, R, C>& y) {
   check_vector("unit_vector", "y", y);
   check_nonzero_size("unit_vector", "y", y);
-  vector_d y_d = y.val();
 
   vari** y_vi_array = reinterpret_cast<vari**>(
       ChainableStack::instance_->memalloc_.alloc(sizeof(vari*) * y.size()));
   double* unit_vector_y_d_array = reinterpret_cast<double*>(
       ChainableStack::instance_->memalloc_.alloc(sizeof(double) * y_d.size()));
 
-  Eigen::Map<vector_vi>(y_vi_array, y.size()) = y.vi();
+  Eigen::Map<vector_vi> y_vi(y_vi_array, y.size());
+  read_vi_val(y, y_vi, y_d);
   const double norm = y_d.norm();
 
   check_positive_finite("unit_vector", "norm", norm);

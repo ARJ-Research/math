@@ -18,8 +18,9 @@ inline var calc_variance(size_t size, const var* dtrs) {
       = ChainableStack::instance_->memalloc_.alloc_array<double>(size);
 
   Eigen::Map<const vector_v> dtrs_map(dtrs, size);
-  Eigen::Map<vector_vi>(varis, size) = dtrs_map.vi();
-  vector_d dtrs_vals = dtrs_map.val();
+  Eigen::Map<vector_vi> dtrs_vi(varis, size);
+  vector_d dtrs_vals(size);
+  read_vi_val(dtrs_map, dtrs_vi, dtrs_vals);
 
   vector_d diff = dtrs_vals.array() - dtrs_vals.mean();
   double size_m1 = size - 1;

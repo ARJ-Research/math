@@ -68,8 +68,8 @@ class mdivide_left_ldlt_vv_vari : public vari {
                                                        * B.cols()))),
         alloc_(new mdivide_left_ldlt_alloc<R1, C1, R2, C2>()),
         alloc_ldlt_(A.alloc_) {
-    Eigen::Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
-    alloc_->C_ = B.val();
+    Eigen::Map<matrix_vi> B_vi(variRefB_, M_, N_);
+    read_vi_val(B, B_vi, alloc_->C_);
     alloc_ldlt_->ldlt_.solveInPlace(alloc_->C_);
     Eigen::Map<matrix_vi>(variRefC_, M_, N_)
         = alloc_->C_.unaryExpr([](double x) { return new vari(x, false); });
@@ -124,8 +124,8 @@ class mdivide_left_ldlt_dv_vari : public vari {
             ChainableStack::instance_->memalloc_.alloc(sizeof(vari *) * B.rows()
                                                        * B.cols()))),
         alloc_(new mdivide_left_ldlt_alloc<R1, C1, R2, C2>()) {
-    Eigen::Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
-    alloc_->C_ = B.val();
+    Eigen::Map<matrix_vi> B_vi(variRefB_, M_, N_);
+    read_vi_val(B, B_vi, alloc_->C_);
     alloc_->ldltP_ = A.ldltP_;
     alloc_->ldltP_->solveInPlace(alloc_->C_);
     Eigen::Map<matrix_vi>(variRefC_, M_, N_)

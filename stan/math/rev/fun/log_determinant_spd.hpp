@@ -26,7 +26,11 @@ inline var log_determinant_spd(const EigMat& m) {
     return 0;
   }
 
-  matrix_d m_d = m.val();
+  vari** operands
+      = ChainableStack::instance_->memalloc_.alloc_array<vari*>(m.size());
+  Eigen::Map<matrix_vi> m_vi(operands, m.rows(), m.cols());
+  matrix_d m_d;
+  read_vi_val(m, m_vi, m_d);
 
   Eigen::LDLT<matrix_d> ldlt(m_d);
   if (ldlt.info() != Eigen::Success) {
@@ -49,10 +53,6 @@ inline var log_determinant_spd(const EigMat& m) {
 
   check_finite("log_determinant_spd",
                "log determininant of the matrix argument", val);
-
-  vari** operands
-      = ChainableStack::instance_->memalloc_.alloc_array<vari*>(m.size());
-  Eigen::Map<matrix_vi>(operands, m.rows(), m.cols()) = m.vi();
 
   double* gradients
       = ChainableStack::instance_->memalloc_.alloc_array<double>(m.size());

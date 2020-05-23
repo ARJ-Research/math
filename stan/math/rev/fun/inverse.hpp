@@ -38,11 +38,11 @@ class inverse_vari : public vari {
     using Eigen::Map;
 
     Map<matrix_d> Ad(A_, M_, M_);
+    Map<matrix_vi> A_vi(vari_ref_A_, M_, M_);
+    read_vi_val(A, A_vi, Ad);
     Map<matrix_d> A_inv_d(A_inv_, M_, M_);
-    Ad = A.val();
     A_inv_d = Ad.inverse();
 
-    Map<matrix_vi>(vari_ref_A_, M_, M_) = A.vi();
     Map<matrix_vi>(vari_ref_A_inv_, M_, M_)
         = A_inv_d.unaryExpr([](double x) { return new vari(x, false); });
   }
@@ -61,7 +61,7 @@ class inverse_vari : public vari {
     matrix_d adj_A_inv = Map<matrix_vi>(vari_ref_A_inv_, M_, M_).adj();
     Map<matrix_d> A_inv_d(A_inv_, M_, M_);
 
-    matrix_d adjA = A_inv_d.transpose() * adj_A_inv * A_inv_d.transpose();
+    decltype(auto) adjA = A_inv_d.transpose() * adj_A_inv * A_inv_d.transpose();
     Map<matrix_vi>(vari_ref_A_, M_, M_).adj() -= adjA;
   }
 };

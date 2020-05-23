@@ -67,8 +67,8 @@ class mdivide_left_tri_vv_vari : public vari {
     Map<matrix_d> c_map(C_, M_, N_);
     Map<matrix_d> a_map(A_, M_, M_);
     a_map = A.val();
-    c_map = B.val();
-    Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
+    Eigen::Map<matrix_vi> B_vi(variRefB_, M_, N_);
+    read_vi_val(B, B_vi, c_map);
 #ifdef STAN_OPENCL
     if (A.rows()
         >= opencl_context.tuning_opts().tri_inverse_size_worth_transfer) {
@@ -159,9 +159,9 @@ class mdivide_left_tri_dv_vari : public vari {
     using Eigen::Map;
 
     Map<matrix_d>(A_, M_, M_) = A;
-    Map<matrix_vi>(variRefB_, M_, N_) = B.vi();
     Map<matrix_d> c_map(C_, M_, N_);
-    c_map = B.val();
+    Eigen::Map<matrix_vi> B_vi(variRefB_, M_, N_);
+    read_vi_val(B, B_vi, c_map);
 
 #ifdef STAN_OPENCL
     if (A.rows()

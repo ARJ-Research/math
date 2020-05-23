@@ -73,12 +73,12 @@ class multiply_mat_vari : public vari {
         variRefAB_(ChainableStack::instance_->memalloc_.alloc_array<vari*>(
             A_rows_ * B_cols_)) {
     using Eigen::Map;
-    Map<matrix_vi>(variRefA_, A_rows_, A_cols_) = A.vi();
-    Map<matrix_vi>(variRefB_, A_cols_, B_cols_) = B.vi();
+    Map<matrix_vi> A_vi(variRefA_, A_rows_, A_cols_);
+    Map<matrix_vi> B_vi(variRefB_, A_cols_, B_cols_);
     Map<matrix_d> Ad(Ad_, A_rows_, A_cols_);
     Map<matrix_d> Bd(Bd_, A_cols_, B_cols_);
-    Ad = A.val();
-    Bd = B.val();
+    read_vi_val(A, A_vi, Ad);
+    read_vi_val(B, B_vi, Bd);
 #ifdef STAN_OPENCL
     if (Ad.rows() * Ad.cols() * Bd.cols()
         > opencl_context.tuning_opts().multiply_dim_prod_worth_transfer) {
@@ -181,12 +181,12 @@ class multiply_mat_vari<Ta, 1, Ca, Tb, 1> : public vari {
         variRefB_(
             ChainableStack::instance_->memalloc_.alloc_array<vari*>(size_)) {
     using Eigen::Map;
-    Map<row_vector_vi>(variRefA_, size_) = A.vi();
-    Map<vector_vi>(variRefB_, size_) = B.vi();
+    Map<row_vector_vi> A_vi(variRefA_, size_);
+    Map<vector_vi> B_vi(variRefB_, size_);
     Map<row_vector_d> Ad(Ad_, size_);
     Map<vector_d> Bd(Bd_, size_);
-    Ad = A.val();
-    Bd = B.val();
+    read_vi_val(A, A_vi, Ad);
+    read_vi_val(B, B_vi, Bd);
 
     variRefAB_ = new vari(Ad * Bd, false);
   }
@@ -260,11 +260,11 @@ class multiply_mat_vari<double, Ra, Ca, Tb, Cb> : public vari {
         variRefAB_(ChainableStack::instance_->memalloc_.alloc_array<vari*>(
             A_rows_ * B_cols_)) {
     using Eigen::Map;
-    Map<matrix_vi>(variRefB_, A_cols_, B_cols_) = B.vi();
+    Map<matrix_vi> B_vi(variRefB_, A_cols_, B_cols_);
     Map<matrix_d> Ad(Ad_, A_rows_, A_cols_);
     Map<matrix_d> Bd(Bd_, A_cols_, B_cols_);
     Ad = A;
-    Bd = B.val();
+    read_vi_val(B, B_vi, Bd);
 #ifdef STAN_OPENCL
     if (Ad.rows() * Ad.cols() * Bd.cols()
         > opencl_context.tuning_opts().multiply_dim_prod_worth_transfer) {
@@ -357,9 +357,9 @@ class multiply_mat_vari<double, 1, Ca, Tb, 1> : public vari {
     using Eigen::Map;
     Map<row_vector_d> Ad(Ad_, size_);
     Map<vector_d> Bd(Bd_, size_);
-    Map<vector_vi>(variRefB_, size_) = B.vi();
+    Map<vector_vi> B_vi(variRefB_, size_);
     Ad = A;
-    Bd = B.val();
+    read_vi_val(B, B_vi, Bd);
     variRefAB_ = new vari(Ad * Bd, false);
   }
 
@@ -430,10 +430,10 @@ class multiply_mat_vari<Ta, Ra, Ca, double, Cb> : public vari {
         variRefAB_(ChainableStack::instance_->memalloc_.alloc_array<vari*>(
             A_rows_ * B_cols_)) {
     using Eigen::Map;
-    Map<matrix_vi>(variRefA_, A_rows_, A_cols_) = A.vi();
+    Map<matrix_vi> A_vi(variRefA_, A_rows_, A_cols_);
     Map<matrix_d> Ad(Ad_, A_rows_, A_cols_);
     Map<matrix_d> Bd(Bd_, A_cols_, B_cols_);
-    Ad = A.val();
+    read_vi_val(A, A_vi, Ad);
     Bd = B.val();
 #ifdef STAN_OPENCL
     if (Ad.rows() * Ad.cols() * Bd.cols()
@@ -525,10 +525,10 @@ class multiply_mat_vari<Ta, 1, Ca, double, 1> : public vari {
         variRefA_(
             ChainableStack::instance_->memalloc_.alloc_array<vari*>(size_)) {
     using Eigen::Map;
-    Map<row_vector_vi>(variRefA_, size_) = A.vi();
+    Map<row_vector_vi> A_vi(variRefA_, size_);
     Map<row_vector_d> Ad(Ad_, size_);
     Map<vector_d> Bd(Bd_, size_);
-    Ad = A.val();
+    read_vi_val(A, A_vi, Ad);
     Bd = B;
 
     variRefAB_ = new vari(Ad * Bd, false);

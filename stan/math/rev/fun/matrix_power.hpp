@@ -77,8 +77,8 @@ class matrix_product_vari : public vari {
             M.rows() * M.cols())),
         n(n) {
     Mds.resize(n - 1);
-    Mds[0] = M.val();
-    Eigen::Map<matrix_vi>(adjMRef_, rows_, cols_) = M.vi();
+    Eigen::Map<matrix_vi> M_vi(adjMRef_, rows_, cols_);
+    read_vi_val(M, M_vi, Mds[0]);
     for (int i = 1; i < n - 1; i++) {
       Mds[i] = Mds[i - 1] * Mds[0];
     }

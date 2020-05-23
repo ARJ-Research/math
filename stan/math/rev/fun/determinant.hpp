@@ -28,8 +28,9 @@ class determinant_vari : public vari {
         adjARef_(
             reinterpret_cast<vari**>(ChainableStack::instance_->memalloc_.alloc(
                 sizeof(vari*) * A.rows() * A.cols()))) {
-    Eigen::Map<Eigen::MatrixXd>(A_, rows_, cols_) = A.val();
-    Eigen::Map<matrix_vi>(adjARef_, rows_, cols_) = A.vi();
+    Eigen::Map<Eigen::MatrixXd> A_val(A_, rows_, cols_);
+    Eigen::Map<matrix_vi> A_vi(adjARef_, rows_, cols_);
+    read_vi_val(A, A_vi, A_val);
   }
   static double determinant_vari_calc(const Eigen::Matrix<var, R, C>& A) {
     return A.val().determinant();

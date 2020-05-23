@@ -59,30 +59,37 @@ template <typename T, require_container_st<is_var, T>* = nullptr>
 inline auto log_softmax(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& alpha) {
     const int a_size = alpha.size();
+    using VecT = plain_type_t<decltype(alpha)>;
+    using ArithVecT = Eigen::Matrix<double, VecT::RowsAtCompileTime,
+                                    VecT::ColsAtCompileTime>;
+    using VarVecT = Eigen::Matrix<var, VecT::RowsAtCompileTime,
+                                  VecT::ColsAtCompileTime>;
+    using VariVecT = Eigen::Matrix<vari*, VecT::RowsAtCompileTime,
+                                   VecT::ColsAtCompileTime>;
 
     check_nonzero_size("log_softmax", "alpha", alpha);
 
     vari** alpha_vi_array
         = ChainableStack::instance_->memalloc_.alloc_array<vari*>(a_size);
-    Eigen::Map<vector_vi>(alpha_vi_array, a_size) = alpha.vi();
-
-    vector_d alpha_d = alpha.val();
+    Eigen::Map<VariVecT> alpha_vi(alpha_vi_array, a_size);
+    ArithVecT alpha_d(a_size);
+    read_vi_val(alpha, alpha_vi, alpha_d);
 
     // fold logic of math::softmax() and math::log_softmax()
     // to save computations
 
-    vector_d diff = (alpha_d.array() - alpha_d.maxCoeff());
-    vector_d softmax_alpha_d = diff.array().exp();
+    ArithVecT diff = (alpha_d.array() - alpha_d.maxCoeff());
+    ArithVecT softmax_alpha_d = diff.array().exp();
     double sum = softmax_alpha_d.sum();
-    vector_d log_softmax_alpha_d = diff.array() - std::log(sum);
+    ArithVecT log_softmax_alpha_d = diff.array() - std::log(sum);
 
     // end fold
     double* softmax_alpha_d_array
         = ChainableStack::instance_->memalloc_.alloc_array<double>(a_size);
-    Eigen::Map<vector_d>(softmax_alpha_d_array, a_size)
+    Eigen::Map<ArithVecT>(softmax_alpha_d_array, a_size)
         = softmax_alpha_d.array() / sum;
 
-    vector_v log_softmax_alpha(a_size);
+    VarVecT log_softmax_alpha(a_size);
     for (int k = 0; k < a_size; ++k) {
       log_softmax_alpha(k) = var(new internal::log_softmax_elt_vari(
           log_softmax_alpha_d[k], alpha_vi_array, softmax_alpha_d_array, a_size,
