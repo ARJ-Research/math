@@ -61,7 +61,7 @@ class inverse_vari : public vari {
     matrix_d adj_A_inv = Map<matrix_vi>(vari_ref_A_inv_, M_, M_).adj();
     Map<matrix_d> A_inv_d(A_inv_, M_, M_);
 
-    decltype(auto) adjA = A_inv_d.transpose() * adj_A_inv * A_inv_d.transpose();
+    matrix_d adjA = A_inv_d.transpose() * adj_A_inv * A_inv_d.transpose();
     Map<matrix_vi>(vari_ref_A_, M_, M_).adj() -= adjA;
   }
 };

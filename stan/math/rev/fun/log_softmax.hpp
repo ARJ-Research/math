@@ -60,12 +60,9 @@ inline auto log_softmax(const T& x) {
   return apply_vector_unary<T>::apply(x, [&](const auto& alpha) {
     const int a_size = alpha.size();
     using VecT = plain_type_t<decltype(alpha)>;
-    using ArithVecT = Eigen::Matrix<double, VecT::RowsAtCompileTime,
-                                    VecT::ColsAtCompileTime>;
-    using VarVecT = Eigen::Matrix<var, VecT::RowsAtCompileTime,
-                                  VecT::ColsAtCompileTime>;
-    using VariVecT = Eigen::Matrix<vari*, VecT::RowsAtCompileTime,
-                                   VecT::ColsAtCompileTime>;
+    using ArithVecT = promote_scalar_t<double, VecT>;
+    using VarVecT = promote_scalar_t<var, VecT>;
+    using VariVecT = promote_scalar_t<vari*, VecT>;
 
     check_nonzero_size("log_softmax", "alpha", alpha);
 

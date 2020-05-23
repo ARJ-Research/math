@@ -29,7 +29,7 @@ inline var log_determinant_spd(const EigMat& m) {
   vari** operands
       = ChainableStack::instance_->memalloc_.alloc_array<vari*>(m.size());
   Eigen::Map<matrix_vi> m_vi(operands, m.rows(), m.cols());
-  matrix_d m_d;
+  matrix_d m_d(m.rows(), m.cols());
   read_vi_val(m, m_vi, m_d);
 
   Eigen::LDLT<matrix_d> ldlt(m_d);
