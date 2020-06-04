@@ -2,9 +2,13 @@
 #define STAN_MATH_PRIM_META_APPLY_SCALAR_UNARY_HPP
 
 #include <stan/math/prim/fun/Eigen.hpp>
+#include <stan/math/prim/meta/return_type.hpp>
+#include <stan/math/prim/meta/plain_type.hpp>
 #include <stan/math/prim/meta/is_eigen.hpp>
 #include <stan/math/prim/meta/is_vector.hpp>
 #include <stan/math/prim/meta/is_vector_like.hpp>
+#include <tbb/parallel_for.h>
+#include <tbb/blocked_range.h>
 #include <utility>
 #include <vector>
 
@@ -61,11 +65,18 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
    * by F to the specified matrix.
    */
   static inline auto apply(const T& x) {
-    return x
-        .unaryExpr([](scalar_t x) {
-          return apply_scalar_unary<F, scalar_t>::apply(x);
-        })
-        .eval();
+    plain_type_t<T> res(x.rows(), x.cols());
+
+    tbb::task_scheduler_init init(2);
+
+    tbb::parallel_for(
+      tbb::blocked_range<size_t>(0, x.size()), 
+      [&x,&res](const tbb::blocked_range<size_t>& r) {
+        for (size_t i = r.begin(); i < r.end(); ++i)
+          res.coeffRef(i) = F::fun(x.coeff(i));
+    });
+
+    return res;
   }
 
   /**

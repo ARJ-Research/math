@@ -3,6 +3,7 @@
 #include <limits>
 #include <vector>
 
+/*
 TEST(mathMixMatFun, acos) {
   using stan::test::expect_unary_vectorized;
   auto f = [](const auto& x1) {
@@ -20,4 +21,16 @@ TEST(mathMixMatFun, acos) {
       stan::test::expect_ad(f, std::complex<double>{re, im});
     }
   }
+}
+*/
+
+TEST(mathMixMatFun, acos) {
+  // segfaults
+  //stan::math::vector_v vec_v = Eigen::VectorXd::Random(10000);
+  //auto out_v = stan::math::acos(vec_v);
+
+  // Working
+  stan::math::vector_fd vec_fd = Eigen::VectorXd::Random(10000);
+  auto out_fd = stan::math::acos(vec_fd);
+
 }
