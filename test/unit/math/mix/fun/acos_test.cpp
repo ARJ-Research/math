@@ -26,11 +26,13 @@ TEST(mathMixMatFun, acos) {
 
 TEST(mathMixMatFun, acos) {
   // segfaults
-  //stan::math::vector_v vec_v = Eigen::VectorXd::Random(10000);
-  //auto out_v = stan::math::acos(vec_v);
+  stan::math::vector_v vec_v = Eigen::VectorXd::Random(10000);
+  auto out_v = stan::math::acos(vec_v);
 
   // Working
   stan::math::vector_fd vec_fd = Eigen::VectorXd::Random(10000);
   auto out_fd = stan::math::acos(vec_fd);
 
+  stan::math::vector_ffd vec_ffd = Eigen::VectorXd::Random(10000);
+  auto out_ffd = stan::math::acos(vec_ffd);
 }
