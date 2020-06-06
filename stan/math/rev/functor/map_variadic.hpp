@@ -24,15 +24,17 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
   struct recursive_applier {
     double* partials_;
     double* vals__;
+    double* adjs__;
     ReturnType result_;
     std::ostream* msgs_;
     std::tuple<Args...> args_;
 
     recursive_applier(double* sliced_partials, double* vals_,
-                      ReturnType&& result,
+                      double* adjs_, ReturnType&& result,
                       std::ostream* msgs, Args&&... args)
-        : vals__(vals_),
-          partials_(sliced_partials),
+        : partials_(sliced_partials),
+          vals__(vals_),
+          adjs__(adjs_),
           result_(std::forward<ReturnType>(result)),
           msgs_(msgs),
           args_(std::forward<Args>(args)...) {}
@@ -62,6 +64,9 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
 
               // Copy calculated value
               vals__[i] = sub_v.val();
+
+              // Copy calculated value
+              adjs__[i] = sub_v.adj();
             }
           },
           args_tuple_local_copy);
@@ -87,10 +92,13 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
     double* partials = ChainableStack::instance_->memalloc_.alloc_array<double>(
         num_vars_all_terms);
 
+    Eigen::Map<vector_d>(partials, num_vars_all_terms).setZero();
+
     save_varis(varis, args...);
     Eigen::VectorXd vals_(num_iter);
+    Eigen::VectorXd adjs_(num_iter);
 
-    recursive_applier worker(partials, &vals_[0],
+    recursive_applier worker(partials, &vals_[0], &adjs_[0],
                              std::forward<ReturnType>(result), msgs,
                              std::forward<Args>(args)...);
 
