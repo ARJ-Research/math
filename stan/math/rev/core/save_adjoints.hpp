@@ -36,15 +36,15 @@ inline double* save_adjoints(double* dest, Arith&& x, Pargs&&... args);
 inline double* save_adjoints(double* dest);
 
 /**
- * Save the vari pointer in x into the memory pointed to by dest,
+ * Save the adjoint in x into the memory pointed to by dest,
  *   increment the dest storage pointer,
  *   recursively call save_adjoints on the rest of the arguments,
  *   and return the final value of the dest storage pointer.
  *
  * @tparam Pargs Types of remaining arguments
- * @param[in, out] dest Pointer to where vari pointers are saved
+ * @param[in, out] dest Pointer to where adjoints are saved
  * @param[in] x A var
- * @param[in] args Additional arguments to have their varis saved
+ * @param[in] args Additional arguments to have their adjoints saved
  * @return Final position of dest pointer
  */
 template <typename... Pargs>
@@ -54,16 +54,16 @@ inline double* save_adjoints(double* dest, const var& x, Pargs&&... args) {
 }
 
 /**
- * Save the vari pointers in x into the memory pointed to by dest,
+ * Save the adjoints in x into the memory pointed to by dest,
  *   increment the dest storage pointer,
  *   recursively call save_adjoints on the rest of the arguments,
  *   and return the final value of the dest storage pointer.
  *
  * @tparam VarVec A variant of std::vector<var>
  * @tparam Pargs Types of remaining arguments
- * @param[in, out] dest Pointer to where vari pointers are saved
+ * @param[in, out] dest Pointer to where adjoints are saved
  * @param[in] x A std::vector of vars
- * @param[in] args Additional arguments to have their varis saved
+ * @param[in] args Additional arguments to have their adjoints saved
  * @return Final position of dest pointer
  */
 template <typename VarVec, require_std_vector_vt<is_var, VarVec>*,
@@ -76,16 +76,16 @@ inline double* save_adjoints(double* dest, VarVec&& x, Pargs&&... args) {
 }
 
 /**
- * Save the vari pointers in x into the memory pointed to by dest,
+ * Save the adjoints in x into the memory pointed to by dest,
  *   increment the dest storage pointer,
  *   recursively call save_adjoints on the rest of the arguments,
  *   and return the final value of the dest storage pointer.
  *
  * @tparam VecContainer std::vector<T> where T is another type containing vars
  * @tparam Pargs Types of remaining arguments
- * @param[in, out] dest Pointer to where vari pointers are saved
+ * @param[in, out] dest Pointer to where adjoints are saved
  * @param[in] x A std::vector of containers containing of vars
- * @param[in] args Additional arguments to have their varis saved
+ * @param[in] args Additional arguments to have their adjoints saved
  * @return Final position of dest pointer
  */
 template <typename VecContainer, require_std_vector_st<is_var, VecContainer>*,
@@ -98,16 +98,16 @@ inline double* save_adjoints(double* dest, VecContainer&& x, Pargs&&... args) {
 }
 
 /**
- * Save the vari pointers in x into the memory pointed to by dest,
+ * Save the adjoints in x into the memory pointed to by dest,
  *   increment the dest storage pointer,
  *   recursively call save_adjoints on the rest of the arguments,
  *   and return the final value of the dest storage pointer.
  *
  * @tparam EigT An Eigen type with var value type
  * @tparam Pargs Types of remaining arguments
- * @param[in, out] dest Pointer to where vari pointers are saved
+ * @param[in, out] dest Pointer to where adjoints are saved
  * @param[in] x An Eigen container of vars
- * @param[in] args Additional arguments to have their varis saved
+ * @param[in] args Additional arguments to have their adjoints saved
  * @return Final position of dest pointer
  */
 template <typename EigT, require_eigen_vt<is_var, EigT>*, typename... Pargs>
@@ -126,9 +126,9 @@ inline double* save_adjoints(double* dest, EigT&& x, Pargs&&... args) {
  *
  * @tparam Arith An arithmetic type
  * @tparam Pargs Types of remaining arguments
- * @param[in, out] dest Pointer to where vari pointers are saved
+ * @param[in, out] dest Pointer to where adjoints are saved
  * @param[in] x An argument not containing vars
- * @param[in] args Additional arguments to have their varis saved
+ * @param[in] args Additional arguments to have their adjoints saved
  * @return Final position of dest pointer
  */
 template <typename Arith, require_arithmetic_t<scalar_type_t<Arith>>*,

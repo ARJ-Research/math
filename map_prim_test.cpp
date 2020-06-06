@@ -29,5 +29,4 @@ int main() {
 
   stan::math::map_variadic<test_fun>(outv,1,&msgs,inv);
   stan::math::map_variadic<test_fun_binary>(outv2,1,&msgs,inv,offset);
-
 }
