@@ -18,22 +18,22 @@ namespace math {
 namespace internal {
 
 
-template <typename ReduceFunction, typename ReturnType, typename... Args>
-struct map_variadic_impl<ReduceFunction, ReturnType,
+template <typename ApplyFunction, typename ReturnType, typename... Args>
+struct map_variadic_impl<ApplyFunction, ReturnType,
                          require_st_var<ReturnType>, Args...> {
 
   struct recursive_applier {
     double* partials_;
-    double* vals__;
+    double* vals_;
     ReturnType result_;
     std::ostream* msgs_;
     std::tuple<Args...> args_;
 
-    recursive_applier(double* sliced_partials, double* vals_,
+    recursive_applier(double* sliced_partials, double* values,
                       ReturnType&& result,
                       std::ostream* msgs, Args&&... args)
         : partials_(sliced_partials),
-          vals__(vals_),
+          vals_(values),
           result_(std::forward<ReturnType>(result)),
           msgs_(msgs),
           args_(std::forward<Args>(args)...) {}
@@ -56,13 +56,13 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
             for (size_t i = r.begin(); i < r.end(); ++i) {
 
               // Perform calculation
-              var sub_v = ReduceFunction()(i, args...);
+              var sub_v = ApplyFunction()(i, args...);
 
               // Compute Jacobian
               sub_v.grad();
 
               // Copy calculated value
-              vals__[i] = sub_v.val();
+              vals_[i] = sub_v.val();
             }
           },
           args_tuple_local_copy);
@@ -86,11 +86,13 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
         num_vars_all_terms);
     double* partials = ChainableStack::instance_->memalloc_.alloc_array<double>(
         num_vars_all_terms);
-    Eigen::VectorXd vals_(num_iter);
+    double* values = ChainableStack::instance_->memalloc_.alloc_array<double>(
+        num_vars_all_terms);
 
+    // Copy varis for all terms
     save_varis(varis, args...);
 
-    recursive_applier worker(partials, &vals_[0],
+    recursive_applier worker(partials, values,
                              std::forward<ReturnType>(result), msgs,
                              std::forward<Args>(args)...);
 

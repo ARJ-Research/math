@@ -17,11 +17,11 @@ namespace math {
 
 namespace internal {
 
-template <typename ReduceFunction, typename ReturnType, typename Enable, typename... Args>
+template <typename ApplyFunction, typename ReturnType, typename Enable, typename... Args>
 struct map_variadic_impl {};
 
-template <typename ReduceFunction, typename ReturnType, typename... Args>
-struct map_variadic_impl<ReduceFunction, ReturnType,
+template <typename ApplyFunction, typename ReturnType, typename... Args>
+struct map_variadic_impl<ApplyFunction, ReturnType,
                          require_st_arithmetic<ReturnType>, Args...> {
 
   struct recursive_applier {
@@ -37,7 +37,7 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
     inline void operator()(const tbb::blocked_range<size_t>& r) const {
       apply([&](auto&&... args) {
                 for (size_t i = r.begin(); i < r.end(); ++i) {
-                  result_[i] = ReduceFunction()(i, args...);
+                  result_[i] = ApplyFunction()(i, args...);
                 }
               },
             args_);
@@ -59,11 +59,11 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
 
 }  // namespace internal
 
-template <typename ReduceFunction, typename OutputType, typename... Args>
+template <typename ApplyFunction, typename OutputType, typename... Args>
 inline void map_variadic(OutputType&& result, int grainsize, std::ostream* msgs,
                          Args&&... args) {
 
-   internal::map_variadic_impl<ReduceFunction,
+   internal::map_variadic_impl<ApplyFunction,
                                OutputType, void,
                                Args...>()(std::forward<OutputType>(result),
                                        grainsize, msgs,
