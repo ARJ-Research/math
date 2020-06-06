@@ -66,18 +66,18 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
             }
           },
           args_tuple_local_copy);
-	      // Copy adjoints of arguments
-	      apply(
-	          [&](auto&&... args) {
-	            save_adjoints(partials_,
-	                          std::forward<decltype(args)>(args)...);
-	          },
-	          std::move(args_tuple_local_copy));
+          // Copy adjoints of arguments
+          apply(
+              [&](auto&&... args) {
+                save_adjoints(partials_,
+                              std::forward<decltype(args)>(args)...);
+              },
+              std::move(args_tuple_local_copy));
     }
   };
 
   inline ReturnType operator()(ReturnType&& result, int grainsize,
-  							   std::ostream* msgs, Args&&... args) const {
+                               std::ostream* msgs, Args&&... args) const {
 
     const std::size_t num_iter = result.size();
     const std::size_t num_vars_all_terms = count_vars(args...);
