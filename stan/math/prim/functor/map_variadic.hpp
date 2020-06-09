@@ -17,27 +17,28 @@ namespace math {
 
 namespace internal {
 
-template <typename ApplyFunction, typename ReturnType, typename Enable, typename... Args>
+template <typename ReduceFunction, typename ReturnType, typename Enable, typename... Args>
 struct map_variadic_impl {};
 
-template <typename ApplyFunction, typename ReturnType, typename... Args>
-struct map_variadic_impl<ApplyFunction, ReturnType,
+template <typename ReduceFunction, typename ReturnType, typename... Args>
+struct map_variadic_impl<ReduceFunction, ReturnType,
                          require_st_arithmetic<ReturnType>, Args...> {
 
+  template <typename TupleT>
   struct recursive_applier {
     ReturnType result_;
     std::ostream* msgs_;
-    std::tuple<Args...> args_;
+    TupleT* args_;
 
-    recursive_applier(ReturnType&& result, std::ostream* msgs, Args&&... args)
+    recursive_applier(ReturnType&& result, std::ostream* msgs, TupleT* tuple_args)
         : result_(std::forward<ReturnType>(result)),
           msgs_(msgs),
-          args_(std::forward<Args>(args)...) {}
+          args_(tuple_args) {}
 
     inline void operator()(const tbb::blocked_range<size_t>& r) const {
       apply([&](auto&&... args) {
                 for (size_t i = r.begin(); i < r.end(); ++i) {
-                  result_[i] = ApplyFunction()(i, args...);
+                  result_[i] = ReduceFunction()(i, args...);
                 }
               },
             args_);
@@ -48,8 +49,9 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
                                int grainsize, std::ostream* msgs,
                                Args&&... args) const {
     const std::size_t num_terms = result.size();
-    recursive_applier worker(std::forward<ReturnType>(result), msgs,
-                             std::forward<Args>(args)...);
+    auto args_tuple = std::make_tuple(args...);
+    recursive_applier<decltype(args_tuple)> worker(std::forward<ReturnType>(result), msgs,
+                             (&args_tuple));
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>(0, num_terms, grainsize), worker);
 
@@ -59,11 +61,11 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
 
 }  // namespace internal
 
-template <typename ApplyFunction, typename OutputType, typename... Args>
+template <typename ReduceFunction, typename OutputType, typename... Args>
 inline void map_variadic(OutputType&& result, int grainsize, std::ostream* msgs,
                          Args&&... args) {
 
-   internal::map_variadic_impl<ApplyFunction,
+   internal::map_variadic_impl<ReduceFunction,
                                OutputType, void,
                                Args...>()(std::forward<OutputType>(result),
                                        grainsize, msgs,

@@ -22,41 +22,29 @@ template <typename ApplyFunction, typename ReturnType, typename... Args>
 struct map_variadic_impl<ApplyFunction, ReturnType,
                          require_st_var<ReturnType>, Args...> {
 
+  template <typename TupleT>
   struct recursive_applier {
     double* partials_;
     double* vals_;
     ReturnType result_;
     std::ostream* msgs_;
-    std::tuple<Args...> args_;
+    TupleT* args_;
 
     recursive_applier(double* sliced_partials, double* values,
                       ReturnType&& result,
-                      std::ostream* msgs, Args&&... args)
+                      std::ostream* msgs, TupleT* tuple_args)
         : partials_(sliced_partials),
           vals_(values),
           result_(std::forward<ReturnType>(result)),
           msgs_(msgs),
-          args_(std::forward<Args>(args)...) {}
+          args_(tuple_args) {}
 
     inline void operator()(const tbb::blocked_range<size_t>& r) const {
-      // Initialize nested autodiff stack
-      const nested_rev_autodiff begin_nest;
-
-      // Create nested autodiff copies of all arguments that do not point
-      //   back to main autodiff stack
-      auto args_tuple_local_copy = apply(
-          [&](auto&&... args) {
-            return std::tuple<decltype(deep_copy_vars(args))...>(
-                deep_copy_vars(args)...);
-          },
-          args_);
-
-      apply(
-          [&](auto&&... args) {
+      apply([&](auto&&... args) {
             for (size_t i = r.begin(); i < r.end(); ++i) {
 
               // Perform calculation
-              var sub_v = ApplyFunction()(i, args...);
+              auto sub_v = ApplyFunction()(i, args...);
 
               // Compute Jacobian
               sub_v.grad();
@@ -65,14 +53,7 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
               vals_[i] = sub_v.val();
             }
           },
-          args_tuple_local_copy);
-          // Copy adjoints of arguments
-          apply(
-              [&](auto&&... args) {
-                save_adjoints(partials_,
-                              std::forward<decltype(args)>(args)...);
-              },
-              std::move(args_tuple_local_copy));
+          args_);
     }
   };
 
@@ -86,25 +67,40 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
         num_vars_all_terms);
     double* partials = ChainableStack::instance_->memalloc_.alloc_array<double>(
         num_vars_all_terms);
-    double* values = ChainableStack::instance_->memalloc_.alloc_array<double>(
-        num_vars_all_terms);
+    promote_scalar_t<double, plain_type_t<ReturnType>> values(result.size());
 
     // Copy varis for all terms
     save_varis(varis, args...);
 
-    recursive_applier worker(partials, values,
-                             std::forward<ReturnType>(result), msgs,
-                             std::forward<Args>(args)...);
+    // Initialize nested autodiff stack
+    const nested_rev_autodiff begin_nest;
+
+    // Create nested autodiff copies of all arguments that do not point
+    //   back to main autodiff stack
+    auto args_tuple_local_copy = std::tuple<decltype(deep_copy_vars(args))...>(
+              deep_copy_vars(args)...);
+
+    recursive_applier<decltype(args_tuple_local_copy)> 
+        worker(partials, &values[0], std::forward<ReturnType>(result),
+               msgs, (&args_tuple_local_copy));
 
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>(0, num_iter, grainsize), worker);
-/*
+
+    // Copy adjoints of arguments
+    apply(
+        [&](auto&&... args) {
+          save_adjoints(partials,
+                        std::forward<decltype(args)>(args)...);
+        },
+        args_tuple_local_copy);
+
     for(size_t i = 0; i < num_iter; ++i) {
       result[i] = var(new precomputed_gradients_vari(
-                            vals_[i], num_vars_all_terms, varis,
+                            values[i], num_vars_all_terms, varis,
                             partials));
     }
-*/
+
     return result;
   }
 };

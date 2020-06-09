@@ -2,6 +2,7 @@
 #include <stan/math/prim/functor/map_variadic.hpp>
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
+#include <iostream>
 
 
 struct test_fun {
@@ -29,4 +30,8 @@ int main() {
 
   stan::math::map_variadic<test_fun>(outv,1,&msgs,inv);
   stan::math::map_variadic<test_fun_binary>(outv2,1,&msgs,inv,offset);
+
+  std::cout << outv[107] << std::endl << stan::math::exp(inv[107]) << std::endl
+            << outv2[9830] << std::endl << stan::math::distance(inv[9830], offset)
+            << std::endl;
 }
