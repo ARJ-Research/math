@@ -1,17 +1,11 @@
 #ifndef STAN_MATH_REV_FUNCTOR_MAP_VARIADIC_HPP
 #define STAN_MATH_REV_FUNCTOR_MAP_VARIADIC_HPP
 
-#include <stan/math/prim/meta.hpp>
-#include <stan/math/prim/functor.hpp>
 #include <stan/math/prim/functor/map_variadic.hpp>
 #include <stan/math/rev/core.hpp>
+#include <stan/math/rev/core/precomputed_gradients.hpp>
+#include <stan/math/rev/core/nested_rev_autodiff.hpp>
 #include <stan/math/rev/core/save_adjoints.hpp>
-#include <tbb/task_arena.h>
-#include <tbb/parallel_reduce.h>
-#include <tbb/blocked_range.h>
-
-#include <tuple>
-#include <vector>
 
 namespace stan {
 namespace math {
@@ -26,16 +20,13 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
   struct recursive_applier {
     double* partials_;
     double* vals_;
-    ReturnType result_;
     std::ostream* msgs_;
     TupleT* args_;
 
     recursive_applier(double* sliced_partials, double* values,
-                      ReturnType&& result,
                       std::ostream* msgs, TupleT* tuple_args)
         : partials_(sliced_partials),
           vals_(values),
-          result_(std::forward<ReturnType>(result)),
           msgs_(msgs),
           args_(tuple_args) {}
 
@@ -57,7 +48,7 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
     }
   };
 
-  inline ReturnType operator()(ReturnType&& result, int grainsize,
+  inline auto operator()(ReturnType&& result, int grainsize,
                                std::ostream* msgs, Args&&... args) const {
 
     const std::size_t num_iter = result.size();
@@ -67,7 +58,7 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
         num_vars_all_terms);
     double* partials = ChainableStack::instance_->memalloc_.alloc_array<double>(
         num_vars_all_terms);
-    promote_scalar_t<double, plain_type_t<ReturnType>> values(result.size());
+    Eigen::VectorXd values(result.size());
 
     // Copy varis for all terms
     save_varis(varis, args...);
@@ -81,22 +72,20 @@ struct map_variadic_impl<ApplyFunction, ReturnType,
               deep_copy_vars(args)...);
 
     recursive_applier<decltype(args_tuple_local_copy)> 
-        worker(partials, &values[0], std::forward<ReturnType>(result),
-               msgs, (&args_tuple_local_copy));
+        worker(partials, &values[0], msgs, (&args_tuple_local_copy));
 
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>(0, num_iter, grainsize), worker);
 
     // Copy adjoints of arguments
-    apply(
-        [&](auto&&... args) {
+    apply([&](auto&&... args) {
           save_adjoints(partials,
                         std::forward<decltype(args)>(args)...);
         },
         args_tuple_local_copy);
 
     for(size_t i = 0; i < num_iter; ++i) {
-      result[i] = var(new precomputed_gradients_vari(
+      result.coeffRef(i) = var(new precomputed_gradients_vari(
                             values[i], num_vars_all_terms, varis,
                             partials));
     }

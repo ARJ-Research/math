@@ -2,6 +2,7 @@
 #define STAN_MATH_REV_META_APPLY_SCALAR_UNARY_HPP
 
 #include <stan/math/prim/meta/apply_scalar_unary.hpp>
+#include <stan/math/rev/functor/map_variadic.hpp>
 #include <stan/math/rev/core/var.hpp>
 
 namespace stan {

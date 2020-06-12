@@ -5,6 +5,8 @@
 #include <stan/math/prim/meta/is_eigen.hpp>
 #include <stan/math/prim/meta/is_vector.hpp>
 #include <stan/math/prim/meta/is_vector_like.hpp>
+#include <stan/math/prim/meta/promote_scalar_type.hpp>
+#include <stan/math/prim/functor/map_variadic.hpp>
 #include <utility>
 #include <vector>
 
@@ -51,6 +53,12 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
    * Type of underlying scalar for the matrix type T.
    */
   using scalar_t = typename Eigen::internal::traits<T>::Scalar;
+  struct test_fun {
+    template <typename Arg>
+    auto operator()(size_t index, Arg&& arg) {
+      return F::fun(arg.coeff(index));
+    }
+  };
 
   /**
    * Return the result of applying the function defined by the
@@ -61,19 +69,19 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
    * by F to the specified matrix.
    */
   static inline auto apply(const T& x) {
-    return x
-        .unaryExpr([](scalar_t x) {
-          return apply_scalar_unary<F, scalar_t>::apply(x);
-        })
-        .eval();
+    using return_type = promote_scalar_t<decltype(F::fun(x(0))), T>;
+    std::ostream msgs(NULL);
+    return_type out(x.rows(), x.cols());
+    stan::math::map_variadic<test_fun>(out,1,&msgs,x);
+    return out;
   }
-
   /**
    * Return type for applying the function elementwise to a matrix
    * expression template of type T.
    */
   using return_t = std::decay_t<decltype(
       apply_scalar_unary<F, T>::apply(std::declval<T>()).eval())>;
+
 };
 
 /**

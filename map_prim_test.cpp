@@ -8,14 +8,14 @@
 struct test_fun {
   template <typename Arg>
   auto operator()(size_t index, Arg&& arg) {
-    return stan::math::exp(arg[index]);
+    return stan::math::exp(arg.coeffRef(index));
   }
 };
 
 struct test_fun_binary {
   template <typename Arg1, typename Arg2>
   auto operator()(size_t index, Arg1&& arg1, Arg2&& arg2) {
-    return stan::math::distance(arg1[index], arg2);
+    return stan::math::distance(arg1.coeffRef(index), arg2);
   }
 };
 

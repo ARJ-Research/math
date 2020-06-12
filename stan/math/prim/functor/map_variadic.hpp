@@ -1,11 +1,12 @@
 #ifndef STAN_MATH_PRIM_FUNCTOR_MAP_VARIADIC_HPP
 #define STAN_MATH_PRIM_FUNCTOR_MAP_VARIADIC_HPP
 
-#include <stan/math/prim/meta.hpp>
-#include <stan/math/prim/err.hpp>
+#include <stan/math/prim/meta/require_generics.hpp>
+#include <stan/math/prim/meta/is_var.hpp>
+#include <stan/math/prim/functor/apply.hpp>
 
 #include <tbb/task_arena.h>
-#include <tbb/parallel_reduce.h>
+#include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 
 #include <algorithm>
@@ -22,7 +23,7 @@ struct map_variadic_impl {};
 
 template <typename ReduceFunction, typename ReturnType, typename... Args>
 struct map_variadic_impl<ReduceFunction, ReturnType,
-                         require_st_arithmetic<ReturnType>, Args...> {
+                         require_not_st_var<ReturnType>, Args...> {
 
   template <typename TupleT>
   struct recursive_applier {
@@ -38,7 +39,7 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
     inline void operator()(const tbb::blocked_range<size_t>& r) const {
       apply([&](auto&&... args) {
                 for (size_t i = r.begin(); i < r.end(); ++i) {
-                  result_[i] = ReduceFunction()(i, args...);
+                  result_.coeffRef(i) = ReduceFunction()(i, args...);
                 }
               },
             args_);
