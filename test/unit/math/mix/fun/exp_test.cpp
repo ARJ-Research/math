@@ -11,7 +11,7 @@ TEST(mathMixMatFun, exp) {
   stan::test::expect_complex_common(f);*/
 
 
-  Eigen::VectorXd tes(2);
-  tes << 1.0, 2.0;
+  Eigen::VectorXd tes(5);
+  tes << 1.0, 2.0, 3.0, 4.0, 5.0;
   stan::test::expect_ad(f, tes);
 }
