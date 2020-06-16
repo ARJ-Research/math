@@ -27,31 +27,32 @@ struct map_impl<ReduceFunction, ReturnType,
 
   template <typename TupleT>
   struct recursive_applier {
-    ReturnType result_;
+    scalar_type_t<ReturnType>* result_;
     std::ostream* msgs_;
     TupleT* args_;
 
-    recursive_applier(ReturnType&& result, std::ostream* msgs, TupleT* tuple_args)
-        : result_(std::forward<ReturnType>(result)),
+    recursive_applier(scalar_type_t<ReturnType>* result, 
+                      std::ostream* msgs, TupleT* tuple_args)
+        : result_(result),
           msgs_(msgs),
           args_(tuple_args) {}
 
     inline void operator()(const tbb::blocked_range<size_t>& r) const {
       apply([&](auto&&... args) {
                 for (size_t i = r.begin(); i < r.end(); ++i) {
-                  result_.coeffRef(i) = ReduceFunction()(i, args...);
+                  result_[i] = ReduceFunction()(i, args...);
                 }
               },
             args_);
     }
   };
 
-  inline ReturnType operator()(ReturnType&& result,
+  inline auto operator()(ReturnType&& result,
                                int grainsize, std::ostream* msgs,
                                Args&&... args) const {
     const std::size_t num_terms = result.size();
     auto args_tuple = std::make_tuple(args...);
-    recursive_applier<decltype(args_tuple)> worker(std::forward<ReturnType>(result), msgs,
+    recursive_applier<decltype(args_tuple)> worker(result.data(), msgs,
                              (&args_tuple));
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>(0, num_terms, grainsize), worker);
