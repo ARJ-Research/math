@@ -1,5 +1,5 @@
-#ifndef STAN_MATH_PRIM_FUNCTOR_MAP_VARIADIC_HPP
-#define STAN_MATH_PRIM_FUNCTOR_MAP_VARIADIC_HPP
+#ifndef STAN_MATH_PRIM_FUNCTOR_MAP_HPP
+#define STAN_MATH_PRIM_FUNCTOR_MAP_HPP
 
 #include <stan/math/prim/meta/require_generics.hpp>
 #include <stan/math/prim/meta/is_stan_scalar.hpp>
@@ -19,10 +19,10 @@ namespace math {
 namespace internal {
 
 template <typename ReduceFunction, typename ReturnType, typename Enable, typename... Args>
-struct map_variadic_impl {};
+struct map_impl {};
 
 template <typename ReduceFunction, typename ReturnType, typename... Args>
-struct map_variadic_impl<ReduceFunction, ReturnType,
+struct map_impl<ReduceFunction, ReturnType,
                          require_st_stan_scalar<ReturnType>, Args...> {
 
   template <typename TupleT>
@@ -63,10 +63,10 @@ struct map_variadic_impl<ReduceFunction, ReturnType,
 }  // namespace internal
 
 template <typename ReduceFunction, typename OutputType, typename... Args>
-inline void map_variadic(OutputType&& result, int grainsize, std::ostream* msgs,
+inline void map(OutputType&& result, int grainsize, std::ostream* msgs,
                          Args&&... args) {
 
-   internal::map_variadic_impl<ReduceFunction,
+   internal::map_impl<ReduceFunction,
                                OutputType, void,
                                Args...>()(std::forward<OutputType>(result),
                                        grainsize, msgs,

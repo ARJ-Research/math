@@ -6,7 +6,7 @@
 #include <stan/math/prim/meta/is_vector.hpp>
 #include <stan/math/prim/meta/is_vector_like.hpp>
 #include <stan/math/prim/meta/promote_scalar_type.hpp>
-#include <stan/math/prim/functor/map_variadic.hpp>
+#include <stan/math/prim/functor/map.hpp>
 #include <utility>
 #include <vector>
 
@@ -62,19 +62,11 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
     }
   };
 
-  /**
-   * Return the result of applying the function defined by the
-   * template parameter F to the specified matrix argument.
-   *
-   * @param x Matrix to which operation is applied.
-   * @return Componentwise application of the function specified
-   * by F to the specified matrix.
-   */
   static inline auto apply(const T& x) {
     using return_type = promote_scalar_t<decltype(F::fun(x(0))), T>;
     std::ostream msgs(NULL);
     return_type out(x.rows(), x.cols());
-    stan::math::map_variadic<test_fun>(out,1,&msgs,x);
+    stan::math::map<test_fun>(out,1,&msgs,x);
     return out;
   }
 #else

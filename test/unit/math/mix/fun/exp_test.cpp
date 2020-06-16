@@ -9,7 +9,9 @@ TEST(mathMixMatFun, exp) {
   stan::test::expect_unary_vectorized(f, -15.2, -10, -0.5, 0.5, 1, 1.0, 1.3, 5,
                                       10);
   stan::test::expect_complex_common(f);*/
-  Eigen::VectorXd tes = Eigen::VectorXd::Random(20);
 
+
+  Eigen::VectorXd tes(2);
+  tes << 1.0, 2.0;
   stan::test::expect_ad(f, tes);
 }
