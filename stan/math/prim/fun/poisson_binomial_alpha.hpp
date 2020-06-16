@@ -5,7 +5,7 @@
 #include <stan/math/prim/fun/log.hpp>
 #include <stan/math/prim/fun/log1m.hpp>
 #include <stan/math/prim/fun/log_sum_exp.hpp>
-#include <stan/math/prim/fun/size.hpp>
+#include <stan/math/prim/fun/max_size.hpp>
 
 namespace stan {
 namespace math {
@@ -44,10 +44,10 @@ plain_type_t<T_theta> poisson_binomial_alpha(int y, const T_theta& theta) {
 
 template <typename T_theta, typename T_scalar = scalar_type_t<T_theta>>
 auto poisson_binomial_alpha(std::vector<int> y, const T_theta& theta) {
-  size_t theta_size = theta.size();
-  std::vector<Eigen::Matrix<T_scalar, Eigen::Dynamic, 1>> result(theta_size);
+  size_t max_sizes = max_size(y, theta);
+  std::vector<Eigen::Matrix<T_scalar, Eigen::Dynamic, 1>> result(max_sizes);
   vector_seq_view<T_theta> theta_vec(theta);
-  for(size_t i = 0; i < theta_size; ++i) {
+  for(size_t i = 0; i < max_sizes; ++i) {
     result[i] = poisson_binomial_alpha(y[i], theta_vec[i]);
   }
 
