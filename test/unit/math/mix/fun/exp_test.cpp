@@ -10,10 +10,7 @@ TEST(mathMixMatFun, exp) {
                                       10);
   stan::test::expect_complex_common(f);
 */
-  Eigen::VectorXd tes(4);
-  tes << 1.2, -1, -0.5, 0.5;
-  stan::test::ad_tolerances tols;
-  tols.hessian_hessian_ = 1e-2;
-  tols.hessian_fvar_hessian_ = 1e-2;
-  stan::test::expect_ad(tols,f,tes);
+  Eigen::VectorXd tes(2);
+  tes << 1.2, 1.2;
+  stan::test::expect_ad(f,tes);
 }
