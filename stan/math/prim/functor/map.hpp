@@ -18,11 +18,11 @@ namespace math {
 
 namespace internal {
 
-template <typename ReduceFunction, typename ReturnType, typename Enable, typename... Args>
+template <typename ApplyFunction, typename ReturnType, typename Enable, typename... Args>
 struct map_impl {};
 
-template <typename ReduceFunction, typename ReturnType, typename... Args>
-struct map_impl<ReduceFunction, ReturnType,
+template <typename ApplyFunction, typename ReturnType, typename... Args>
+struct map_impl<ApplyFunction, ReturnType,
                          require_st_stan_scalar<ReturnType>, Args...> {
 
   template <typename TupleT>
@@ -40,7 +40,7 @@ struct map_impl<ReduceFunction, ReturnType,
     inline void operator()(const tbb::blocked_range<size_t>& r) const {
       apply([&](auto&&... args) {
                 for (size_t i = r.begin(); i < r.end(); ++i) {
-                  result_[i] = ReduceFunction()(i, args...);
+                  result_[i] = ApplyFunction()(i, args...);
                 }
               },
             args_);
@@ -63,11 +63,11 @@ struct map_impl<ReduceFunction, ReturnType,
 
 }  // namespace internal
 
-template <typename ReduceFunction, typename OutputType, typename... Args>
+template <typename ApplyFunction, typename OutputType, typename... Args>
 inline void map(OutputType&& result, int grainsize, std::ostream* msgs,
                          Args&&... args) {
 
-   internal::map_impl<ReduceFunction,
+   internal::map_impl<ApplyFunction,
                                OutputType, void,
                                Args...>()(std::forward<OutputType>(result),
                                        grainsize, msgs,
