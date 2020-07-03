@@ -16,63 +16,16 @@
 namespace stan {
 namespace math {
 
-namespace internal {
-
-template <typename ApplyFunction, typename ReturnType, typename Enable, typename... Args>
-struct map_impl {};
-
-template <typename ApplyFunction, typename ReturnType, typename... Args>
-struct map_impl<ApplyFunction, ReturnType,
-                         require_st_stan_scalar<ReturnType>, Args...> {
-
-  template <typename TupleT>
-  struct recursive_applier {
-    scalar_type_t<ReturnType>* result_;
-    std::ostream* msgs_;
-    TupleT* args_;
-
-    recursive_applier(scalar_type_t<ReturnType>* result, 
-                      std::ostream* msgs, TupleT* tuple_args)
-        : result_(result),
-          msgs_(msgs),
-          args_(tuple_args) {}
-
-    inline void operator()(const tbb::blocked_range<size_t>& r) const {
-      apply([&](auto&&... args) {
-                for (size_t i = r.begin(); i < r.end(); ++i) {
-                  result_[i] = ApplyFunction()(i, args...);
-                }
-              },
-            args_);
-    }
-  };
-
-  inline auto operator()(ReturnType&& result,
-                               int grainsize, std::ostream* msgs,
-                               Args&&... args) const {
-    const std::size_t num_terms = result.size();
-    auto args_tuple = std::make_tuple(args...);
-    recursive_applier<decltype(args_tuple)> worker(result.data(), msgs,
-                             (&args_tuple));
-    tbb::parallel_for(
-        tbb::blocked_range<std::size_t>(0, num_terms, grainsize), worker);
-
-    return worker.result_;
-  }
-};
-
-}  // namespace internal
 
 template <typename ApplyFunction, typename OutputType, typename... Args>
 inline void map(OutputType&& result, int grainsize, std::ostream* msgs,
                          Args&&... args) {
-
-   internal::map_impl<ApplyFunction,
-                               OutputType, void,
-                               Args...>()(std::forward<OutputType>(result),
-                                       grainsize, msgs,
-                                       std::forward<Args>(args)...);
-
+    tbb::parallel_for(
+        tbb::blocked_range<std::size_t>(0, result.size(), grainsize), 
+        [&](const tbb::blocked_range<size_t>& r) {
+        for (size_t i = r.begin(); i < r.end(); ++i)
+          result(i) = ApplyFunction()(i, args...);
+      });
 }
 
 }  // namespace math
