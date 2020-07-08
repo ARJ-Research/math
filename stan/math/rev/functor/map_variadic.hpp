@@ -9,7 +9,7 @@
 #include <stan/math/rev/core/precomputed_gradients.hpp>
 #include <stan/math/rev/core/save_adjoints.hpp>
 #include <tbb/task_arena.h>
-#include <tbb/parallel_reduce.h>
+#include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 
 #include <tuple>

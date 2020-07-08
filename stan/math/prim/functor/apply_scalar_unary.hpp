@@ -53,6 +53,7 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
    * Type of underlying scalar for the matrix type T.
    */
   using scalar_t = typename Eigen::internal::traits<T>::Scalar;
+#ifdef STAN_THREADS
   struct test_fun {
     template <typename Arg>
     auto operator()(size_t index, Arg&& arg) {
@@ -60,14 +61,6 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
     }
   };
 
-  /**
-   * Return the result of applying the function defined by the
-   * template parameter F to the specified matrix argument.
-   *
-   * @param x Matrix to which operation is applied.
-   * @return Componentwise application of the function specified
-   * by F to the specified matrix.
-   */
   static inline auto apply(const T& x) {
     using return_type = promote_scalar_t<decltype(F::fun(x(0))), T>;
     std::ostream msgs(NULL);
@@ -75,6 +68,17 @@ struct apply_scalar_unary<F, T, require_eigen_t<T>> {
     stan::math::map_variadic<test_fun>(out,1,&msgs,x);
     return out;
   }
+#else
+
+  static inline auto apply(const T& x) {
+    return x
+        .unaryExpr([](scalar_t x) {
+          return apply_scalar_unary<F, scalar_t>::apply(x);
+        })
+        .eval();
+  }
+
+#endif
   /**
    * Return type for applying the function elementwise to a matrix
    * expression template of type T.
