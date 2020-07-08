@@ -19,10 +19,10 @@ TEST(MathFunctions, log_falling_factorial_nan) {
   EXPECT_TRUE(std::isnan(stan::math::log_falling_factorial(nan, 3)));
 }
 
-TEST(MathFunctions, fdim_vec) {
+TEST(MathFunctions, log_falling_factorial_vec) {
   auto f = [](const auto& x1, const auto& x2) {
-    using stan::math::fdim;
-    return fdim(x1, x2);
+    using stan::math::log_falling_factorial;
+    return log_falling_factorial(x1, x2);
   };
 
   Eigen::VectorXd in1(3);
