@@ -9,12 +9,12 @@ namespace stan {
 namespace math {
 
 /**
- * Return the lesser of the two specified arguments.  If one is
- * not-a-number, return the other.
+ * Return the floating point remainder of the first argument divided by
+ * the second argument.
  *
  * @param x First argument.
  * @param y Second argument.
- * @return Minimum of x or y and if one is NaN return the other
+ * @return Floating point remainder x / y.
  */
 template <typename T1, typename T2, require_all_arithmetic_t<T1, T2>* = nullptr>
 inline double fmod(T1 x, T2 y) {
