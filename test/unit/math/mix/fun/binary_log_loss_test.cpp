@@ -12,3 +12,16 @@ TEST(mathMixScalFun, binaryLogLoss) {
       stan::test::expect_ad(f(y), y_hat);
   }
 }
+
+TEST(mathMixScalFun, binaryLogLoss_vec) {
+  auto f = [](const auto& x1, const auto& x2) {
+    using stan::math::binary_log_loss;
+    return binary_log_loss(x1, x2);
+  };
+
+  Eigen::VectorXi in1(2);
+  in1 << 3, 1;
+  Eigen::VectorXd in2(2);
+  in2 << 0.5, 0.4;
+  stan::test::expect_ad_vectorized_binary(f, in1, in2);
+}

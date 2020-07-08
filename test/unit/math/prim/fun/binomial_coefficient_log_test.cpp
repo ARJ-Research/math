@@ -1,4 +1,5 @@
 #include <stan/math/prim.hpp>
+#include <test/unit/math/prim/fun/binary_scalar_tester.hpp>
 #include <test/unit/math/expect_near_rel.hpp>
 #include <gtest/gtest.h>
 #include <cmath>
@@ -63,4 +64,17 @@ TEST(MathFunctions, binomial_coefficient_log_errors_edge_cases) {
   EXPECT_FLOAT_EQ(binomial_coefficient_log(-1, -0.3), INFTY);
   EXPECT_FLOAT_EQ(binomial_coefficient_log(0.3, -1), -INFTY);
   EXPECT_FLOAT_EQ(binomial_coefficient_log(5.0, 6.0), -INFTY);
+}
+
+TEST(MathFunctions, bessel_first_kind_vec) {
+  auto f = [](const auto& x1, const auto& x2) {
+    using stan::math::bessel_first_kind;
+    return bessel_first_kind(x1, x2);
+  };
+
+  Eigen::VectorXd in1(3);
+  in1 << 1.5, 13, -1.5;
+  Eigen::VectorXd in2(3);
+  in2 << -1.3, 0.7, 2.8;
+  stan::test::binary_scalar_tester(f, in1, in2);
 }

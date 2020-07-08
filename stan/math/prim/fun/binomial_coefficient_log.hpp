@@ -77,7 +77,7 @@ namespace math {
  */
 
 template <typename T_n, typename T_k,
-          require_all_arithmetic_t<T_n, T_k>* = nullptr>
+          require_all_stan_scalar_t<T_n, T_k>* = nullptr>
 inline return_type_t<T_n, T_k> binomial_coefficient_log(const T_n n,
                                                         const T_k k) {
   using T_partials_return = partials_return_t<T_n, T_k>;

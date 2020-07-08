@@ -32,7 +32,7 @@ namespace math {
  * @param y second argument
  * @return Result of log difference of inverse logits of arguments.
  */
-template <typename T1, typename T2>
+template <typename T1, typename T2, require_all_arithmetic_t<T1, T2>* = nullptr>
 inline return_type_t<T1, T2> log_inv_logit_diff(const T1& x, const T2& y) {
   return x - log1p_exp(x) + log1m_exp(y - x) - log1p_exp(y);
 }
@@ -50,7 +50,8 @@ inline return_type_t<T1, T2> log_inv_logit_diff(const T1& x, const T2& y) {
 template <typename T1, typename T2, require_any_container_t<T1, T2>* = nullptr>
 inline auto log_inv_logit_diff(const T1& a, const T2& b) {
   return apply_scalar_binary(
-      a, b, [&](const auto& c, const auto& d) { return log_inv_logit_diff(c, d); });
+      a, b, [&](const auto& c, const auto& d) {
+        return log_inv_logit_diff(c, d); });
 }
 
 }  // namespace math
