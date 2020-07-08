@@ -23,13 +23,14 @@ TEST(mathMixScalFun, fmod) {
 
 TEST(mathMixScalFun, fmod_vec) {
   auto f = [](const auto& x1, const auto& x2) {
+    using std::fmod;
     using stan::math::fmod;
     return fmod(x1, x2);
   };
 
   Eigen::VectorXd in1(2);
-  in1 << 3.0, 1.5;
+  in1 << 2.0, 2.0;
   Eigen::VectorXd in2(2);
-  in2 << 0.5, 3.4;
+  in2 << 3.0, 4.0;
   stan::test::expect_ad_vectorized_binary(f, in1, in2);
 }

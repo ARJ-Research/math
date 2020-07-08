@@ -41,7 +41,7 @@ namespace math {
  * negative, or v is less than -1
  * @return log of Bessel I function
  */
-template <typename T1, typename T2, require_all_arithmetic_t<T1, T2>* = nullptr>
+template <typename T1, typename T2, require_all_stan_scalar_t<T1, T2>* = nullptr>
 inline return_type_t<T1, T2, double> log_modified_bessel_first_kind(
     const T1 v, const T2 z) {
   check_not_nan("log_modified_bessel_first_kind", "first argument (order)", v);

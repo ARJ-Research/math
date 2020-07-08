@@ -49,7 +49,8 @@ namespace math {
  * @param b the second variable
  * @return a * log(b)
  */
-template <typename T_a, typename T_b, require_all_arithmetic_t<T_a, T_b>* = nullptr>
+template <typename T_a, typename T_b,
+          require_all_arithmetic_t<T_a, T_b>* = nullptr>
 inline return_type_t<T_a, T_b> multiply_log(const T_a a, const T_b b) {
   using std::log;
   if (b == 0.0 && a == 0.0) {
