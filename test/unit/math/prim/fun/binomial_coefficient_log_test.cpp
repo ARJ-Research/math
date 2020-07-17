@@ -68,13 +68,13 @@ TEST(MathFunctions, binomial_coefficient_log_errors_edge_cases) {
 
 TEST(MathFunctions, bessel_first_kind_vec) {
   auto f = [](const auto& x1, const auto& x2) {
-    using stan::math::bessel_first_kind;
-    return bessel_first_kind(x1, x2);
+    using stan::math::binomial_coefficient_log;
+    return binomial_coefficient_log(x1, x2);
   };
 
   Eigen::VectorXd in1(3);
-  in1 << 1.5, 13, -1.5;
+  in1 << 6.5, 13, 15;
   Eigen::VectorXd in2(3);
-  in2 << -1.3, 0.7, 2.8;
+  in2 << 0.2, 0.7, 2.8;
   stan::test::binary_scalar_tester(f, in1, in2);
 }

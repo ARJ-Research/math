@@ -49,9 +49,7 @@ TEST(MathFunctions, choose_vec) {
     return choose(x1, x2);
   };
 
-  Eigen::VectorXi in1(3);
-  in1 << 10, 3, 1;
-  Eigen::VectorXi in2(3);
-  in2 << 3, 2, 1;
-  stan::test::binary_scalar_tester(f, in1, in2);
+  std::vector<int> std_in1{10, 3, 1};
+  std::vector<int> std_in2{3, 2, 1};
+  stan::test::binary_scalar_tester(f, std_in1, std_in2);
 }
