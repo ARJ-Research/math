@@ -15,10 +15,10 @@ template <bool Ranged, typename ApplyFunction, typename IndexFunction,
           require_st_arithmetic<Res>* = nullptr,
           std::enable_if_t<!Ranged>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
-                                   const IndexFunction& index_fun,
-                                   Res&& result, ArgsTuple&& x) {
+                         const IndexFunction& index_fun,
+                         Res&& result, int grainsize, ArgsTuple&& x) {
   tbb::parallel_for(
-    tbb::blocked_range<size_t>(0, result.size()), 
+    tbb::blocked_range<size_t>(0, result.size(), grainsize), 
     [&x,&app_fun,&index_fun,&result](
      const tbb::blocked_range<size_t>& r) {
       for (size_t i = r.begin(); i < r.end(); ++i) {
@@ -36,10 +36,10 @@ template <bool Ranged, typename ApplyFunction, typename IndexFunction,
           require_st_arithmetic<Res>* = nullptr,
           std::enable_if_t<Ranged>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
-                                   const IndexFunction& index_fun,
-                                   Res&& result, ArgsTuple&& x) {
+                         const IndexFunction& index_fun,
+                         Res&& result, int grainsize, ArgsTuple&& x) {
   tbb::parallel_for(
-    tbb::blocked_range<size_t>(0, result.size()), 
+    tbb::blocked_range<size_t>(0, result.size(), grainsize), 
     [&x,&app_fun,&index_fun,&result](
      const tbb::blocked_range<size_t>& r) {
 
@@ -55,10 +55,10 @@ template <typename ApplyFunction, typename IndexFunction,
           typename Res, typename ArgsTuple,
           require_st_arithmetic<Res>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
-                                   const IndexFunction& index_fun,
-                                   Res&& result, ArgsTuple&& x) {
+                         const IndexFunction& index_fun,
+                         Res&& result, int grainsize, ArgsTuple&& x) {
 parallel_map<false>(app_fun, index_fun, std::forward<Res>(result),
-                    std::forward<ArgsTuple>(x));
+                    grainsize, std::forward<ArgsTuple>(x));
 }
 }  // namespace math
 }  // namespace stan

@@ -14,8 +14,9 @@ template <typename ApplyFunction, typename IndexFunction,
           typename Res, typename ArgsTuple,
           require_st_var<Res>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
-                                   const IndexFunction& index_fun,
-                                   Res&& result, ArgsTuple&& x) {
+                         const IndexFunction& index_fun,
+                         Res&& result, int grainsize,
+                         ArgsTuple&& x) {
 
     // Functors for manipulating vars at a given iteration of the loop
     auto var_counter = [&](auto&... xargs) {
@@ -49,7 +50,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
     Eigen::Map<Eigen::VectorXd>(partials, S * nvars).setZero();
 
     tbb::parallel_for(
-      tbb::blocked_range<size_t>(0, S), 
+      tbb::blocked_range<size_t>(0, S, grainsize), 
       [&x,&partials,&values,&app_fun,&vari_saver,
        &var_copier,&index_fun,&varis,&nvars](
        const tbb::blocked_range<size_t>& r) {
