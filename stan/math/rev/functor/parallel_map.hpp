@@ -11,12 +11,12 @@ namespace stan {
 namespace math {
 
 template <typename ApplyFunction, typename IndexFunction,
-          typename Res, typename ArgsTuple,
+          typename Res, typename... Args,
           require_st_var<Res>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
                          Res&& result, int grainsize,
-                         ArgsTuple&& x) {
+                         Args&&... x) {
 
     // Functors for manipulating vars at a given iteration of the loop
     auto var_counter = [&](auto&... xargs) {
@@ -37,40 +37,26 @@ inline void parallel_map(const ApplyFunction& app_fun,
     // Assuming that the number of the vars at each iteration of the loop is
     // the same (as the operations at each iteration should be the same), we can
     // just count vars at the first iteration.
-    int nvars = apply([&](auto&&... args) {
-      return index_fun(0, var_counter, args...);
-    }, x);
+    int nvars = index_fun(0, var_counter, x...);
 
     vari** varis = ChainableStack::instance_->memalloc_.alloc_array<vari*>(
       S * nvars);
     double* values = ChainableStack::instance_->memalloc_.alloc_array<double>(
       S);
-    double* partials = ChainableStack::instance_->memalloc_.alloc_array<double>(
-      S * nvars);
-    Eigen::Map<Eigen::VectorXd>(partials, S * nvars).setZero();
+    Eigen::VectorXd partials = Eigen::VectorXd::Zero(S * nvars);
 
     tbb::parallel_for(
       tbb::blocked_range<size_t>(0, S, grainsize), 
-      [&x,&partials,&values,&app_fun,&vari_saver,
-       &var_copier,&index_fun,&varis,&nvars](
-       const tbb::blocked_range<size_t>& r) {
+      [&](const tbb::blocked_range<size_t>& r) {
         // Run nested autodiff in this scope
         nested_rev_autodiff nested;
 
         for (size_t i = r.begin(); i < r.end(); ++i) {
-          auto args_tuple_local_copy = apply(
-            [&](auto&&... args) {
-              // Save varis from arguments at current iteration
-              index_fun(i, vari_saver(i, nvars, varis), args...);
-
-              // Create nested autodiff copies of all arguments at current
-              // iteration that do not point back to main autodiff stack
-              return index_fun(i, var_copier, args...);
-            }, std::forward<ArgsTuple>(x));
+          index_fun(i, vari_saver(i, nvars, varis), x...);
+          auto args_tuple_local_copy = index_fun(i, var_copier, x...);
 
           // Apply specified function to arguments at current iteration
-          var out = apply(
-              [&](auto&&... args) {
+          var out = apply([&](auto&&... args) {
                 return app_fun(args...);
               }, args_tuple_local_copy);
 
@@ -80,7 +66,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
           // autodiff stack
           values[i] = std::move(out.vi_->val_);
           apply([&](auto&&... args) {
-            accumulate_adjoints(partials + nvars*i,
+            accumulate_adjoints(partials.data() + nvars*i,
                                 std::forward<decltype(args)>(args)...); },
             std::move(args_tuple_local_copy));
         }
@@ -91,7 +77,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
       values[i],
       nvars,
       varis + nvars*i,
-      partials + nvars*i));
+      partials.data() + nvars*i));
   }
 }
 
