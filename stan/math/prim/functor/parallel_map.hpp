@@ -105,8 +105,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
  * evaluation.
  */
 template <typename ApplyFunction, typename IndexFunction,
-          typename Res, typename... Args,
-          require_st_arithmetic<Res>* = nullptr>
+          typename Res, typename... Args>
 inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
                          Res&& result, int grainsize, Args&&... x) {
