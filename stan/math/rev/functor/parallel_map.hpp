@@ -132,18 +132,16 @@ inline void parallel_map(const ApplyFunction& app_fun,
     // just count vars at the first iteration.
     int nvars = index_fun(0, 0, var_counter, x...);
 
-    std::cout << nvars << std::endl;
-
     vari** varis = ChainableStack::instance_->memalloc_.alloc_array<vari*>(
       S * nvars);
     Eigen::MatrixXd values(R, C);
     Eigen::VectorXd partials = Eigen::VectorXd::Zero(S * nvars);
 
-    Eigen::Map<Eigen::MatrixXd,0,Eigen::InnerStride<>> par_map(
-      partials.data(), R, C, Eigen::InnerStride<>(nvars)
+    Eigen::Map<Eigen::MatrixXd,0,Eigen::Stride<-1,-1>> par_map(
+      partials.data(), R, C, Eigen::Stride<-1,-1>(nvars*R,nvars)
     );
-    Eigen::Map<stan::math::matrix_vi,0,Eigen::InnerStride<>> vari_map(
-      varis, R, C, Eigen::InnerStride<>(nvars)
+    Eigen::Map<stan::math::matrix_vi,0,Eigen::Stride<-1,-1>> vari_map(
+      varis, R, C, Eigen::Stride<-1,-1>(nvars*R,nvars)
     );
 
     tbb::parallel_for(

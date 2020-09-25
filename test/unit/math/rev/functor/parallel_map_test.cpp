@@ -119,12 +119,10 @@ TEST(MathFunctions, parall_map_var_2d) {
   using stan::math::pow;
   using stan::math::var;
   using stan::math::matrix_v;
-  Eigen::MatrixXd par1 = Eigen::MatrixXd::Random(10,10);
-  Eigen::MatrixXd par2 = Eigen::MatrixXd::Random(10,10);
-  matrix_v in1_par = par1;
-  matrix_v in2_par = par2;
-  matrix_v in1_ser = par1;
-  matrix_v in2_ser = par2;
+  matrix_v in1_par = matrix_v::Random(10,10);
+  matrix_v in2_par = matrix_v::Random(10,10);
+  matrix_v in1_ser = in1_par;
+  matrix_v in2_ser = in2_par;
   matrix_v out_par(10,10);
   matrix_v out_ser(10,10);
   
