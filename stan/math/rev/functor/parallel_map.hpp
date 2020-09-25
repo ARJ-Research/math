@@ -7,6 +7,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include <tbb/blocked_range2d.h>
+#include <iostream>
 
 namespace stan {
 namespace math {
@@ -33,9 +34,9 @@ inline void parallel_map(const ApplyFunction& app_fun,
       return std::tuple<decltype(deep_copy_vars(xargs))...>(
         deep_copy_vars(xargs)...);
     };
-    auto vari_saver = [&](int i, int nvars, vari** varis) {
+    auto vari_saver = [&](vari** varis) {
       return [=](const auto&... xargs) {
-        save_varis(varis + nvars*i, xargs...);
+        save_varis(varis, xargs...);
       };
     };
 
@@ -51,6 +52,13 @@ inline void parallel_map(const ApplyFunction& app_fun,
     Eigen::VectorXd values(S);
     Eigen::VectorXd partials = Eigen::VectorXd::Zero(S * nvars);
 
+    Eigen::Map<Eigen::VectorXd,0,Eigen::InnerStride<>> par_map(
+      partials.data(), S, Eigen::InnerStride<>(nvars)
+    );
+    Eigen::Map<stan::math::vector_vi,0,Eigen::InnerStride<>> vari_map(
+      varis, S, Eigen::InnerStride<>(nvars)
+    );
+
     tbb::parallel_for(
       tbb::blocked_range<size_t>(0, S, grainsize), 
       [&](const tbb::blocked_range<size_t>& r) {
@@ -58,7 +66,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
         nested_rev_autodiff nested;
 
         for (size_t i = r.begin(); i < r.end(); ++i) {
-          index_fun(i, vari_saver(i, nvars, varis), x...);
+          index_fun(i, vari_saver(&vari_map(i)), x...);
           auto args_tuple_local_copy = index_fun(i, var_copier, x...);
 
           // Apply specified function to arguments at current iteration
@@ -72,7 +80,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
           // autodiff stack
           values[i] = std::move(out.vi_->val_);
           apply([&](auto&&... args) {
-            accumulate_adjoints(partials.data() + nvars*i,
+            accumulate_adjoints(&par_map(i),
                                 std::forward<decltype(args)>(args)...); },
             std::move(args_tuple_local_copy));
         }
@@ -82,8 +90,8 @@ inline void parallel_map(const ApplyFunction& app_fun,
     result.coeffRef(i) = var(new precomputed_gradients_vari(
       values[i],
       nvars,
-      varis + nvars*i,
-      partials.data() + nvars*i));
+      &vari_map(i),
+      &par_map(i)));
   }
 }
 
@@ -109,9 +117,9 @@ inline void parallel_map(const ApplyFunction& app_fun,
       return std::tuple<decltype(deep_copy_vars(xargs))...>(
         deep_copy_vars(xargs)...);
     };
-    auto vari_saver = [&](int i, int nvars, vari** varis) {
+    auto vari_saver = [&](vari** varis) {
       return [=](const auto&... xargs) {
-        save_varis(varis + nvars*i, xargs...);
+        save_varis(varis, xargs...);
       };
     };
 
@@ -124,10 +132,19 @@ inline void parallel_map(const ApplyFunction& app_fun,
     // just count vars at the first iteration.
     int nvars = index_fun(0, 0, var_counter, x...);
 
+    std::cout << nvars << std::endl;
+
     vari** varis = ChainableStack::instance_->memalloc_.alloc_array<vari*>(
       S * nvars);
     Eigen::MatrixXd values(R, C);
     Eigen::VectorXd partials = Eigen::VectorXd::Zero(S * nvars);
+
+    Eigen::Map<Eigen::MatrixXd,0,Eigen::InnerStride<>> par_map(
+      partials.data(), R, C, Eigen::InnerStride<>(nvars)
+    );
+    Eigen::Map<stan::math::matrix_vi,0,Eigen::InnerStride<>> vari_map(
+      varis, R, C, Eigen::InnerStride<>(nvars)
+    );
 
     tbb::parallel_for(
       tbb::blocked_range2d<size_t>(0, result.rows(), 0, result.cols()), 
@@ -138,7 +155,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
 
         for (size_t j = r.cols().begin(); j < r.cols().end(); ++j) {
           for (size_t i = r.rows().begin(); i < r.rows().end(); ++i) {
-            index_fun(i, j, vari_saver(j + i*C, nvars, varis), x...);
+            index_fun(i, j, vari_saver(&vari_map(i, j)), x...);
             auto args_tuple_local_copy = index_fun(i, j, var_copier, x...);
 
             // Apply specified function to arguments at current iteration
@@ -152,7 +169,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
             // autodiff stack
             values(i, j) = std::move(out.vi_->val_);
             apply([&](auto&&... args) {
-              accumulate_adjoints(partials.data() + nvars*(j + i*C),
+              accumulate_adjoints(&par_map(i,j),
                                   std::forward<decltype(args)>(args)...); },
               std::move(args_tuple_local_copy));
           }
@@ -164,8 +181,8 @@ inline void parallel_map(const ApplyFunction& app_fun,
       result(i, j) = var(new precomputed_gradients_vari(
         values(i, j),
         nvars,
-        varis + nvars*(j + i*C),
-        partials.data() + nvars*(j + i*C)));
+        &vari_map(i, j),
+        &par_map(i,j)));
     }
   }
 }
