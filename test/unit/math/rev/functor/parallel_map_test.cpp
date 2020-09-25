@@ -40,6 +40,8 @@ TEST(MathFunctions, parall_map) {
 
   EXPECT_MATRIX_EQ(in1_par.adj(), in1_ser.adj());
   EXPECT_MATRIX_EQ(in2_par.adj(), in2_ser.adj());
+
+  stan::math::recover_memory();
 }
 
 TEST(MathFunctions, parall_map_vec) {
@@ -82,6 +84,8 @@ TEST(MathFunctions, parall_map_vec) {
   EXPECT_MATRIX_EQ(in1_par.adj(), in1_ser.adj());
   EXPECT_MATRIX_EQ(in2_par.adj(), in2_ser.adj());
   EXPECT_MATRIX_EQ(in3_par.adj(), in3_ser.adj());
+
+  stan::math::recover_memory();
 }
 
 TEST(MathFunctions, parall_map_ranged_var) {
@@ -107,16 +111,20 @@ TEST(MathFunctions, parall_map_ranged_var) {
   stan::math::parallel_map<true>(f, ind_f, std::forward<stan::math::vector_v>(out_par), 1,
                          in1_par);
   EXPECT_MATRIX_FLOAT_EQ(out_par.val(), in1_par.val().array().exp().matrix());
+
+  stan::math::recover_memory();
 }
 
 TEST(MathFunctions, parall_map_var_2d) {
   using stan::math::pow;
   using stan::math::var;
   using stan::math::matrix_v;
-  matrix_v in1_par = matrix_v::Random(100,10);
-  matrix_v in2_par = matrix_v::Random(100,10);
-  matrix_v in1_ser = in1_par;
-  matrix_v in2_ser = in2_par;
+  Eigen::MatrixXd par1 = Eigen::MatrixXd::Random(100,10);
+  Eigen::MatrixXd par2 = Eigen::MatrixXd::Random(100,10);
+  matrix_v in1_par = par1;
+  matrix_v in2_par = par2;
+  matrix_v in1_ser = par1;
+  matrix_v in2_ser = par2;
   matrix_v out_par(100,10);
   matrix_v out_ser(100,10);
   
@@ -151,4 +159,5 @@ TEST(MathFunctions, parall_map_var_2d) {
 
   EXPECT_MATRIX_EQ(in1_par.adj(), in1_ser.adj());
   EXPECT_MATRIX_EQ(in2_par.adj(), in2_ser.adj());
+
 }
