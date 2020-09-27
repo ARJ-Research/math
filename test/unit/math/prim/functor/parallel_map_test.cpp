@@ -20,7 +20,6 @@ TEST(MathFunctions, parall_map_prim) {
   // Functor defining function to be applied to indexed arguments
   auto f = [&](const auto& x) { return std::exp(x); };
 
-  // Boolean template parameter to enable ranged parallelism
   stan::math::parallel_map(f, ind_f, std::forward<Eigen::VectorXd>(out_par), 1,
                          in1_par);
   EXPECT_MATRIX_FLOAT_EQ(out_par, in1_par.array().exp().matrix());
@@ -43,7 +42,6 @@ TEST(MathFunctions, parall_map_prim_2d) {
   // Functor defining function to be applied to indexed arguments
   auto f = [&](const auto& x) { return std::exp(x); };
 
-  // Boolean template parameter to enable ranged parallelism
   stan::math::parallel_map(f, ind_f, std::forward<Eigen::MatrixXd>(out_par),
                                   1, 1, in1_par);
   EXPECT_MATRIX_FLOAT_EQ(out_par, in1_par.array().exp().matrix());

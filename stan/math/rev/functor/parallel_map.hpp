@@ -52,7 +52,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
 
     // By using a Map with an InnerStride of length nvars we can index the Map
     // normally (i.e., from 0 to S-1) to get the location in memory for the
-    // varis/adjoints for that iteration. Wherethe InnerStride (nvars) is the
+    // varis/adjoints for that iteration. Where the InnerStride (nvars) is the
     // distance between consecutive indexes.
     Eigen::Map<Eigen::VectorXd, 0, Eigen::InnerStride<>> par_map(
       partials, S, Eigen::InnerStride<>(nvars)
