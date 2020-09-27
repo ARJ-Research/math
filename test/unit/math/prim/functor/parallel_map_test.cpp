@@ -44,8 +44,8 @@ TEST(MathFunctions, parall_map_prim_2d) {
   auto f = [&](const auto& x) { return std::exp(x); };
 
   // Boolean template parameter to enable ranged parallelism
-  stan::math::parallel_map<false>(f, ind_f, std::forward<Eigen::MatrixXd>(out_par), 1,
-                         in1_par);
+  stan::math::parallel_map<false>(f, ind_f, std::forward<Eigen::MatrixXd>(out_par),
+                                  1, 1, in1_par);
   EXPECT_MATRIX_FLOAT_EQ(out_par, in1_par.array().exp().matrix());
 }
 
@@ -91,7 +91,7 @@ TEST(MathFunctions, parall_map_ranged_2d) {
   auto f = [&](const auto& x) { return x.array().exp().matrix(); };
 
   // Boolean template parameter to enable ranged parallelism
-  stan::math::parallel_map<true>(f, ind_f, std::forward<Eigen::MatrixXd>(out_par), 1,
-                         in1_par);
+  stan::math::parallel_map<true>(f, ind_f, std::forward<Eigen::MatrixXd>(out_par),
+                                 1, 1, in1_par);
   EXPECT_MATRIX_FLOAT_EQ(out_par, in1_par.array().exp().matrix());
 }
