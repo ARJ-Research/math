@@ -38,14 +38,14 @@ inline void parallel_map(const ApplyFunction& app_fun,
 template <bool Ranged, typename ApplyFunction, typename IndexFunction,
           typename Res, typename... Args,
           require_st_arithmetic<Res>* = nullptr,
-          std::enable_if_t<!Ranged>* = nullptr,
-          std::enable_if_t<is_callable<IndexFunction,int, int,
-                                       ApplyFunction,Args...>::value>* = nullptr>
+          std::enable_if_t<!Ranged>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
-                         Res&& result, int grainsize, Args&&... x) {
+                         Res&& result, int row_grainsize,
+                         int col_grainsize, Args&&... x) {
   tbb::parallel_for(
-    tbb::blocked_range2d<size_t>(0, result.rows(), 0, result.cols()), 
+    tbb::blocked_range2d<size_t>(0, result.rows(), row_grainsize,
+                                 0, result.cols(), col_grainsize), 
     [&](
      const tbb::blocked_range2d<size_t>& r) {
       for (size_t j = r.cols().begin(); j < r.cols().end(); ++j) {
@@ -78,17 +78,16 @@ inline void parallel_map(const ApplyFunction& app_fun,
 }
 
 /**
- * Evaluate segments of a matrix in parallel
+ * Evaluate blocks of a matrix in parallel
  */
 template <bool Ranged, typename ApplyFunction, typename IndexFunction,
           typename Res, typename... Args,
           require_st_arithmetic<Res>* = nullptr,
-          std::enable_if_t<Ranged>* = nullptr,
-          std::enable_if_t<is_callable<IndexFunction,int, int, int, int,
-                                       ApplyFunction,Args...>::value>* = nullptr>
+          std::enable_if_t<Ranged>* = nullptr>
 inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
-                         Res&& result, int grainsize, Args&&... x) {
+                         Res&& result, int row_grainsize,
+                         int col_grainsize, Args&&... x) {
   tbb::parallel_for(
     tbb::blocked_range2d<size_t>(0, result.rows(), 0, result.cols()), 
     [&](
@@ -111,6 +110,20 @@ inline void parallel_map(const ApplyFunction& app_fun,
                          Res&& result, int grainsize, Args&&... x) {
 parallel_map<false>(app_fun, index_fun, std::forward<Res>(result),
                     grainsize, std::forward<Args>(x)...);
+}
+
+/**
+ * If no boolean parameter is passed then assume loop, rather than block,
+ * evaluation.
+ */
+template <typename ApplyFunction, typename IndexFunction,
+          typename Res, typename... Args>
+inline void parallel_map(const ApplyFunction& app_fun,
+                         const IndexFunction& index_fun,
+                         Res&& result, int row_grainsize,
+                         int col_grainsize, Args&&... x) {
+parallel_map<false>(app_fun, index_fun, std::forward<Res>(result),
+                    row_grainsize, col_grainsize, std::forward<Args>(x)...);
 }
 }  // namespace math
 }  // namespace stan
