@@ -7,7 +7,7 @@ namespace stan {
 namespace math {
 
 /**
- * Evaluate a single-index loop in parallel
+ * Evaluate a single-index loop (not parallelised)
  */
 template <typename ApplyFunction, typename IndexFunction,
           typename Res, typename... Args,
@@ -23,7 +23,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
 }
 
 /**
- * Evaluate a two-index loop in parallel
+ * Evaluate a two-index loop (not parallelised)
  */
 template <typename ApplyFunction, typename IndexFunction,
           typename Res, typename... Args,
