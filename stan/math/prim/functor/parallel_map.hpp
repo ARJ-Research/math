@@ -18,6 +18,7 @@ template <typename ApplyFunction, typename IndexFunction,
 inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
                          Res&& result, int grainsize, Args&&... x) {
+#ifdef STAN_THREADS
   tbb::parallel_for(
     tbb::blocked_range<size_t>(0, result.size(), grainsize), 
     [&](
@@ -27,6 +28,12 @@ inline void parallel_map(const ApplyFunction& app_fun,
         result(i) = index_fun(i, app_fun, x...);
       }
     });
+#else
+  for (size_t i = 0; i < result.size(); ++i) {
+    // Apply specified function to arguments at current iteration
+    result(i) = index_fun(i, app_fun, x...);
+  }
+#endif
 }
 
 /**
@@ -39,6 +46,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
                          Res&& result, int row_grainsize,
                          int col_grainsize, Args&&... x) {
+#ifdef STAN_THREADS
   tbb::parallel_for(
     tbb::blocked_range2d<size_t>(0, result.rows(), row_grainsize,
                                  0, result.cols(), col_grainsize), 
@@ -51,6 +59,14 @@ inline void parallel_map(const ApplyFunction& app_fun,
         }
       }
     });
+#else
+  for (size_t j = 0; j < result.cols(); ++j) {
+    for (size_t i = 0; i < result.rows(); ++i) {
+      // Apply specified function to arguments at current iteration
+      result(i, j) = index_fun(i, j, app_fun, x...);
+    }
+  }
+#endif
 }
 
 }  // namespace math

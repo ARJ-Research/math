@@ -20,7 +20,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
                          Res&& result, int grainsize,
                          Args&&... x) {
-
+#ifdef STAN_THREADS
     // Functors for manipulating vars at a given iteration of the loop
     auto var_counter = [&](auto&... xargs) {
       return count_vars(xargs...);
@@ -96,6 +96,12 @@ inline void parallel_map(const ApplyFunction& app_fun,
       &vari_map(i),
       &par_map(i)));
   }
+#else
+  for (size_t i = 0; i < result.size(); ++i) {
+    // Apply specified function to arguments at current iteration
+    result(i) = index_fun(i, app_fun, x...);
+  }
+#endif
 }
 
 /**
@@ -108,7 +114,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
                          const IndexFunction& index_fun,
                          Res&& result, int row_grainsize,
                          int col_grainsize, Args&&... x) {
-
+#ifdef STAN_THREADS
     // Functors for manipulating vars at a given iteration of the loop
     auto var_counter = [&](auto&... xargs) {
       return count_vars(xargs...);
@@ -194,6 +200,14 @@ inline void parallel_map(const ApplyFunction& app_fun,
         &par_map(i, j)));
     }
   }
+#else
+  for (size_t j = 0; j < result.cols(); ++j) {
+    for (size_t i = 0; i < result.rows(); ++i) {
+      // Apply specified function to arguments at current iteration
+      result(i, j) = index_fun(i, j, app_fun, x...);
+    }
+  }
+#endif
 }
 
 }  // namespace math
