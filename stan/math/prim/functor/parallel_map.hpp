@@ -25,13 +25,13 @@ inline void parallel_map(const ApplyFunction& app_fun,
      const tbb::blocked_range<size_t>& r) {
       for (size_t i = r.begin(); i < r.end(); ++i) {
         // Apply specified function to arguments at current iteration
-        result(i) = index_fun(i, app_fun, x...);
+        result[i] = index_fun(i, app_fun, x...);
       }
     });
 #else
   for (size_t i = 0; i < result.size(); ++i) {
     // Apply specified function to arguments at current iteration
-    result(i) = index_fun(i, app_fun, x...);
+    result[i] = index_fun(i, app_fun, x...);
   }
 #endif
 }

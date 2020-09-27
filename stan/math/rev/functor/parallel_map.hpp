@@ -69,7 +69,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
         const nested_rev_autodiff nested;
 
         for (size_t i = r.begin(); i < r.end(); ++i) {
-          index_fun(i, vari_saver(&vari_map(i)), x...);
+          index_fun(i, vari_saver(&vari_map[i]), x...);
           auto args_tuple_local_copy = index_fun(i, var_copier, x...);
 
           // Apply specified function to arguments at current iteration
@@ -82,7 +82,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
           // autodiff stack
           values[i] = std::move(out.vi_->val_);
           apply([&](auto&&... args) {
-              save_adjoints(&par_map(i),
+              save_adjoints(&par_map[i],
                             std::forward<decltype(args)>(args)...); },
             std::move(args_tuple_local_copy));
         }
@@ -90,16 +90,16 @@ inline void parallel_map(const ApplyFunction& app_fun,
 
   // Pack values and adjoints into new vars on main autodiff stack
   for(int i = 0; i < S; ++i) {
-    result.coeffRef(i) = var(new precomputed_gradients_vari(
+    result[i] = var(new precomputed_gradients_vari(
       values[i],
       nvars,
-      &vari_map(i),
-      &par_map(i)));
+      &vari_map[i],
+      &par_map[i]));
   }
 #else
   for (size_t i = 0; i < result.size(); ++i) {
     // Apply specified function to arguments at current iteration
-    result(i) = index_fun(i, app_fun, x...);
+    result[i] = index_fun(i, app_fun, x...);
   }
 #endif
 }

@@ -18,7 +18,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
                          Res&& result, int grainsize, Args&&... x) {
   for (size_t i = 0; i < result.size(); ++i) {
     // Apply specified function to arguments at current iteration
-    result(i) = index_fun(i, app_fun, x...);
+    result[i] = index_fun(i, app_fun, x...);
   }
 }
 
