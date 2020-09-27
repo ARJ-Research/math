@@ -13,8 +13,8 @@ TEST(MathFunctions, parall_map) {
   vector_v in2_ser = in2_par;
   vector_v out_par(10);
   vector_v out_ser(10);
-  
-  for(int i = 0; i < 10; ++i) {
+
+  for (int i = 0; i < 10; ++i) {
     out_ser[i] = in1_ser[i] * 0.5 + exp(in2_ser[i]);
   }
 
@@ -33,7 +33,7 @@ TEST(MathFunctions, parall_map) {
   EXPECT_MATRIX_EQ(out_par.val(), out_ser.val());
   EXPECT_MATRIX_EQ(out_par.adj(), out_ser.adj());
 
-  for(int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 10; ++i) {
     out_par[i].grad();
     out_ser[i].grad();
   }
@@ -56,8 +56,8 @@ TEST(MathFunctions, parall_map_vec) {
   vector_v in3_ser = in3_par;
   vector_v out_par(10);
   vector_v out_ser(10);
-  
-  for(int i = 0; i < 10; ++i) {
+
+  for (int i = 0; i < 10; ++i) {
     out_ser[i] = in1_ser[i] * sum(in2_ser) + exp(in3_ser[i]);
   }
 
@@ -76,7 +76,7 @@ TEST(MathFunctions, parall_map_vec) {
   EXPECT_MATRIX_EQ(out_par.val(), out_ser.val());
   EXPECT_MATRIX_EQ(out_par.adj(), out_ser.adj());
 
-  for(int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 10; ++i) {
     out_par[i].grad();
     out_ser[i].grad();
   }
@@ -93,16 +93,16 @@ TEST(MathFunctions, parall_map_var_2d) {
   using stan::math::pow;
   using stan::math::var;
   using stan::math::matrix_v;
-  matrix_v in1_par = matrix_v::Random(10,10);
-  matrix_v in2_par = matrix_v::Random(10,10);
+  matrix_v in1_par = matrix_v::Random(10, 10);
+  matrix_v in2_par = matrix_v::Random(10, 10);
   matrix_v in1_ser = in1_par;
   matrix_v in2_ser = in2_par;
-  matrix_v out_par(10,10);
-  matrix_v out_ser(10,10);
-  
-  for(int i = 0; i < 10; ++i) {
-    for(int j = 0; j < 10; ++j) {
-      out_ser(i,j) = in1_ser(i,j) * 0.5 + exp(in2_ser(i,j));
+  matrix_v out_par(10, 10);
+  matrix_v out_ser(10, 10);
+
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j < 10; ++j) {
+      out_ser(i, j) = in1_ser(i, j) * 0.5 + exp(in2_ser(i, j));
     }
   }
 
@@ -122,10 +122,10 @@ TEST(MathFunctions, parall_map_var_2d) {
   EXPECT_MATRIX_EQ(out_par.val(), out_ser.val());
   EXPECT_MATRIX_EQ(out_par.adj(), out_ser.adj());
 
-  for(int i = 0; i < 10; ++i) {
-    for(int j = 0; j< 10; ++j) {
-      out_ser(i,j).grad();
-      out_par(i,j).grad();
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j< 10; ++j) {
+      out_ser(i, j).grad();
+      out_par(i, j).grad();
     }
   }
 

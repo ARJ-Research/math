@@ -27,10 +27,10 @@ TEST(MathFunctions, parall_map_prim) {
 
 TEST(MathFunctions, parall_map_prim_2d) {
   using Eigen::MatrixXd;
-  Eigen::MatrixXd in1_par = Eigen::MatrixXd::Random(100,10);
+  Eigen::MatrixXd in1_par = Eigen::MatrixXd::Random(100, 10);
   Eigen::MatrixXd in1_ser = in1_par;
-  Eigen::MatrixXd out_par(100,10);
-  Eigen::MatrixXd out_ser(100,10);
+  Eigen::MatrixXd out_par(100, 10);
+  Eigen::MatrixXd out_ser(100, 10);
 
 
   // Functor defining how inputs should be indexed

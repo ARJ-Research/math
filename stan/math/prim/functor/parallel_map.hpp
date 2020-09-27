@@ -20,7 +20,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
                          Res&& result, int grainsize, Args&&... x) {
 #ifdef STAN_THREADS
   tbb::parallel_for(
-    tbb::blocked_range<size_t>(0, result.size(), grainsize), 
+    tbb::blocked_range<size_t>(0, result.size(), grainsize),
     [&](
      const tbb::blocked_range<size_t>& r) {
       for (size_t i = r.begin(); i < r.end(); ++i) {
@@ -49,13 +49,13 @@ inline void parallel_map(const ApplyFunction& app_fun,
 #ifdef STAN_THREADS
   tbb::parallel_for(
     tbb::blocked_range2d<size_t>(0, result.rows(), row_grainsize,
-                                 0, result.cols(), col_grainsize), 
+                                 0, result.cols(), col_grainsize),
     [&](
      const tbb::blocked_range2d<size_t>& r) {
       for (size_t j = r.cols().begin(); j < r.cols().end(); ++j) {
         for (size_t i = r.rows().begin(); i < r.rows().end(); ++i) {
           // Apply specified function to arguments at current iteration
-          result(i,j) = index_fun(i, j, app_fun, x...);
+          result(i, j) = index_fun(i, j, app_fun, x...);
         }
       }
     });

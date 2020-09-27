@@ -55,16 +55,13 @@ inline void parallel_map(const ApplyFunction& app_fun,
     // varis/adjoints for that iteration. Where the InnerStride (nvars) is the
     // distance between consecutive indexes.
     Eigen::Map<Eigen::VectorXd, 0, Eigen::InnerStride<>> par_map(
-      partials, S, Eigen::InnerStride<>(nvars)
-    );
+      partials, S, Eigen::InnerStride<>(nvars));
     Eigen::Map<stan::math::vector_vi, 0, Eigen::InnerStride<>> vari_map(
-      varis, S, Eigen::InnerStride<>(nvars)
-    );
+      varis, S, Eigen::InnerStride<>(nvars));
 
     tbb::parallel_for(
-      tbb::blocked_range<size_t>(0, S, grainsize), 
+      tbb::blocked_range<size_t>(0, S, grainsize),
       [&](const tbb::blocked_range<size_t>& r) {
-
         // Run nested autodiff in this scope
         const nested_rev_autodiff nested;
 
@@ -89,7 +86,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
       });
 
   // Pack values and adjoints into new vars on main autodiff stack
-  for(int i = 0; i < S; ++i) {
+  for (int i = 0; i < S; ++i) {
     result[i] = var(new precomputed_gradients_vari(
       values[i],
       nvars,
@@ -153,16 +150,14 @@ inline void parallel_map(const ApplyFunction& app_fun,
     // column in memory, and the InnerStride (nvars) is the distance between
     // consecutive indexes.
     Eigen::Map<Eigen::MatrixXd, 0, Eigen::Stride<-1, -1>> par_map(
-      partials, R, C, Eigen::Stride<-1, -1>(nvars*R, nvars)
-    );
+      partials, R, C, Eigen::Stride<-1, -1>(nvars*R, nvars));
     Eigen::Map<stan::math::matrix_vi, 0, Eigen::Stride<-1, -1>> vari_map(
-      varis, R, C, Eigen::Stride<-1, -1>(nvars*R, nvars)
-    );
+      varis, R, C, Eigen::Stride<-1, -1>(nvars*R, nvars));
     Eigen::Map<Eigen::MatrixXd> values(vals, R, C);
 
     tbb::parallel_for(
       tbb::blocked_range2d<size_t>(0, result.rows(), row_grainsize,
-                                   0, result.cols(), col_grainsize), 
+                                   0, result.cols(), col_grainsize),
       [&](
        const tbb::blocked_range2d<size_t>& r) {
         // Run nested autodiff in this scope
@@ -183,7 +178,7 @@ inline void parallel_map(const ApplyFunction& app_fun,
             // autodiff stack
             values(i, j) = std::move(out.vi_->val_);
             apply([&](auto&&... args) {
-                save_adjoints(&par_map(i,j),
+                save_adjoints(&par_map(i, j),
                               std::forward<decltype(args)>(args)...); },
               std::move(args_tuple_local_copy));
           }
@@ -191,8 +186,8 @@ inline void parallel_map(const ApplyFunction& app_fun,
       });
 
   // Pack values and adjoints into new vars on main autodiff stack
-  for(int j = 0; j < C; ++j) {
-    for(int i = 0; i < R; ++i) {
+  for (int j = 0; j < C; ++j) {
+    for (int i = 0; i < R; ++i) {
       result(i, j) = var(new precomputed_gradients_vari(
         values(i, j),
         nvars,
