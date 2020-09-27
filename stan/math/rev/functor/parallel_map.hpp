@@ -140,9 +140,11 @@ inline void parallel_map(const ApplyFunction& app_fun,
       S * nvars);
 
 
-    // By using a Map with an InnerStride of length nvars we can index the Map
-    // normally (i.e., from 0 to S-1) to get the location in memory for the
-    // varis/adjoints for that iteration
+    // By using a Map with an InnerStride & OuterStride we can index the Map
+    // normally to get the location in memory for the varis/adjoints for that
+    // iteration. Where the OuterStride (nvars*R) is the total length of each
+    // column in memory, and the InnerStride (nvars) is the distance between
+    // consecutive indexes.
     Eigen::Map<Eigen::MatrixXd, 0, Eigen::Stride<-1, -1>> par_map(
       partials, R, C, Eigen::Stride<-1, -1>(nvars*R, nvars)
     );

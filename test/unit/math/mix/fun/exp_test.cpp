@@ -30,8 +30,7 @@ TEST(mathMixMatFun, exp_parmap_1d) {
     return res;
   };
 
-  Eigen::VectorXd in_vec(5);
-  in_vec << 1, 2, 3, 4, 5;
+  Eigen::VectorXd in_vec = Eigen::VectorXd::Random(25);
 
   stan::test::expect_ad(f, in_vec);
 }
