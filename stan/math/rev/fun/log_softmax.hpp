@@ -56,41 +56,30 @@ class log_softmax_elt_vari : public vari {
  * @return Softmax of the input.
  * @throw std::domain_error If the input vector is size 0.
  */
-template <typename T, require_container_st<is_var, T>* = nullptr>
+template <typename T,
+          require_any_t<conjunction<is_container<T>, is_var<scalar_type_t<T>>>,
+                        is_var_matrix<T>>* = nullptr>
 inline auto log_softmax(const T& x) {
   return apply_vector_unary<ref_type_t<T>>::apply(
       to_ref(x), [&](const auto& alpha) {
-        const int a_size = alpha.size();
-
         check_nonzero_size("log_softmax", "alpha", alpha);
+        using alpha_plain = plain_type_t<decltype(alpha)>;
 
-        vari** alpha_vi_array
-            = ChainableStack::instance_->memalloc_.alloc_array<vari*>(a_size);
-        Eigen::Map<vector_vi>(alpha_vi_array, a_size) = alpha.vi();
+        const auto& alpha_val = to_ref(value_of(alpha));
+        const auto& theta = to_ref(alpha_val.array() - alpha_val.maxCoeff());
+        arena_t<promote_scalar_t<double, alpha_plain>> res_val
+            = theta.array() - log(theta.exp().sum());
 
-        vector_d alpha_d = alpha.val();
+        arena_t<alpha_plain> res = res_val;
+        auto alpha_arena = to_arena(alpha);
 
-        // fold logic of math::softmax() and math::log_softmax()
-        // to save computations
+        reverse_pass_callback([alpha_arena, res, res_val]() mutable {
+          const auto& res_adj = to_ref(res.adj());
+          alpha_arena.adj()
+              += res_adj - (res_adj.sum() * res_val.array().exp()).matrix();
+        });
 
-        vector_d diff = (alpha_d.array() - alpha_d.maxCoeff());
-        vector_d softmax_alpha_d = diff.array().exp();
-        double sum = softmax_alpha_d.sum();
-        vector_d log_softmax_alpha_d = diff.array() - std::log(sum);
-
-        // end fold
-        double* softmax_alpha_d_array
-            = ChainableStack::instance_->memalloc_.alloc_array<double>(a_size);
-        Eigen::Map<vector_d>(softmax_alpha_d_array, a_size)
-            = softmax_alpha_d.array() / sum;
-
-        vector_v log_softmax_alpha(a_size);
-        for (int k = 0; k < a_size; ++k) {
-          log_softmax_alpha(k) = var(new internal::log_softmax_elt_vari(
-              log_softmax_alpha_d[k], alpha_vi_array, softmax_alpha_d_array,
-              a_size, k));
-        }
-        return log_softmax_alpha;
+        return alpha_plain(res);
       });
 }
 

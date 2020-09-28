@@ -49,9 +49,11 @@ inline var log_sum_exp(const T1& a, const T2& b) {
  * @tparam T Type of input vector or matrix.
  * @param x matrix
  */
-template <typename T, require_container_st<is_var, T>* = nullptr>
+template <typename T,
+          require_any_t<conjunction<is_container<T>, is_var<scalar_type_t<T>>>,
+                        is_var_matrix<T>>* = nullptr>
 inline auto log_sum_exp(const T& x) {
-  return apply_vector_unary<T>::reduce(x, [](const auto& v) {
+  return apply_vector_unary<T>::reduce(x, [&](const auto& v) {
     const auto& v_ref = to_ref(v);
     const auto& v_val = value_of(v_ref);
 
@@ -59,8 +61,9 @@ inline auto log_sum_exp(const T& x) {
     auto arena_v = to_arena(v_ref);
 
     reverse_pass_callback([arena_v, res]() mutable {
+      const auto& arena_val = to_ref(arena_v.val());
       arena_v.adj()
-          += res.adj() * (arena_v.array().val() - res.val()).exp().matrix();
+          += res.adj() * (arena_val.array() - res.val()).exp().matrix();
     });
 
     return res;

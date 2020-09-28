@@ -6,6 +6,7 @@
 #include <stan/math/prim/meta/is_stan_scalar.hpp>
 #include <stan/math/prim/meta/is_container.hpp>
 #include <stan/math/prim/meta/is_eigen_matrix_base.hpp>
+#include <stan/math/prim/meta/is_var_matrix.hpp>
 #include <stan/math/prim/meta/plain_type.hpp>
 #include <stan/math/prim/meta/require_generics.hpp>
 #include <vector>
@@ -30,7 +31,8 @@ struct apply_vector_unary {};
  * This base template class takes (and returns) Eigen expression templates.
  */
 template <typename T>
-struct apply_vector_unary<T, require_eigen_t<T>> {
+struct apply_vector_unary<T, require_t<disjunction<is_eigen<T>,
+                                                   is_var_matrix<T>>>> {
   /**
    * Member function for applying a functor to a vector and subsequently
    * returning a vector. The returned objects are evaluated so that
@@ -55,6 +57,12 @@ struct apply_vector_unary<T, require_eigen_t<T>> {
             require_t<is_eigen_array<plain_type_t<T2>>>* = nullptr>
   static inline auto apply(const T& x, const F& f) {
     return f(x).array().eval();
+  }
+
+  template <typename F, typename T2 = T,
+            require_var_matrix_t<T2>* = nullptr>
+  static inline auto apply(const T& x, const F& f) {
+    return f(x);
   }
 
   /**
@@ -134,7 +142,9 @@ struct apply_vector_unary<T, require_std_vector_vt<is_stan_scalar, T>> {
  *
  */
 template <typename T>
-struct apply_vector_unary<T, require_std_vector_vt<is_container, T>> {
+struct apply_vector_unary<T, require_all_t<is_std_vector<T>,
+                                 disjunction<is_container<value_type_t<T>>,
+                                             is_var_matrix<value_type_t<T>>>>> {
   using T_vt = value_type_t<T>;
 
   /**
