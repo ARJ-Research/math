@@ -13,9 +13,9 @@ template <typename ApplyFunction, typename IndexFunction,
           typename Res, typename... Args,
           require_not_st_arithmetic<Res>* = nullptr,
           require_not_st_var<Res>* = nullptr>
-inline void parallel_map(const ApplyFunction& app_fun,
-                         const IndexFunction& index_fun,
-                         Res&& result, int grainsize, Args&&... x) {
+inline void parallel_map_impl(const ApplyFunction& app_fun,
+                              const IndexFunction& index_fun,
+                              Res&& result, int grainsize, Args&&... x) {
   for (size_t i = 0; i < result.size(); ++i) {
     // Apply specified function to arguments at current iteration
     result[i] = index_fun(i, app_fun, x...);
@@ -29,10 +29,10 @@ template <typename ApplyFunction, typename IndexFunction,
           typename Res, typename... Args,
           require_not_st_arithmetic<Res>* = nullptr,
           require_not_st_var<Res>* = nullptr>
-inline void parallel_map(const ApplyFunction& app_fun,
-                         const IndexFunction& index_fun,
-                         Res&& result, int row_grainsize,
-                         int col_grainsize, Args&&... x) {
+inline void parallel_map_impl(const ApplyFunction& app_fun,
+                              const IndexFunction& index_fun,
+                              Res&& result, int row_grainsize,
+                              int col_grainsize, Args&&... x) {
   for (size_t j = 0; j < result.cols(); ++j) {
     for (size_t i = 0; i < result.rows(); ++i) {
       // Apply specified function to arguments at current iteration
