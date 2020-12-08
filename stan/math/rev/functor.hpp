@@ -7,6 +7,7 @@
 #include <stan/math/rev/functor/algebra_solver_newton.hpp>
 #include <stan/math/rev/functor/algebra_system.hpp>
 #include <stan/math/rev/functor/apply_scalar_unary.hpp>
+#include <stan/math/rev/functor/apply_vector_unary.hpp>
 #include <stan/math/rev/functor/coupled_ode_system.hpp>
 #include <stan/math/rev/functor/cvodes_integrator.hpp>
 #include <stan/math/rev/functor/cvodes_utils.hpp>
@@ -26,6 +27,5 @@
 #include <stan/math/rev/functor/operands_and_partials.hpp>
 #include <stan/math/rev/functor/parallel_map.hpp>
 #include <stan/math/rev/functor/reduce_sum.hpp>
-#include <stan/math/rev/functor/reverse_pass_callback.hpp>
 
 #endif
