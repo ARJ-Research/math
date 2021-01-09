@@ -175,6 +175,7 @@
 #include <stan/math/prim/meta/append_return_type.hpp>
 #include <stan/math/prim/meta/as_array_or_scalar.hpp>
 #include <stan/math/prim/meta/as_column_vector_or_scalar.hpp>
+#include <stan/math/prim/meta/as_row_vector_or_scalar.hpp>
 #include <stan/math/prim/meta/base_type.hpp>
 #include <stan/math/prim/meta/child_type.hpp>
 #include <stan/math/prim/meta/compiler_attributes.hpp>
