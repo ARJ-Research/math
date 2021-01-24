@@ -14,6 +14,7 @@
 #include <stan/math/prim/fun/array_builder.hpp>
 #include <stan/math/prim/fun/as_bool.hpp>
 #include <stan/math/prim/fun/as_column_vector_or_scalar.hpp>
+#include <stan/math/prim/fun/as_row_vector_or_scalar.hpp>
 #include <stan/math/prim/fun/as_array_or_scalar.hpp>
 #include <stan/math/prim/fun/as_value_column_vector_or_scalar.hpp>
 #include <stan/math/prim/fun/as_value_column_array_or_scalar.hpp>

@@ -1,53 +1,26 @@
-#ifndef STAN_MATH_PRIM_FUNCTOR_ROWWISE_HPP
-#define STAN_MATH_PRIM_FUNCTOR_ROWWISE_HPP
+#ifndef STAN_MATH_PRIM_FUNCTOR_COLWISE_HPP
+#define STAN_MATH_PRIM_FUNCTOR_COLWISE_HPP
 
-#include <stan/math/prim/meta.hpp>
+#include <stan/math/prim/functor/rowwise.hpp>
 #include <vector>
 
 namespace stan {
 namespace math {
 namespace internal {
 
-template <template <class> class Check>
-constexpr size_t type_count(size_t x) {
-  return x;
-}
-template <template <class> class Check, typename T, typename... TArgs>
-constexpr size_t type_count(size_t x) {
-  return Check<T>::value ? type_count<Check, TArgs...>(x + 1) : x;
-}
-template <template <class> class Check, typename... TArgs>
-constexpr size_t type_count() {
-    return type_count<Check, TArgs...>(0);
-}
-
 template <typename T1, typename... Ts>
-inline size_t rows_equal(const T1& x1, const Ts&... xs) {
-  auto v = {rows(x1), rows(xs)...};
+inline size_t cols_equal(const T1& x1, const Ts&... xs) {
+  auto v = {cols(x1), cols(xs)...};
   return std::all_of(v.begin(), v.end(),
                      [&](int i){ return i == *v.begin(); });
 }
 
 template <typename TupleT>
-decltype(auto) row_index(const TupleT& x, size_t i) {
+decltype(auto) col_index(const TupleT& x, size_t i) {
   return apply([&](auto&&... args){
-    return std::forward_as_tuple(row(args, i + 1)...);
+    return std::forward_as_tuple(col(args, i + 1)...);
   }, x);
 }
-
-template <std::size_t O, std::size_t ... Is>
-std::index_sequence<(O + Is)...>
-  add_offset(std::index_sequence<Is...>) {
-    return {};
-}
-
-template<typename Tuple, std::size_t... Ints>
-auto subset_tuple(Tuple&& tuple, std::index_sequence<Ints...>) {
- return std::forward_as_tuple(std::get<Ints>(std::forward<Tuple>(tuple))...);
-}
-
-template <typename T>
-using is_stan_type = disjunction<is_stan_scalar<T>, is_container<T>>;
 
 template <bool colwise, typename T>
 using apply_return_t
