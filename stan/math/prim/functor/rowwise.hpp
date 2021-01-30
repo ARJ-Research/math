@@ -49,12 +49,10 @@ auto subset_tuple(Tuple&& tuple, std::index_sequence<Ints...>) {
 template <typename T>
 using is_stan_type = disjunction<is_stan_scalar<T>, is_container<T>>;
 
-template <bool colwise, typename T>
-using apply_return_t
+template <typename T>
+using row_return_t
   = std::conditional_t<is_stan_scalar<T>::value,
-                       Eigen::Matrix<T,
-                                     colwise ? 1 : Eigen::Dynamic,
-                                     colwise ? Eigen::Dynamic : 1>,
+                       Eigen::Matrix<T, Eigen::Dynamic, 1>,
                        Eigen::Matrix<scalar_type_t<T>,
                                      Eigen::Dynamic,
                                      Eigen::Dynamic>>;
@@ -98,7 +96,7 @@ auto rowwise(const TArgs&... args) {
             std::tuple_cat(internal::row_index(std::forward<decltype(t1)>(t1), 0),
                            std::forward<decltype(t2)>(t2)));
 
-  internal::apply_return_t<0, decltype(iter_0)> rtn(rs, stan::math::size(iter_0));
+  internal::row_return_t<decltype(iter_0)> rtn(rs, stan::math::size(iter_0));
   rtn.row(0) = as_row_vector(std::move(iter_0));
 
   for(size_t i = 1; i < rs; ++i) {

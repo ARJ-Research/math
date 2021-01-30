@@ -66,6 +66,19 @@ inline auto as_column_vector_or_scalar(T&& a) {
                      std::forward<T>(a));
 }
 
+template <typename T,
+          require_not_stan_scalar_t<T>* = nullptr>
+inline auto as_column_vector(T&& x) {
+  return as_column_vector_or_scalar(std::forward<T>(x));
+}
+
+template <typename T,
+          require_stan_scalar_t<T>* = nullptr>
+inline auto as_column_vector(T&& x) {
+  return make_holder([](auto& x) { return Eigen::Map<Eigen::Matrix<value_type_t<T>,Eigen::Dynamic,1>>(&x, 1); },
+                     std::forward<T>(x));
+}
+
 }  // namespace math
 }  // namespace stan
 

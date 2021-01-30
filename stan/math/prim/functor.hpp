@@ -5,6 +5,7 @@
 #include <stan/math/prim/functor/apply_scalar_unary.hpp>
 #include <stan/math/prim/functor/apply_scalar_binary.hpp>
 #include <stan/math/prim/functor/apply_vector_unary.hpp>
+#include <stan/math/prim/functor/colwise.hpp>
 #include <stan/math/prim/functor/coupled_ode_system.hpp>
 #include <stan/math/prim/functor/finite_diff_gradient.hpp>
 #include <stan/math/prim/functor/finite_diff_gradient_auto.hpp>

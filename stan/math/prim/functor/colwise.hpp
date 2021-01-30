@@ -22,19 +22,17 @@ decltype(auto) col_index(const TupleT& x, size_t i) {
   }, x);
 }
 
-template <bool colwise, typename T>
-using apply_return_t
+template <typename T>
+using col_return_t
   = std::conditional_t<is_stan_scalar<T>::value,
-                       Eigen::Matrix<T,
-                                     colwise ? 1 : Eigen::Dynamic,
-                                     colwise ? Eigen::Dynamic : 1>,
+                       Eigen::Matrix<T, 1, Eigen::Dynamic>,
                        Eigen::Matrix<scalar_type_t<T>,
                                      Eigen::Dynamic,
                                      Eigen::Dynamic>>;
 } // namespace internal
 
 template <typename... TArgs>
-auto rowwise(const TArgs&... args) {
+auto colwise(const TArgs&... args) {
   // Get location of functor in parameter pack
   constexpr size_t pos = internal::type_count<internal::is_stan_type,
                                               TArgs...>();
@@ -51,16 +49,16 @@ auto rowwise(const TArgs&... args) {
 
   // Check that inputs to be iterated have the same number of rows
   bool eqrows = apply([&](auto&&... args) {
-                        return internal::rows_equal(args...); },
+                        return internal::cols_equal(args...); },
                       std::forward<decltype(t1)>(t1));
 
   if (!eqrows) {
     std::ostringstream msg;
-    msg << "Inputs to be iterated over must have the same number of rows!";
+    msg << "Inputs to be iterated over must have the same number of cols!";
     throw std::invalid_argument(msg.str());
   }
 
-  size_t rs = std::get<0>(std::forward<decltype(t1)>(t1)).rows();
+  size_t cs = std::get<0>(std::forward<decltype(t1)>(t1)).cols();
 
   // Extract functor from parameter pack
   decltype(auto) f = std::get<pos>(args_tuple);
@@ -68,16 +66,16 @@ auto rowwise(const TArgs&... args) {
   // Evaluate first iteration, needed to determine type and size of return
   decltype(auto) iter_0
     = apply([&](auto&&... args) { return f(args...); },
-            std::tuple_cat(internal::row_index(std::forward<decltype(t1)>(t1), 0),
+            std::tuple_cat(internal::col_index(std::forward<decltype(t1)>(t1), 0),
                            std::forward<decltype(t2)>(t2)));
 
-  internal::apply_return_t<0, decltype(iter_0)> rtn(rs, stan::math::size(iter_0));
-  rtn.row(0) = as_row_vector(std::move(iter_0));
+  internal::col_return_t<decltype(iter_0)> rtn(stan::math::size(iter_0), cs);
+  rtn.col(0) = as_column_vector(std::move(iter_0));
 
-  for(size_t i = 1; i < rs; ++i) {
-    rtn.row(i) = as_row_vector(
+  for(size_t i = 1; i < cs; ++i) {
+    rtn.col(i) = as_column_vector(
       apply([&](auto&&... args) { return f(args...); },
-        std::tuple_cat(internal::row_index(std::forward<decltype(t1)>(t1), i),
+        std::tuple_cat(internal::col_index(std::forward<decltype(t1)>(t1), i),
                         std::forward<decltype(t2)>(t2)))
     );
   }
