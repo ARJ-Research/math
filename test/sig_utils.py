@@ -60,6 +60,7 @@ pos_definite = "make_pos_definite_matrix"
 # None means to use the default argument value.
 special_arg_values = {
     "acosh": [1.4],
+    "to_vector": [1.4,0,0],
     "algebra_solver": [None, None, None, None, None, None, None, 10],
     "algebra_solver_newton": [None, None, None, None, None, None, None, 10],
     "log1m_exp": [-0.6],

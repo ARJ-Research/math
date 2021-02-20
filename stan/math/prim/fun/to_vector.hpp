@@ -7,6 +7,39 @@
 
 namespace stan {
 namespace math {
+namespace internal {
+  template <typename EigMat, typename IndVec>
+  class to_vector_functor {
+    const EigMat& eig_mat;
+    const IndVec& ind_vec1;
+    const IndVec& ind_vec2;
+
+   public:
+    to_vector_functor(const EigMat& arg1, const IndVec& arg2, const IndVec& arg3)
+        : eig_mat(arg1), ind_vec1(arg2), ind_vec2(arg3) {}
+
+    inline decltype(auto) operator()(Eigen::Index index) const {
+      return eig_mat.coeff(ind_vec1[index], ind_vec2[index]);
+    }
+  };
+}  // namespace internal
+
+// vector to_vector(matrix, int[], int[])
+template <typename EigMat, require_eigen_t<EigMat>* = nullptr>
+inline Eigen::Matrix<scalar_type_t<EigMat>, Eigen::Dynamic, 1>
+  to_vector(const EigMat& matrix, const std::vector<int>& ind1,
+            const std::vector<int>& ind2) {
+  check_size_match("to_vector", "row indexes", ind1.size(),
+                   "column indexes", ind2.size());
+  check_bounded("to_vector", "row indexes", ind1, 0, matrix.rows() - 1);
+  check_bounded("to_vector", "column indexes", ind2, 0, matrix.cols() - 1);
+
+  using EigRtn = Eigen::Matrix<value_type_t<EigMat>, Eigen::Dynamic, 1>;
+  
+  return EigRtn::NullaryExpr(ind1.size(),
+          internal::to_vector_functor<const EigMat,
+                                      std::vector<int>>(matrix, ind1, ind2));
+}
 
 // vector to_vector(matrix)
 // vector to_vector(row_vector)
