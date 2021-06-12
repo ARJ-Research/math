@@ -118,6 +118,7 @@
 #include <stan/math/prim/prob/gamma_ccdf_log.hpp>
 #include <stan/math/prim/prob/gamma_cdf.hpp>
 #include <stan/math/prim/prob/gamma_cdf_log.hpp>
+#include <stan/math/prim/prob/gamma_icdf.hpp>
 #include <stan/math/prim/prob/gamma_lccdf.hpp>
 #include <stan/math/prim/prob/gamma_lcdf.hpp>
 #include <stan/math/prim/prob/gamma_log.hpp>

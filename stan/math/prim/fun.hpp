@@ -106,6 +106,7 @@
 #include <stan/math/prim/fun/fmin.hpp>
 #include <stan/math/prim/fun/fmod.hpp>
 #include <stan/math/prim/fun/gamma_p.hpp>
+#include <stan/math/prim/fun/gamma_p_inv.hpp>
 #include <stan/math/prim/fun/gamma_q.hpp>
 #include <stan/math/prim/fun/generalized_inverse.hpp>
 #include <stan/math/prim/fun/get.hpp>
